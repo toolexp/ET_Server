@@ -20,6 +20,6 @@ class Administrator(Base):
         self.password = password
 
     def __str__(self):
-        cadena = '{}:{}:{}'.format(self.id, self.name, self.surname)
+        cadena = '{}¥{}¥{}'.format(self.id, self.name, self.surname)
         return cadena
 

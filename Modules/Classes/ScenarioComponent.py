@@ -24,5 +24,5 @@ class ScenarioComponent(Base):
         self.problem = problem
 
     def __str__(self):
-        cadena = '{}: {}'.format(self.experimental_scenario, self.problem)
+        cadena = '{}¥{}'.format(self.experimental_scenario, self.problem)
         return cadena

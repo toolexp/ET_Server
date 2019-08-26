@@ -266,8 +266,9 @@ def create_section(parameters, session):
     section_aux = Section(parameters[0], parameters[1], parameters[2], parameters[3])
     session.add(section_aux)
     session.commit()
+    section_aux = session.query(Section).order_by(Section.id.desc()).first()
     session.close()
-    msg_rspt = Message(action=2, comment='Register created successfully')
+    msg_rspt = Message(action=2, information=[section_aux.__str__()], comment='Register created successfully')
     return msg_rspt
 
 
@@ -370,7 +371,7 @@ def select_template(parameters, session):
     return msg_rspt
 
 
-def create_pattern(parameters, session):
+'''def create_pattern(parameters, session):
     template_aux = session.query(Template).filter(Template.id == parameters[1]).first()
     if len(parameters) == 2:
         # Without diagram --> parameters=[name, id_Template]
@@ -383,7 +384,18 @@ def create_pattern(parameters, session):
     session.commit()
     session.close()
     msg_rspt = Message(action=2, comment='Register created successfully')
+    return msg_rspt'''
+
+def create_pattern(parameters, session):
+    template_aux = session.query(Template).filter(Template.id == parameters[1]).first()
+    pattern_aux = Pattern(parameters[0], template_aux)
+    session.add(pattern_aux)
+    session.commit()
+    id_pattern_aux = session.query(Pattern).order_by(Pattern.id.desc()).first()
+    session.close()
+    msg_rspt = Message(action=2, information=[id_pattern_aux.id], comment='Register created successfully')
     return msg_rspt
+
 
 
 def read_pattern(parameters, session):
@@ -396,6 +408,16 @@ def read_pattern(parameters, session):
 
 
 def update_pattern(parameters, session):
+    # Received --> [id_pattern, name]
+    # Template can not be updated
+    pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[0]).first()
+    pattern_aux.name = parameters[1]
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register updated successfully')
+    return msg_rspt
+
+'''def update_pattern(parameters, session):
     # Without diagram parameters = [id_pattern, name, id_template]
     pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[0]).first()
     template_aux = session.query(Template).filter(Template.id == parameters[2]).first()
@@ -408,7 +430,7 @@ def update_pattern(parameters, session):
     session.commit()
     session.close()
     msg_rspt = Message(action=2, comment='Register updated successfully')
-    return msg_rspt
+    return msg_rspt'''
 
 
 def delete_pattern(parameters, session):
@@ -425,16 +447,21 @@ def select_pattern(parameters, session):
     msg_rspt = Message(action=2, information=[])
     msg_rspt.information.append(pattern_aux.name)
     msg_rspt.information.append(pattern_aux.template.__str__())
-    if pattern_aux.diagram is not None:
-        msg_rspt.information.append(pattern_aux.diagram.__str__())
+    '''if pattern_aux.diagram is not None:
+        msg_rspt.information.append(pattern_aux.diagram.__str__())'''
     session.close()
     return msg_rspt
 
 
 def create_content(parameters, session):
-    # Received --> [content, id_pattern]
+    # Received --> [content, id_pattern, id_section, id_diagram]
     pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[1]).first()
-    content_aux = PatternSection(parameters[0], pattern_aux)
+    section_aux = session.query(Section).filter(Section.id == parameters[2]).first()
+    if parameters[3] is not None:
+        diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[3]).first()
+    else:
+        diagram_aux = None
+    content_aux = PatternSection(parameters[0], pattern_aux, section_aux, diagram_aux)
     session.add(content_aux)
     session.commit()
     session.close()
@@ -453,9 +480,14 @@ def read_content(parameters, session):
 
 
 def update_content(parameters, session):
-    # Received --> [id_pattern_section, content]
+    # Received --> [id_pattern_section, content, id_diagram]
     content_aux = session.query(PatternSection).filter(PatternSection.id == parameters[0]).first()
     content_aux.content = parameters[1]
+    if parameters[2] is not None:
+        diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[3]).first()
+    else:
+        diagram_aux = None
+    content_aux.diagram = diagram_aux
     session.commit()
     session.close()
     msg_rspt = Message(action=2, comment='Register updated successfully')

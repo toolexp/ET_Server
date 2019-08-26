@@ -21,5 +21,5 @@ class Problem(Base):
         self.ideal_solution = ideal_solution
 
     def __str__(self):
-        cadena = '{}:{}:{}'.format(self.id, self.name, self.description)
+        cadena = '{}¥{}¥{}'.format(self.id, self.name, self.description)
         return cadena

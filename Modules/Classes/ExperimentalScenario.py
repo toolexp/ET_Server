@@ -42,5 +42,5 @@ class ExperimentalScenario(Base):
         self.experimental_group = experimental_group
 
     def __str__(self):
-        cadena = '{}: {}'.format(self.name, self.description)
+        cadena = '{}¥{}'.format(self.name, self.description)
         return cadena

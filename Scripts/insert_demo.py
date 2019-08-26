@@ -45,14 +45,15 @@ experimental_sc_demo = ExperimentalScenario('demo_name', 'demo_description', 'ac
                                             date(2000, 1, 2), True, False, experiment_demo, designers_group_demo1,
                                             designers_group_demo2)
 
-section_demo = Section('demo_name', 'demo_description', 'String', True)
+section_demo = Section('demo_name', 'demo_description', 'Text', True)
 template_demo = Template('demo_name', 'demo_description')
 template_demo.sections = [section_demo]
 
 diagram_demo = Diagram('demo_name', 'demo_file_path')
-pattern_demo1 = Pattern('demo_name', template_demo, diagram_demo)
-pattern_demo2 = Pattern('demo_name', template_demo, diagram_demo)
-pattern_section = PatternSection('demo_content', pattern_demo1)
+pattern_demo1 = Pattern('demo_name', template_demo)
+pattern_demo2 = Pattern('demo_name', template_demo)
+pattern_section1 = PatternSection(content='demo_content', pattern=pattern_demo1, section=section_demo)
+pattern_section2 = PatternSection(pattern=pattern_demo1, section=section_demo, diagram=diagram_demo)
 ideal_sol_demo = IdealSolution('demo_name', 'demo_description', diagram_demo)
 ideal_sol_demo.patterns = [pattern_demo1, pattern_demo2]
 
@@ -76,7 +77,8 @@ session.add(template_demo)
 session.add(diagram_demo)
 session.add(pattern_demo1)
 session.add(pattern_demo2)
-session.add(pattern_section)
+session.add(pattern_section1)
+session.add(pattern_section2)
 session.add(ideal_sol_demo)
 session.add(problem_demo)
 session.add(scenario_component_demo)

@@ -21,8 +21,8 @@ class Section(Base):
 
     def __str__(self):
         if self.mandatory is True:
-            aux = 'mandatory'
+            aux = 'Mandatory'
         else:
-            aux = 'optional'
-        cadena = '{}:{}:{}:{}:{}'.format(self.id, self.name, self.description, self.data_type, aux)
+            aux = 'Optional'
+        cadena = '{}¥{}¥{}¥{}¥{}'.format(self.id, self.name, self.description, self.data_type, aux)
         return cadena

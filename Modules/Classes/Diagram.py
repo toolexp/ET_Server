@@ -16,5 +16,5 @@ class Diagram(Base):
         self.file_path = file_path
 
     def __str__(self):
-        cadena = '{}: {}'.format(self.name, self.file_path)
+        cadena = '{}¥{}'.format(self.name, self.file_path)
         return cadena

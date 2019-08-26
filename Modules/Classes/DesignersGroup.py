@@ -24,5 +24,5 @@ class DesignersGroup(Base):
         self.description = description
 
     def __str__(self):
-        cadena = '{}:{}:{}:{}'.format(self.id, self.name, self.description, len(self.designers))
+        cadena = '{}¥{}¥{}¥{}'.format(self.id, self.name, self.description, len(self.designers))
         return cadena

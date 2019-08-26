@@ -26,5 +26,5 @@ class Template(Base):
         self.description = description
 
     def __str__(self):
-        cadena = '{}:{}:{}'.format(self.id, self.name, self.description)
+        cadena = '{}¥{}¥{}'.format(self.id, self.name, self.description)
         return cadena

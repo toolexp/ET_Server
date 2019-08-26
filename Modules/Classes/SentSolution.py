@@ -37,5 +37,5 @@ class SentSolution(Base):
         self.diagram = diagram
 
     def __str__(self):
-        cadena = '{}: {}'.format(self.name, self.description)
+        cadena = '{}¥{}'.format(self.name, self.description)
         return cadena
