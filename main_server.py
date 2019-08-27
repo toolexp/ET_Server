@@ -12,7 +12,11 @@ try:
     connection.accept_connection()
     while True:
         connection.receive_message()
-        msg_rspt = handle_decision(connection.message, connection.c_socket)
+        if connection.message.comment == 'close_connection':
+            connection.close_connection()
+            print('Connection closed by the client')
+            break
+        msg_rspt = handle_decision(connection)
         connection.create_message(msg_rspt)
         connection.send_message()
 except Exception as e:

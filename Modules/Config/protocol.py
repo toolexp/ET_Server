@@ -22,14 +22,12 @@ from Modules.Classes.SentSolution import SentSolution
 from Modules.Classes.Template import Template
 
 
-def handle_decision(message, socket):
-    if message.comment == 'close_connection':
-        socket.close()
+def handle_decision(connection):
     Base.metadata.create_all(engine)
     session = Session()
-    argument = message.action
+    argument = connection.message.action
     func = switcher_protocol.get(argument, 'nothing')
-    return func(message.information, session)
+    return func(connection.message.information, session)
 
 
 def create_admin(parameters, session):
