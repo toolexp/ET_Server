@@ -1,6 +1,8 @@
 # coding=utf-8
 
 from sqlalchemy import Column, String, Integer
+from sqlalchemy.orm import relationship, backref
+
 from Modules.Config.base import Base
 
 
@@ -10,6 +12,7 @@ class Diagram(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     file_path = Column(String)
+    #pattern_sec = relationship("PatternSection", backref=backref("diagram", uselist=False, cascade="all, delete-orphan"))
 
     def __init__(self, name, file_path):
         self.name = name

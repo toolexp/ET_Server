@@ -11,23 +11,23 @@ class PatternSection(Base):
     id = Column(Integer, primary_key=True)
     content = Column(String)
     pattern_id = Column(Integer, ForeignKey('patterns.id'))
-    section_id = Column(Integer, ForeignKey('sections.id'))
-    diagram_id = Column(Integer, ForeignKey('diagrams.id'))
+    #template_section_id = Column(Integer, ForeignKey('templates_sections.id'))
+    diagram_id = Column(Integer, ForeignKey('diagrams.id', use_alter=True, name='fk_pattern_sec_diagram_id'))
     pattern = relationship("Pattern", backref=backref("pattern_sections", cascade="all, delete-orphan",
                                                       single_parent=True))
-    section = relationship("Section", backref=backref("pattern_sections", cascade="all, delete-orphan",
-                                                      single_parent=True))
-    diagram = relationship("Diagram", backref=backref("pattern_sections", cascade="all, delete-orphan", single_parent=True))
+    diagram = relationship("Diagram", foreign_keys=diagram_id, post_update=True, cascade="all, delete-orphan", single_parent=True)
+    #template_section = relationship("TemplateSection", backref=backref("pattern_sections", cascade="all, delete-orphan",
+                                                                        #single_parent=True))
+    #diagram = relationship("Diagram", backref=backref("pattern_sections", cascade="all, delete-orphan", single_parent=True))
 
     # Relacion 1 a 1
-    # diagram = relationship("Diagram", backref=backref("patterns", uselist=False, cascade="all, delete-orphan", single_parent=True))
 
-    def __init__(self, content='', pattern=None, section=None, diagram=None):
+
+    def __init__(self, content='', pattern=None, diagram=None):
         self.content = content
         self.pattern = pattern
-        self.section = section
         self.diagram = diagram
 
     def __str__(self):
-        cadena = '{}¥{}¥{}¥{}¥{}'.format(self.id, self.content, self.pattern, self.section, self.diagram)
+        cadena = '{}¥{}¥{}¥{}¥{}'.format(self.id, self.content, self.pattern.id, self.diagram.id)
         return cadena

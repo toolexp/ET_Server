@@ -1,6 +1,6 @@
 import socket
 import pickle
-from Modules.Config.Message import Message
+from Modules.Config.Data import Message
 
 HEADER_SIZE = 10  # Length that indicates the number of characters in the stream
 

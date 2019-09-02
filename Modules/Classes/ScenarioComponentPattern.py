@@ -11,9 +11,9 @@ class ScenarioComponentPattern(Base):
     id = Column(Integer, primary_key=True)
     scenario_component_id = Column(Integer, ForeignKey('scenario_components.id'))
     pattern_id = Column(Integer, ForeignKey('patterns.id'))
-    pattern_type = Column(String)
     scenario_component = relationship("ScenarioComponent", back_populates="patterns")
     pattern = relationship("Pattern", back_populates="scenario_components")
+    pattern_type = Column(String)
 
     def __init__(self, pattern_type, scenario_component, pattern):
         self.pattern_type = pattern_type

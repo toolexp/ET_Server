@@ -2,8 +2,9 @@
 
 # Import necessary modules
 from datetime import date
+import os
 from Modules.Config.base import Session, engine, Base
-from Modules.Config.Message import Message
+from Modules.Config.Data import Message
 from Modules.Classes.Administrator import Administrator
 from Modules.Classes.Section import Section
 from Modules.Classes.Designer import Designer
@@ -20,6 +21,7 @@ from Modules.Classes.ScenarioComponent import ScenarioComponent
 from Modules.Classes.ScenarioComponentPattern import ScenarioComponentPattern
 from Modules.Classes.SentSolution import SentSolution
 from Modules.Classes.Template import Template
+from Modules.Classes.TemplateSection import TemplateSection
 
 
 def handle_decision(connection):
@@ -32,76 +34,175 @@ def handle_decision(connection):
 
 def create_admin(parameters, session):
     """
-    Creates an 'Administrator' object and stores it into the database, the data for the
-    object is inside the 'parameters'
+       Creates an 'Administrator' object and stores it into the DB, the data for the
+       object is inside the 'parameters'
 
-    Parameters
-    ----------
-    parameters: Message.information []
-        List of data (string, int, boolean, list, etc) that contains information
-        -> parameters[0] has Administrator.name
-        -> parameters[1] has Administrator.surname
-        -> parameters[2] has Administrator.email
-        -> parameters[3] has Administrator.password
-    session: Session
-        Session with connection to the database
-    Returns
-    -------
-    msg_rspt: Message
-        Message with information of the fail or success of the operation
+       Parameters
+       ----------
+       parameters: Message.information [string, string, string, string]
+           -> parameters[0] has Administrator.name
+           -> parameters[1] has Administrator.surname
+           -> parameters[2] has Administrator.email
+           -> parameters[3] has Administrator.password
+       session: Session
+           Session of connection with the database
 
-    Raises
-    ------
-    Exception:
-        If any of the lines of code generates an error
-    """
-    admin_aux = Administrator(parameters[0], parameters[1], parameters[2], parameters[3])
-    session.add(admin_aux)
-    session.commit()
-    session.close()
-    msg_rspt = Message(action=2, comment='Register created successfully')
-    return msg_rspt
+       Returns
+       -------
+       msg_rspt: Message
+           Message with information of the fail or success of the operation
+
+       Raises
+       ------
+       Exception:
+           If any of the lines of code generates an error
+       """
+    try:
+        admin_aux = Administrator(parameters[0], parameters[1], parameters[2], parameters[3])
+        session.add(admin_aux)
+        session.commit()
+        session.close()
+        msg_rspt = Message(action=2, comment='Register created successfully')
+        return msg_rspt
+    except Exception as e:
+        raise Exception('Error creating an administrator: ' + str(e))
 
 
 def read_admin(parameters, session):
-    admins = session.query(Administrator).all()
-    session.close()
-    msg_rspt = Message(action=2, information=[])
-    for admin in admins:
-        msg_rspt.information.append(admin.__str__())
-    return msg_rspt
+    """
+        Retreive a list with al the 'Administrators' registered into the DB. The list
+        contains a string representation of each 'Administrator' (__str__())
+
+        Parameters
+        ----------
+        parameters: Message.information [] (not used)
+        session: Session
+            Session of connection with the database
+
+        Returns
+        -------
+        msg_rspt: Message
+            Message with the list of administrators
+
+        Raises
+        ------
+        Exception:
+            If any of the lines of code generates an error
+        """
+    try:
+        admins = session.query(Administrator).all()
+        session.close()
+        msg_rspt = Message(action=2, information=[])
+        for admin in admins:
+            msg_rspt.information.append(admin.__str__())
+        return msg_rspt
+    except Exception as e:
+        raise Exception('Error retrieving administrators: ' + str(e))
 
 
 def update_admin(parameters, session):
-    admin_aux = session.query(Administrator).filter(Administrator.id == parameters[0]).first()
-    admin_aux.name = parameters[1]
-    admin_aux.surname = parameters[2]
-    admin_aux.email = parameters[3]
-    admin_aux.password = parameters[4]
-    session.commit()
-    session.close()
-    msg_rspt = Message(action=2, comment='Register updated successfully')
-    return msg_rspt
+    """
+        Update information of an 'Administrator' registered into the DB.
+
+        Parameters
+        ----------
+        parameters: Message.information [int, string, string, string, string]
+           -> parameters[0] has Administrator.id
+           -> parameters[1] has Administrator.name
+           -> parameters[2] has Administrator.surname
+           -> parameters[3] has Administrator.email
+           -> parameters[4] has Administrator.password
+        session: Session
+            Session of connection with the database
+
+        Returns
+        -------
+        msg_rspt: Message
+            Message with information of the fail or success of the operation
+
+        Raises
+        ------
+        Exception:
+            If any of the lines of code generates an error
+        """
+    try:
+        admin_aux = session.query(Administrator).filter(Administrator.id == parameters[0]).first()
+        admin_aux.name = parameters[1]
+        admin_aux.surname = parameters[2]
+        admin_aux.email = parameters[3]
+        admin_aux.password = parameters[4]
+        session.commit()
+        session.close()
+        msg_rspt = Message(action=2, comment='Register updated successfully')
+        return msg_rspt
+    except Exception as e:
+        raise Exception('Error updating administrator: ' + str(e))
 
 
 def delete_admin(parameters, session):
-    admin_aux = session.query(Administrator).filter(Administrator.id == parameters[0]).first()
-    session.delete(admin_aux)
-    session.commit()
-    session.close()
-    msg_rspt = Message(action=2, comment='Register deleted successfully')
-    return msg_rspt
+    """
+        Remove an 'Administrator' from the DB.
+
+        Parameters
+        ----------
+        parameters: Message.information [int]
+           -> parameters[0] has Administrator.id
+        session: Session
+            Session of connection with the database
+
+        Returns
+        -------
+        msg_rspt: Message
+            Message with information of the fail or success of the operation
+
+        Raises
+        ------
+        Exception:
+            If any of the lines of code generates an error
+        """
+    try:
+        admin_aux = session.query(Administrator).filter(Administrator.id == parameters[0]).first()
+        session.delete(admin_aux)
+        session.commit()
+        session.close()
+        msg_rspt = Message(action=2, comment='Register deleted successfully')
+        return msg_rspt
+    except Exception as e:
+        raise Exception('Error removing administrator: ' + str(e))
 
 
 def select_admin(parameters, session):
-    admin_aux = session.query(Administrator).filter(Administrator.id == parameters[0]).first()
-    session.close()
-    msg_rspt = Message(action=2, information=[])
-    msg_rspt.information.append(admin_aux.name)
-    msg_rspt.information.append(admin_aux.surname)
-    msg_rspt.information.append(admin_aux.email)
-    msg_rspt.information.append(admin_aux.password)
-    return msg_rspt
+    """
+        Retrieve information of an 'Administrator' from the DB.
+
+        Parameters
+        ----------
+        parameters: Message.information [int]
+           -> parameters[0] has Administrator.id
+        session: Session
+            Session of connection with the database
+
+        Returns
+        -------
+        msg_rspt: Message
+            Message with information of the 'Administrator'
+
+        Raises
+        ------
+        Exception:
+            If any of the lines of code generates an error
+        """
+    try:
+        admin_aux = session.query(Administrator).filter(Administrator.id == parameters[0]).first()
+        session.close()
+        msg_rspt = Message(action=2, information=[])
+        msg_rspt.information.append(admin_aux.name)
+        msg_rspt.information.append(admin_aux.surname)
+        msg_rspt.information.append(admin_aux.email)
+        msg_rspt.information.append(admin_aux.password)
+        return msg_rspt
+    except Exception as e:
+        raise Exception('Error selecting administrator: ' + str(e))
 
 
 def create_experimenter(parameters, session):
@@ -261,7 +362,7 @@ def select_designers_group(parameters, session):
 
 
 def create_section(parameters, session):
-    section_aux = Section(parameters[0], parameters[1], parameters[2], parameters[3])
+    section_aux = Section(parameters[0], parameters[1], parameters[2])
     session.add(section_aux)
     session.commit()
     section_aux = session.query(Section).order_by(Section.id.desc()).first()
@@ -284,7 +385,6 @@ def update_section(parameters, session):
     section_aux.name = parameters[1]
     section_aux.description = parameters[2]
     section_aux.data_type = parameters[3]
-    section_aux.mandatory = parameters[4]
     session.commit()
     session.close()
     msg_rspt = Message(action=2, comment='Register updated successfully')
@@ -292,6 +392,9 @@ def update_section(parameters, session):
 
 
 def delete_section(parameters, session):
+    '''templates_secs_aux = session.query(TemplateSection).filter(TemplateSection.section_id == parameters[0]).all()
+    for i in range(0, len(templates_secs_aux)):
+        session.delete(templates_secs_aux[i])'''
     section_aux = session.query(Section).filter(Section.id == parameters[0]).first()
     session.delete(section_aux)
     session.commit()
@@ -306,17 +409,21 @@ def select_section(parameters, session):
     msg_rspt.information.append(section_aux.name)
     msg_rspt.information.append(section_aux.description)
     msg_rspt.information.append(section_aux.data_type)
-    msg_rspt.information.append(section_aux.mandatory)
     session.close()
     return msg_rspt
 
 
 def create_template(parameters, session):
     template_aux = Template(parameters[0], parameters[1])
+    session.add(template_aux)
     for i in range(0,len(parameters[2])):
         section_aux = session.query(Section).filter(Section.id == parameters[2][i]).first()
-        template_aux.sections += [section_aux]
-    session.add(template_aux)
+        if parameters[3][i] == '✓':
+            mandatory = True
+        else:
+            mandatory = False
+        template_sec_aux = TemplateSection(template_aux, section_aux, mandatory)
+        session.add(template_sec_aux)
     session.commit()
     session.close()
     msg_rspt = Message(action=2, comment='Register created successfully')
@@ -336,10 +443,17 @@ def update_template(parameters, session):
     template_aux = session.query(Template).filter(Template.id == parameters[0]).first()
     template_aux.name = parameters[1]
     template_aux.description = parameters[2]
-    template_aux.sections = []
+    templates_secs_aux = session.query(TemplateSection).filter(TemplateSection.template_id == parameters[0]).all()
+    for i in range(0, len(templates_secs_aux)):
+        session.delete(templates_secs_aux[i])
     for i in range(0,len(parameters[3])):
         section_aux = session.query(Section).filter(Section.id == parameters[3][i]).first()
-        template_aux.sections += [section_aux]
+        if parameters[4][i] == '✓':
+            mandatory = True
+        else:
+            mandatory = False
+        template_sec_aux = TemplateSection(template_aux, section_aux, mandatory)
+        session.add(template_sec_aux)
     session.commit()
     session.close()
     msg_rspt = Message(action=2, comment='Register updated successfully')
@@ -347,6 +461,9 @@ def update_template(parameters, session):
 
 
 def delete_template(parameters, session):
+    '''templates_secs_aux = session.query(TemplateSection).filter(TemplateSection.template_id == parameters[0]).all()
+    for i in range(0, len(templates_secs_aux)):
+        session.delete(templates_secs_aux[i])'''
     template_aux = session.query(Template).filter(Template.id == parameters[0]).first()
     session.delete(template_aux)
     session.commit()
@@ -363,8 +480,9 @@ def select_template(parameters, session):
     msg_rspt.information.append(template_aux.name)
     msg_rspt.information.append(template_aux.description)
     msg_rspt.information.append([])
-    for i in range(0, len(template_aux.sections)):
-        msg_rspt.information[2].append(template_aux.sections[i].__str__())
+    template_sections_aux = session.query(TemplateSection).filter(TemplateSection.template_id == parameters[0]).all()
+    for i in range(0, len(template_sections_aux)):
+        msg_rspt.information[2].append(template_sections_aux[i].__str__())
     session.close()
     return msg_rspt
 
@@ -453,13 +571,14 @@ def select_pattern(parameters, session):
 
 def create_content(parameters, session):
     # Received --> [content, id_pattern, id_section, id_diagram]
+    # Received --> [content, id_pattern, id_diagram]
     pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[1]).first()
-    section_aux = session.query(Section).filter(Section.id == parameters[2]).first()
-    if parameters[3] is not None:
-        diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[3]).first()
+    #section_aux = session.query(TemplateSection).filter(TemplateSection.id == parameters[2]).first()
+    if parameters[2] is not None:
+        diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[2]).first()
     else:
         diagram_aux = None
-    content_aux = PatternSection(parameters[0], pattern_aux, section_aux, diagram_aux)
+    content_aux = PatternSection(parameters[0], pattern_aux, diagram_aux)
     session.add(content_aux)
     session.commit()
     session.close()
@@ -661,6 +780,119 @@ def select_i_solution(parameters, session):
     session.close()
     return msg_rspt
 
+def create_diagram(parameters, session):
+    """
+           Creates a 'Diagram' object and stores it into the DB, the data for the
+           object is inside the 'parameters'
+
+           Parameters
+           ----------
+           parameters: Message.information [string, string, string, string]
+               -> parameters[0] has Bytes: file content
+               -> parameters[1] has string: filename
+           session: Session
+               Session of connection with the database
+
+           Returns
+           -------
+           msg_rspt: Message
+               Message with information of the fail or success of the operation and the id of the
+               created register
+
+           Raises
+           ------
+           Exception:
+               If any of the lines of code generates an error
+           """
+    try:
+        print('Here we are')
+        path = './Resources/Diagrams/'
+        file = path + parameters[1]
+        myfile = open(file, 'wb')
+        myfile.write(parameters[0])
+        myfile.close()
+        diagram_aux = Diagram(parameters[1], file)
+        session.add(diagram_aux)
+        session.commit()
+        id_diagram_aux = session.query(Diagram).order_by(Diagram.id.desc()).first()
+        session.close()
+        msg_rspt = Message(action=2, information=[id_diagram_aux.id], comment='Register created successfully')
+        return msg_rspt
+    except Exception as e:
+        raise Exception('Error creating a diagram: ' + str(e))
+
+
+def read_diagram(parameters, session):
+    templates = session.query(Template).all()
+    msg_rspt = Message(action=2, information=[])
+    for template in templates:
+        msg_rspt.information.append(template.__str__())
+    session.close()
+    return msg_rspt
+
+
+def update_diagram(parameters, session):
+    if len(parameters) == 4:
+        if parameters[3] is not list:
+            # Wthout patterns --> parameters=[id_i_solution, name, description, id_diagram]
+            i_solution_aux = session.query(IdealSolution).filter(IdealSolution.id == parameters[0]).first()
+            diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[3]).first()
+            i_solution_aux.name = parameters[1]
+            i_solution_aux.description = parameters[2]
+            i_solution_aux.diagram = diagram_aux
+        else:
+            # Without diagram --> parameters=[id_i_solution, name, description, [id_pattern1, id_pattern2, ...]]
+            i_solution_aux = session.query(IdealSolution).filter(IdealSolution.id == parameters[0]).first()
+            i_solution_aux.name = parameters[1]
+            i_solution_aux.description = parameters[2]
+            i_solution_aux.patterns = []
+            for i in range(0, len(parameters[3])):
+                pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[3][i]).first()
+                i_solution_aux.patterns += pattern_aux
+    else:
+        # With diagram and patterns--> parameters=[id_i_solution, name, description, id_diagram, [id_pattern1, id_pattern2, ...]]
+        i_solution_aux = session.query(IdealSolution).filter(IdealSolution.id == parameters[0]).first()
+        diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[3]).first()
+        i_solution_aux.name = parameters[1]
+        i_solution_aux.description = parameters[2]
+        i_solution_aux.diagram = diagram_aux
+        i_solution_aux.patterns = []
+        for i in range(0, len(parameters[4])):
+            pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[4][i]).first()
+            i_solution_aux.patterns += pattern_aux
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register created successfully')
+    return msg_rspt
+
+
+def delete_diagram(parameters, session):
+    i_solution_aux = session.query(IdealSolution).filter(IdealSolution.id == parameters[0]).first()
+    session.delete(i_solution_aux)
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register deleted successfully')
+    return msg_rspt
+
+
+def select_diagram(parameters, session):
+    i_solution_aux = session.query(IdealSolution).filter(IdealSolution.id == parameters[0]).first()
+    msg_rspt = Message(action=2, information=[])
+    msg_rspt.information.append(i_solution_aux.name)
+    msg_rspt.information.append(i_solution_aux.description)
+    msg_rspt.information.append(i_solution_aux.diagram_id)
+    msg_rspt.information.append([])
+    for i in range(0, len(i_solution_aux.patterns)):
+        msg_rspt.information[2].append(i_solution_aux.patterns[i].__str__())
+    session.close()
+    return msg_rspt
+
+def upload_file(parameters, session):
+    path = './Resources/Diagrams/'
+    file = path + parameters[1]
+    myfile = open(file, 'wb')
+    myfile.write(parameters[0])
+    myfile.close()
 
 switcher_protocol = {
         11: create_admin,
@@ -713,6 +945,12 @@ switcher_protocol = {
         58: update_i_solution,
         59: delete_i_solution,
         60: select_i_solution,
+        61: create_diagram,
+        62: read_diagram,
+        63: update_diagram,
+        64: delete_diagram,
+        65: select_diagram,
+        99: upload_file,
     }
 
 

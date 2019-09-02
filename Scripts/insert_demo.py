@@ -20,6 +20,7 @@ from Modules.Classes.ScenarioComponentPattern import ScenarioComponentPattern
 from Modules.Classes.Section import Section
 from Modules.Classes.SentSolution import SentSolution
 from Modules.Classes.Template import Template
+from Modules.Classes.TemplateSection import TemplateSection
 
 # Create tables in DB or access them if they exist
 Base.metadata.create_all(engine)
@@ -54,31 +55,41 @@ experimenter_demo2.experiments = [experiment_demo]
 
 section_demo1 = Section('Context', 'It establishes the parameters of the situation in which the problem arises. Explain '
                                    'how these can influence the problem and the repercussions they will have on the '
-                                   'solution.', 'Text', True)
+                                   'solution.', 'Text')
 section_demo2 = Section('Problem', 'It presents the problem to be solved, without factors that influence its definition '
-                                   'or possible solution.', 'Text', True)
-section_demo3 = Section('Solution', 'The solution proposed for the proposed problem.', 'Text', True)
+                                   'or possible solution.', 'Text')
+section_demo3 = Section('Solution', 'The solution proposed for the proposed problem.', 'Text')
 section_demo4 = Section('Consequences', 'Direct and indirect, positive and negative consequences after the application '
-                                        'of the proposed solution.', 'Text', True)
-section_demo5 = Section('Example', 'Real life application of the pattern where all elements can be perceived',
-                        'Text', False)
+                                        'of the proposed solution.', 'Text')
+section_demo5 = Section('Diagram', 'Schematic representation of the pattern', 'File')
+
 template_demo1 = Template('Control template', 'Not defined')
 template_demo2 = Template('Inform template', 'Not defined')
 template_demo3 = Template('Enforce template', 'Not defined')
-template_demo1.sections = [section_demo1, section_demo2, section_demo3]
-template_demo2.sections = [section_demo1, section_demo2, section_demo3, section_demo4, section_demo5]
-template_demo3.sections = [section_demo1, section_demo4]
 
-#diagram_demo = Diagram('demo_name', 'demo_file_path')
+t1_section1 = TemplateSection(template_demo1, section_demo1, True)
+t1_section2 = TemplateSection(template_demo1, section_demo2, True)
+t1_section3 = TemplateSection(template_demo1, section_demo3, True)
+t2_section1 = TemplateSection(template_demo2, section_demo1, True)
+t2_section2 = TemplateSection(template_demo2, section_demo2, True)
+t2_section3 = TemplateSection(template_demo2, section_demo3, False)
+t2_section4 = TemplateSection(template_demo2, section_demo4, True)
+t2_section5 = TemplateSection(template_demo2, section_demo5, True)
+t3_section1 = TemplateSection(template_demo3, section_demo1, True)
+t3_section2 = TemplateSection(template_demo3, section_demo2, True)
+
+diagram_demo = Diagram('diagarm_demo.jpg', '.\Resources\Diagrams\diagarm_demo.jpg')
+
 pattern_demo1 = Pattern('Encryption with user-managed keys', template_demo1)
 pattern_demo2 = Pattern('Informed Secure Passwords', template_demo2)
 pattern_demo3 = Pattern('Sticky Policies', template_demo3)
+
 pattern_section1 = PatternSection('User wants to store or transfer their personal data through an online service and '
                                   'they want to protect their privacy, and specifically the confidentiality of their '
                                   'personal information. Risks of unauthorized access may include the online service '
                                   'provider itself, or third parties such as its partners for example for backup, or '
                                   'government surveillance depending on the geographies the data is stored in or '
-                                  'transferred through.', pattern_demo1, section_demo1, None)
+                                  'transferred through.', pattern_demo1, None)
 pattern_section2 = PatternSection('How can a user store or transfer their personal information through an online '
                                   'service while ensuring their privacy and specifically preventing unauthorized '
                                   'access to their personal information? '
@@ -93,12 +104,11 @@ pattern_section2 = PatternSection('How can a user store or transfer their person
                                   'or de-duplication. If the service provider has written the client side software that '
                                   'does the client side encryption with a user-managed encryption key, there can be '
                                   'additional concerns regarding whether the client software is secure or tampered with '
-                                  'in ways that can compromise privacy.', pattern_demo1, section_demo2, None)
+                                  'in ways that can compromise privacy.', pattern_demo1, None)
 pattern_section3 = PatternSection('Encryption of the personal information of the user prior to storing it with, or '
                                   'transferring it through an online service. In this solution the user shall generate '
                                   'a strong encryption key and manage it themselves, specifically keeping it private and '
-                                  'unknown to the untrusted online service or 3rd parties.', pattern_demo1,
-                                  section_demo3, None)
+                                  'unknown to the untrusted online service or 3rd parties.', pattern_demo1, None)
 pattern_section4 = PatternSection('Credentials are required by numerous services (and products) in order to ensure that '
                                   'only authenticated and authorized users have access to certain features. Controllers '
                                   'typically provide authentication mechanisms in the form of usernames and passwords. '
@@ -108,32 +118,29 @@ pattern_section4 = PatternSection('Credentials are required by numerous services
                                   'users to change them frequently, use stronger variations, check them, and prevent '
                                   'disclosure and reuse. However users make use of many services, and use many '
                                   'passwords, thus discouraging proper application. This misapplication can result in '
-                                  'personal data being accessed by unauthorized persons.', pattern_demo2,
-                                  section_demo1, None)
+                                  'personal data being accessed by unauthorized persons.', pattern_demo2, None)
 pattern_section5 = PatternSection('Users must regularly maintain many strong passwords, remember them, and protect them, '
                                   'but are not well equipped to do so. So instead many choose weak ones and reuse them.',
-                                  pattern_demo2, section_demo2, None)
+                                  pattern_demo2, None)
 pattern_section6 = PatternSection('Provide users with assistance in understanding and maintaining strong passwords which '
-                                  'are easier to remember.', pattern_demo2, section_demo3, None)
+                                  'are easier to remember.', pattern_demo2, None)
 pattern_section7 = PatternSection('Secure passwords are very important in [an interconnected world]. Users generally '
                                   'tend to use familiar words such as names of pets and family members and no special '
                                   '[characters] when creating a password. These passwords can hence be easier hacked '
                                   'using social engineering than longer [and more complex passwords]. Secure passwords '
                                   'are a necessary step towards personal security. Using the above approach, the user '
                                   'obtains more feedback on the safety of the entered password and is therefore able to '
-                                  'create safe passwords that can be remembered.', pattern_demo2, section_demo4, None)
-pattern_section8 = PatternSection('Strongpasswordgenerator.com both provides explanation on state of the art approaches '
-                                  'to secure passwords in a layperson friendly manner and helps generate them.',
-                                  pattern_demo2, section_demo5, None)
+                                  'create safe passwords that can be remembered.', pattern_demo2, None)
+pattern_section8 = PatternSection(None, pattern_demo2, diagram_demo)
 pattern_section9 = PatternSection('Machine-readable policies are sticked to data to define allowed usage and obligations '
                                   'as it travels across multiple parties, enabling users to improve control over their '
-                                  'personal information.''', pattern_demo3, section_demo1, None)
+                                  'personal information.''', pattern_demo3, None)
 pattern_section10 = PatternSection('Beneﬁts: Policies can be propagated throughout the cloud to trusted organisations, '
                                    'strong enforcement of the policies, traceability. Liabilities: Scalability: policies '
                                    'increase size of data. Practicality may not be compatible with existing systems. '
                                    'It may be difficult to update the policy after sharing of the data and existence '
                                    'of multiple copies of data. It requires ensuring data is handled according to '
-                                   'policy e.g. using auditing.', pattern_demo3, section_demo4, None)
+                                   'policy e.g. using auditing.', pattern_demo3, None)
 
 #ideal_sol_demo = IdealSolution('demo_name', 'demo_description', diagram_demo)
 #ideal_sol_demo.patterns = [pattern_demo1, pattern_demo2]
@@ -164,9 +171,20 @@ session.add(section_demo5)
 session.add(template_demo1)
 session.add(template_demo2)
 session.add(template_demo3)
-#session.add(diagram_demo)
+session.add(t1_section1)
+session.add(t1_section2)
+session.add(t1_section3)
+session.add(t2_section1)
+session.add(t2_section2)
+session.add(t2_section3)
+session.add(t2_section4)
+session.add(t2_section5)
+session.add(t3_section1)
+session.add(t3_section2)
+session.add(diagram_demo)
 session.add(pattern_demo1)
 session.add(pattern_demo2)
+session.add(pattern_demo3)
 session.add(pattern_section1)
 session.add(pattern_section2)
 session.add(pattern_section3)

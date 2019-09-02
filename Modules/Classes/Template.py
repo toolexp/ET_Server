@@ -5,21 +5,13 @@ from sqlalchemy.orm import relationship
 from Modules.Config.base import Base
 
 
-templates_sections_association = Table(
-    'templates_sections', Base.metadata,
-    Column('template_id', Integer, ForeignKey('templates.id')),
-    Column('section_id', Integer, ForeignKey('sections.id'))
-)
-
-
 class Template(Base):
     __tablename__ = 'templates'
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
     description = Column(String)
-    sections = relationship("Section", secondary=templates_sections_association, backref='templates')
-
+    sections = relationship("Section", secondary="templates_sections", backref="templates")
 
     def __init__(self, name, description):
         self.name = name
