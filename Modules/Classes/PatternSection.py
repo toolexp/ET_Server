@@ -11,23 +11,27 @@ class PatternSection(Base):
     id = Column(Integer, primary_key=True)
     content = Column(String)
     pattern_id = Column(Integer, ForeignKey('patterns.id'))
-    #template_section_id = Column(Integer, ForeignKey('templates_sections.id'))
-    diagram_id = Column(Integer, ForeignKey('diagrams.id', use_alter=True, name='fk_pattern_sec_diagram_id'))
+    temp_section_id = Column(Integer, ForeignKey('templates_sections.id'))
+    diagram_id = Column(Integer, ForeignKey('diagrams.id'))
+    category_id = Column(Integer, ForeignKey('categories.id'))
+
     pattern = relationship("Pattern", backref=backref("pattern_sections", cascade="all, delete-orphan",
                                                       single_parent=True))
-    diagram = relationship("Diagram", foreign_keys=diagram_id, post_update=True, cascade="all, delete-orphan", single_parent=True)
-    #template_section = relationship("TemplateSection", backref=backref("pattern_sections", cascade="all, delete-orphan",
-                                                                        #single_parent=True))
-    #diagram = relationship("Diagram", backref=backref("pattern_sections", cascade="all, delete-orphan", single_parent=True))
+    temp_section = relationship("TemplateSection", backref=backref("pattern_sections", cascade="all, delete-orphan",
+                                                                   single_parent=True))
+    diagram = relationship("Diagram", foreign_keys=diagram_id, post_update=True, cascade="all, delete-orphan",
+                           single_parent=True)
+    category = relationship("Category", backref=backref("pattern_sections", cascade="all, delete-orphan",
+                                                        single_parent=True))
 
-    # Relacion 1 a 1
-
-
-    def __init__(self, content='', pattern=None, diagram=None):
+    def __init__(self, content='', pattern=None, temp_section=None, diagram=None, category=None):
         self.content = content
         self.pattern = pattern
+        self.temp_section = temp_section
         self.diagram = diagram
+        self.category = category
 
     def __str__(self):
-        cadena = '{}¥{}¥{}¥{}¥{}'.format(self.id, self.content, self.pattern.id, self.diagram.id)
+        cadena = '{}¥{}¥{}¥{}¥{}¥{}'.format(self.id, self.content, self.pattern_id, self.temp_section_id, self.diagram_id,
+                                            self.category_id)
         return cadena

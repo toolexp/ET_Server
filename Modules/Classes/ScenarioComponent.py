@@ -11,18 +11,18 @@ class ScenarioComponent(Base):
     id = Column(Integer, primary_key=True)
     experimental_scenario_id = Column(Integer, ForeignKey('experimental_scenarios.id'))
     problem_id = Column(Integer, ForeignKey('problems.id'))
+
     experimental_scenario = relationship("ExperimentalScenario", backref=backref("scenario_components",
                                                                                  cascade="all, delete-orphan",
                                                                                  single_parent=True))
     problem = relationship("Problem", backref=backref("scenario_components", cascade="all, delete-orphan",
                                                       single_parent=True))
-    patterns = relationship("ScenarioComponentPattern", back_populates="scenario_component",  cascade="all, delete-orphan",
-                                                      single_parent=True)
+    patterns = relationship("Pattern", secondary="scenario_components_patterns", backref="templates")
 
     def __init__(self, experimental_scenario, problem):
         self.experimental_scenario = experimental_scenario
         self.problem = problem
 
     def __str__(self):
-        cadena = '{}¥{}'.format(self.experimental_scenario, self.problem)
+        cadena = '{}¥{}¥{}'.format(self.id, self.experimental_scenario_id, self.problem_id)
         return cadena

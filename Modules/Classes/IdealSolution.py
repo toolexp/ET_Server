@@ -4,6 +4,7 @@ from sqlalchemy import Column, String, Integer, Table, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
 
+
 ideal_solutions_patterns_association = Table(
     'ideal_solutions_patterns', Base.metadata,
     Column('ideal_solution_id', Integer, ForeignKey('ideal_solutions.id')),
@@ -18,8 +19,11 @@ class IdealSolution(Base):
     name = Column(String)
     description = Column(String)
     diagram_id = Column(Integer, ForeignKey('diagrams.id'))
+
     diagram = relationship("Diagram", backref=backref("ideal_solutions", cascade="all, delete-orphan",
                                                       single_parent=True))
+
+    # Relation many to many
     patterns = relationship("Pattern", secondary=ideal_solutions_patterns_association, backref='ideal_solutions')
 
     def __init__(self, name, description, diagram):
@@ -28,5 +32,5 @@ class IdealSolution(Base):
         self.diagram = diagram
 
     def __str__(self):
-        cadena = '{}¥{}¥{}'.format(self.id, self.name, self.description)
+        cadena = '{}¥{}¥{}¥{}'.format(self.id, self.name, self.description, self.diagram_id)
         return cadena

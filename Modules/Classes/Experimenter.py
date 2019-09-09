@@ -19,6 +19,7 @@ class Experimenter(Base):
     surname = Column(String)
     email = Column(String)
     password = Column(String)
+
     experiments = relationship("Experiment", secondary=experimenters_experiments_association, backref='experimenters')
 
     def __init__(self, name, surname, email, password):

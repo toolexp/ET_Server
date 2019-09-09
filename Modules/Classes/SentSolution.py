@@ -4,6 +4,7 @@ from sqlalchemy import Column, String, Integer, Table, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
 
+
 sent_solutions_patterns_association = Table(
     'sent_solutions_patterns', Base.metadata,
     Column('sent_solution_id', Integer, ForeignKey('sent_solutions.id')),
@@ -20,6 +21,7 @@ class SentSolution(Base):
     designer_id = Column(Integer, ForeignKey('designers.id'))
     scenario_component_id = Column(Integer, ForeignKey('scenario_components.id'))
     diagram_id = Column(Integer, ForeignKey('diagrams.id'))
+
     designer = relationship("Designer", backref=backref("sent_solutions", cascade="all, delete-orphan",
                                                         single_parent=True))
     scenario_component = relationship("ScenarioComponent", backref=backref("sent_solutions",
@@ -27,6 +29,7 @@ class SentSolution(Base):
                                                                            single_parent=True))
     diagram = relationship("Diagram", backref=backref("sent_solutions", cascade="all, delete-orphan",
                                                       single_parent=True))
+    # Relation many to many
     patterns = relationship("Pattern", secondary=sent_solutions_patterns_association, backref='sent_solutions')
 
     def __init__(self, name, description, designer, scenario_component, diagram):

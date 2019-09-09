@@ -19,6 +19,7 @@ class ExperimentalScenario(Base):
     experiment_id = Column(Integer, ForeignKey('experiments.id'))
     control_group_id = Column(Integer, ForeignKey('designers_groups.id'))
     experimental_group_id = Column(Integer, ForeignKey('designers_groups.id'))
+
     experiment = relationship("Experiment", backref=backref("experimental_scenarios", cascade="all, delete-orphan",
                                                             single_parent=True))
     control_group = relationship("DesignersGroup", foreign_keys="ExperimentalScenario.control_group_id",

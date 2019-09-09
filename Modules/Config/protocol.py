@@ -3,10 +3,14 @@
 # Import necessary modules
 from datetime import date
 import os
+
+from sqlalchemy import and_
+
 from Modules.Config.base import Session, engine, Base
 from Modules.Config.Data import Message
 from Modules.Classes.Administrator import Administrator
-from Modules.Classes.Section import Section
+from Modules.Classes.Category import Category
+from Modules.Classes.Classification import Classification
 from Modules.Classes.Designer import Designer
 from Modules.Classes.DesignersGroup import DesignersGroup
 from Modules.Classes.Diagram import Diagram
@@ -19,6 +23,7 @@ from Modules.Classes.PatternSection import PatternSection
 from Modules.Classes.Problem import Problem
 from Modules.Classes.ScenarioComponent import ScenarioComponent
 from Modules.Classes.ScenarioComponentPattern import ScenarioComponentPattern
+from Modules.Classes.Section import Section
 from Modules.Classes.SentSolution import SentSolution
 from Modules.Classes.Template import Template
 from Modules.Classes.TemplateSection import TemplateSection
@@ -362,7 +367,11 @@ def select_designers_group(parameters, session):
 
 
 def create_section(parameters, session):
-    section_aux = Section(parameters[0], parameters[1], parameters[2])
+    if len(parameters) == 4:
+        classification_aux = session.query(Classification).filter(Classification.id == parameters[3]).first()
+        section_aux = Section(parameters[0], parameters[1], parameters[2], classification_aux)
+    else:
+        section_aux = Section(parameters[0], parameters[1], parameters[2])
     session.add(section_aux)
     session.commit()
     section_aux = session.query(Section).order_by(Section.id.desc()).first()
@@ -416,13 +425,13 @@ def select_section(parameters, session):
 def create_template(parameters, session):
     template_aux = Template(parameters[0], parameters[1])
     session.add(template_aux)
-    for i in range(0,len(parameters[2])):
+    for i in range(0, len(parameters[2])):
         section_aux = session.query(Section).filter(Section.id == parameters[2][i]).first()
         if parameters[3][i] == '✓':
             mandatory = True
         else:
             mandatory = False
-        template_sec_aux = TemplateSection(template_aux, section_aux, mandatory)
+        template_sec_aux = TemplateSection(mandatory, i+1, template_aux, section_aux)
         session.add(template_sec_aux)
     session.commit()
     session.close()
@@ -452,7 +461,7 @@ def update_template(parameters, session):
             mandatory = True
         else:
             mandatory = False
-        template_sec_aux = TemplateSection(template_aux, section_aux, mandatory)
+        template_sec_aux = TemplateSection(mandatory, i+1, template_aux, section_aux)
         session.add(template_sec_aux)
     session.commit()
     session.close()
@@ -480,7 +489,8 @@ def select_template(parameters, session):
     msg_rspt.information.append(template_aux.name)
     msg_rspt.information.append(template_aux.description)
     msg_rspt.information.append([])
-    template_sections_aux = session.query(TemplateSection).filter(TemplateSection.template_id == parameters[0]).all()
+    template_sections_aux = session.query(TemplateSection).filter(TemplateSection.template_id == parameters[0]).\
+        order_by(TemplateSection.position).all()
     for i in range(0, len(template_sections_aux)):
         msg_rspt.information[2].append(template_sections_aux[i].__str__())
     session.close()
@@ -503,13 +513,15 @@ def select_template(parameters, session):
     return msg_rspt'''
 
 def create_pattern(parameters, session):
-    template_aux = session.query(Template).filter(Template.id == parameters[1]).first()
-    pattern_aux = Pattern(parameters[0], template_aux)
+    # Received --> [id_template]
+    # Returned --> [id_pattern (new)]
+    template_aux = session.query(Template).filter(Template.id == parameters[0]).first()
+    pattern_aux = Pattern(template_aux)
     session.add(pattern_aux)
     session.commit()
-    id_pattern_aux = session.query(Pattern).order_by(Pattern.id.desc()).first()
+    new_pattern_aux = session.query(Pattern).order_by(Pattern.id.desc()).first()
     session.close()
-    msg_rspt = Message(action=2, information=[id_pattern_aux.id], comment='Register created successfully')
+    msg_rspt = Message(action=2, information=[new_pattern_aux.id], comment='Register created successfully')
     return msg_rspt
 
 
@@ -551,6 +563,10 @@ def update_pattern(parameters, session):
 
 def delete_pattern(parameters, session):
     pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[0]).first()
+    diagrams_aux = session.query(PatternSection).filter(and_(PatternSection.pattern_id == parameters[0],
+                                                             PatternSection.diagram_id != None)).all()
+    for item in diagrams_aux:
+        delete_diagram([item.diagram_id, 'just remove path'], session)
     session.delete(pattern_aux)
     session.commit()
     session.close()
@@ -570,15 +586,18 @@ def select_pattern(parameters, session):
 
 
 def create_content(parameters, session):
-    # Received --> [content, id_pattern, id_section, id_diagram]
-    # Received --> [content, id_pattern, id_diagram]
+    # Received --> [content, id_pattern, id_temp_section, id_diagram, id_category]
     pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[1]).first()
-    #section_aux = session.query(TemplateSection).filter(TemplateSection.id == parameters[2]).first()
-    if parameters[2] is not None:
-        diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[2]).first()
+    template_section_aux = session.query(TemplateSection).filter(TemplateSection.id == parameters[2]).first()
+    if parameters[3] is not None:
+        diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[3]).first()
     else:
         diagram_aux = None
-    content_aux = PatternSection(parameters[0], pattern_aux, diagram_aux)
+    if parameters[4] is not None:
+        category_aux = session.query(Category).filter(Category.id == parameters[4]).first()
+    else:
+        category_aux = None
+    content_aux = PatternSection(parameters[0], pattern_aux, template_section_aux, diagram_aux, category_aux)
     session.add(content_aux)
     session.commit()
     session.close()
@@ -587,24 +606,36 @@ def create_content(parameters, session):
 
 
 def read_content(parameters, session):
-    # Received --> [id_Pattern]
-    contents = session.query(PatternSection).filter(PatternSection.pattern_id == parameters[0]).all()
+    if len(parameters) == 0:
+        contents = session.query(PatternSection).all()
+    elif len(parameters) == 1:
+        # Received --> [id_Pattern]
+        contents = session.query(PatternSection).filter(PatternSection.pattern_id == parameters[0]).all()
+    else:
+        # Received --> [id_pattern, id_temp_section]
+        contents = session.query(PatternSection).filter(and_(PatternSection.pattern_id == parameters[0],
+                                                        PatternSection.temp_section_id == parameters[1])).all()
     msg_rspt = Message(action=2, information=[])
-    for content in contents:
-        msg_rspt.information.append(content.__str__())
+    for item in contents:
+        msg_rspt.information.append(item.__str__())
     session.close()
     return msg_rspt
 
 
 def update_content(parameters, session):
-    # Received --> [id_pattern_section, content, id_diagram]
+    # Received --> [id_pattern_section, content, id_diagram, id_category]
     content_aux = session.query(PatternSection).filter(PatternSection.id == parameters[0]).first()
-    content_aux.content = parameters[1]
     if parameters[2] is not None:
-        diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[3]).first()
+        diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[2]).first()
     else:
         diagram_aux = None
+    if parameters[3] is not None:
+        category_aux = session.query(Category).filter(Category.id == parameters[3]).first()
+    else:
+        category_aux = None
+    content_aux.content = parameters[1]
     content_aux.diagram = diagram_aux
+    content_aux.category = category_aux
     session.commit()
     session.close()
     msg_rspt = Message(action=2, comment='Register updated successfully')
@@ -805,7 +836,6 @@ def create_diagram(parameters, session):
                If any of the lines of code generates an error
            """
     try:
-        print('Here we are')
         path = './Resources/Diagrams/'
         file = path + parameters[1]
         myfile = open(file, 'wb')
@@ -814,9 +844,9 @@ def create_diagram(parameters, session):
         diagram_aux = Diagram(parameters[1], file)
         session.add(diagram_aux)
         session.commit()
-        id_diagram_aux = session.query(Diagram).order_by(Diagram.id.desc()).first()
+        new_diagram_aux = session.query(Diagram).order_by(Diagram.id.desc()).first()
         session.close()
-        msg_rspt = Message(action=2, information=[id_diagram_aux.id], comment='Register created successfully')
+        msg_rspt = Message(action=2, information=[new_diagram_aux.id], comment='Register created successfully')
         return msg_rspt
     except Exception as e:
         raise Exception('Error creating a diagram: ' + str(e))
@@ -867,23 +897,148 @@ def update_diagram(parameters, session):
 
 
 def delete_diagram(parameters, session):
-    i_solution_aux = session.query(IdealSolution).filter(IdealSolution.id == parameters[0]).first()
-    session.delete(i_solution_aux)
-    session.commit()
+    diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[0]).first()
+    os.remove(diagram_aux.file_path)
+    if len(parameters) == 1:
+        session.delete(diagram_aux)
+        session.commit()
     session.close()
     msg_rspt = Message(action=2, comment='Register deleted successfully')
     return msg_rspt
 
 
 def select_diagram(parameters, session):
-    i_solution_aux = session.query(IdealSolution).filter(IdealSolution.id == parameters[0]).first()
+    diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[0]).first()
+    myfile = open(diagram_aux.file_path, 'rb')
+    file_bytes = myfile.read()
+    myfile.close()
+    file_name = diagram_aux.name
+    session.close()
+    msg_rspt = Message(action=2, information=[file_name, file_bytes], comment='Register created successfully')
+    return msg_rspt
+
+def create_classification(parameters, session):
+    calssification_aux = Classification(parameters[0])
+    session.add(calssification_aux)
+    session.commit()
+    calssification_aux = session.query(Classification).order_by(Classification.id.desc()).first()
+    session.close()
+    msg_rspt = Message(action=2, information=[calssification_aux.__str__()], comment='Register created successfully')
+    return msg_rspt
+
+
+def read_classification(parameters, session):
+    calssifications = session.query(Classification).all()
     msg_rspt = Message(action=2, information=[])
-    msg_rspt.information.append(i_solution_aux.name)
-    msg_rspt.information.append(i_solution_aux.description)
-    msg_rspt.information.append(i_solution_aux.diagram_id)
-    msg_rspt.information.append([])
-    for i in range(0, len(i_solution_aux.patterns)):
-        msg_rspt.information[2].append(i_solution_aux.patterns[i].__str__())
+    for item in calssifications:
+        msg_rspt.information.append(item.__str__())
+    session.close()
+    return msg_rspt
+
+
+def update_classification(parameters, session):
+    section_aux = session.query(Section).filter(Section.id == parameters[0]).first()
+    section_aux.name = parameters[1]
+    section_aux.description = parameters[2]
+    section_aux.data_type = parameters[3]
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register updated successfully')
+    return msg_rspt
+
+
+def delete_classification(parameters, session):
+    '''templates_secs_aux = session.query(TemplateSection).filter(TemplateSection.section_id == parameters[0]).all()
+    for i in range(0, len(templates_secs_aux)):
+        session.delete(templates_secs_aux[i])'''
+    section_aux = session.query(Section).filter(Section.id == parameters[0]).first()
+    session.delete(section_aux)
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register deleted successfully')
+    return msg_rspt
+
+
+def select_classification(parameters, session):
+    classification_aux = session.query(Classification).filter(Classification.id == parameters[0]).first()
+    msg_rspt = Message(action=2, information=[])
+    msg_rspt.information.append(classification_aux.name)
+    session.close()
+    return msg_rspt
+
+def create_category(parameters, session):
+    classification_aux = session.query(Classification).filter(Classification.id == parameters[1]).first()
+    category_aux = Category(parameters[0], classification_aux)
+    session.add(category_aux)
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register created successfully')
+    return msg_rspt
+
+
+def read_category(parameters, session):
+    if len(parameters) == 0:
+        categories = session.query(Category).all()
+    else:
+        categories = session.query(Category).filter(Category.classification_id == parameters[0]).all()
+    msg_rspt = Message(action=2, information=[])
+    for item in categories:
+        msg_rspt.information.append(item.__str__())
+    session.close()
+    return msg_rspt
+
+
+def update_category(parameters, session):
+    section_aux = session.query(Section).filter(Section.id == parameters[0]).first()
+    section_aux.name = parameters[1]
+    section_aux.description = parameters[2]
+    section_aux.data_type = parameters[3]
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register updated successfully')
+    return msg_rspt
+
+
+def delete_category(parameters, session):
+    '''templates_secs_aux = session.query(TemplateSection).filter(TemplateSection.section_id == parameters[0]).all()
+    for i in range(0, len(templates_secs_aux)):
+        session.delete(templates_secs_aux[i])'''
+    section_aux = session.query(Section).filter(Section.id == parameters[0]).first()
+    session.delete(section_aux)
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register deleted successfully')
+    return msg_rspt
+
+
+def select_category(parameters, session):
+    category_aux = session.query(Category).filter(Category.id == parameters[0]).first()
+    msg_rspt = Message(action=2, information=[])
+    msg_rspt.information.append(category_aux.name)
+    msg_rspt.information.append(category_aux.classification_id)
+    session.close()
+    return msg_rspt
+
+'''def read_template_section(parameters, session):
+    if len(parameters) == 0:
+        categories = session.query(TemplateSection).all()
+    else:
+        categories = session.query(TemplateSection).filter(TemplateSection.classification_id == parameters[0]).all()
+    msg_rspt = Message(action=2, information=[])
+    for item in categories:
+        msg_rspt.information.append(item.__str__())
+    session.close()
+    return msg_rspt'''
+
+def read_template_section(parameters, session):
+    if len(parameters) == 0:
+        template_sections = session.query(TemplateSection).all()
+    else:
+        template_sections = session.query(TemplateSection).filter(TemplateSection.template_id == parameters[0]).\
+            order_by(TemplateSection.position).all()
+    msg_rspt = Message(action=2, information=[])
+    for item in template_sections:
+        msg_rspt.information.append(item.__str__())
     session.close()
     return msg_rspt
 
@@ -950,6 +1105,18 @@ switcher_protocol = {
         63: update_diagram,
         64: delete_diagram,
         65: select_diagram,
+        66: create_classification,
+        67: read_classification,
+        68: update_classification,
+        69: delete_classification,
+        70: select_classification,
+        71: create_category,
+        72: read_category,
+        73: update_category,
+        74: delete_category,
+        75: select_category,
+        #71: create_category,
+        77: read_template_section,
         99: upload_file,
     }
 

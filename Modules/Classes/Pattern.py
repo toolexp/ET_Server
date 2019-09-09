@@ -9,16 +9,15 @@ class Pattern(Base):
     __tablename__ = 'patterns'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String)
     template_id = Column(Integer, ForeignKey('templates.id'))
+
     template = relationship("Template", backref=backref("patterns", cascade="all, delete-orphan", single_parent=True))
     scenario_components = relationship("ScenarioComponentPattern", back_populates="pattern", cascade="all, delete-orphan",
                                        single_parent=True)
 
-    def __init__(self, name, template):
-        self.name = name
+    def __init__(self,template):
         self.template = template
 
     def __str__(self):
-        cadena = '{}¥{}'.format(self.id, self.name)
+        cadena = '{}¥{}'.format(self.id, self.template_id)
         return cadena

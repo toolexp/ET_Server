@@ -17,6 +17,7 @@ class DesignersGroup(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     description = Column(String)
+
     designers = relationship("Designer", secondary=designers_groups_designers_association, backref='designers_groups')
 
     def __init__(self, name, description):

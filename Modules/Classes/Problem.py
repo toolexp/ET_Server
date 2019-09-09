@@ -12,6 +12,7 @@ class Problem(Base):
     name = Column(String)
     description = Column(String)
     ideal_solution_id = Column(Integer, ForeignKey('ideal_solutions.id'))
+
     ideal_solution = relationship("IdealSolution", backref=backref("problems", cascade="all, delete-orphan",
                                                                    single_parent=True))
 
@@ -21,5 +22,5 @@ class Problem(Base):
         self.ideal_solution = ideal_solution
 
     def __str__(self):
-        cadena = '{}¥{}¥{}'.format(self.id, self.name, self.description)
+        cadena = '{}¥{}¥{}¥{}'.format(self.id, self.name, self.description, self.ideal_solution_id)
         return cadena
