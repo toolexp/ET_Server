@@ -211,110 +211,356 @@ def select_admin(parameters, session):
 
 
 def create_experimenter(parameters, session):
-    experimenter_aux = Experimenter(parameters[0], parameters[1], parameters[2], parameters[3])
-    session.add(experimenter_aux)
-    session.commit()
-    session.close()
-    msg_rspt = Message(action=2, comment='Register created successfully')
-    return msg_rspt
+    """
+       Creates an 'Experimenter' object and stores it into the DB, the data for the
+       object is inside the 'parameters'
+
+       Parameters
+       ----------
+       parameters: Message.information [string, string, string, string]
+           -> parameters[0] has Experimenter.name
+           -> parameters[1] has Experimenter.surname
+           -> parameters[2] has Experimenter.email
+           -> parameters[3] has Experimenter.password
+       session: Session
+           Session of connection with the database
+
+       Returns
+       -------
+       msg_rspt: Message
+           Message with information of the fail or success of the operation
+
+       Raises
+       ------
+       Exception:
+           If any of the lines of code generates an error
+       """
+    try:
+        experimenter_aux = Experimenter(parameters[0], parameters[1], parameters[2], parameters[3])
+        session.add(experimenter_aux)
+        session.commit()
+        session.close()
+        msg_rspt = Message(action=2, comment='Register created successfully')
+        return msg_rspt
+    except Exception as e:
+        raise Exception('Error creating experimenter: ' + str(e))
 
 
 def read_experimenter(parameters, session):
-    experimenters = session.query(Experimenter).all()
-    session.close()
-    msg_rspt = Message(action=2, information=[])
-    for experimenter in experimenters:
-        msg_rspt.information.append(experimenter.__str__())
-    return msg_rspt
+    """
+        Retreive a list with al the 'Experimenters' registered into the DB. The list
+        contains a string representation of each 'Experimenter' (__str__())
+
+        Parameters
+        ----------
+        parameters: Message.information [] (not used)
+        session: Session
+            Session of connection with the database
+
+        Returns
+        -------
+        msg_rspt: Message
+            Message with the list of experimenters
+
+        Raises
+        ------
+        Exception:
+            If any of the lines of code generates an error
+        """
+    try:
+        experimenters = session.query(Experimenter).all()
+        session.close()
+        msg_rspt = Message(action=2, information=[])
+        for experimenter in experimenters:
+            msg_rspt.information.append(experimenter.__str__())
+        return msg_rspt
+    except Exception as e:
+        raise Exception('Error retrieving experimenters: ' + str(e))
 
 
 def update_experimenter(parameters, session):
-    experimenter_aux = session.query(Experimenter).filter(Experimenter.id == parameters[0]).first()
-    experimenter_aux.name = parameters[1]
-    experimenter_aux.surname = parameters[2]
-    experimenter_aux.email = parameters[3]
-    experimenter_aux.password = parameters[4]
-    session.commit()
-    session.close()
-    msg_rspt = Message(action=2, comment='Register updated successfully')
-    return msg_rspt
+    """
+        Update information of an 'Experimenter' registered into the DB.
+
+        Parameters
+        ----------
+        parameters: Message.information [int, string, string, string, string]
+           -> parameters[0] has Experimenter.id
+           -> parameters[1] has Experimenter.name
+           -> parameters[2] has Experimenter.surname
+           -> parameters[3] has Experimenter.email
+           -> parameters[4] has Experimenter.password
+        session: Session
+            Session of connection with the database
+
+        Returns
+        -------
+        msg_rspt: Message
+            Message with information of the fail or success of the operation
+
+        Raises
+        ------
+        Exception:
+            If any of the lines of code generates an error
+        """
+    try:
+        experimenter_aux = session.query(Experimenter).filter(Experimenter.id == parameters[0]).first()
+        experimenter_aux.name = parameters[1]
+        experimenter_aux.surname = parameters[2]
+        experimenter_aux.email = parameters[3]
+        experimenter_aux.password = parameters[4]
+        session.commit()
+        session.close()
+        msg_rspt = Message(action=2, comment='Register updated successfully')
+        return msg_rspt
+    except Exception as e:
+        raise Exception('Error updating experimenter: ' + str(e))
 
 
 def delete_experimenter(parameters, session):
-    experimenter_aux = session.query(Experimenter).filter(Experimenter.id == parameters[0]).first()
-    session.delete(experimenter_aux)
-    session.commit()
-    session.close()
-    msg_rspt = Message(action=2, comment='Register deleted successfully')
-    return msg_rspt
+    """
+        Remove an 'Experimenter' from the DB.
+
+        Parameters
+        ----------
+        parameters: Message.information [int]
+           -> parameters[0] has Experimenter.id
+        session: Session
+            Session of connection with the database
+
+        Returns
+        -------
+        msg_rspt: Message
+            Message with information of the fail or success of the operation
+
+        Raises
+        ------
+        Exception:
+            If any of the lines of code generates an error
+        """
+    try:
+        experimenter_aux = session.query(Experimenter).filter(Experimenter.id == parameters[0]).first()
+        session.delete(experimenter_aux)
+        session.commit()
+        session.close()
+        msg_rspt = Message(action=2, comment='Register deleted successfully')
+        return msg_rspt
+    except Exception as e:
+        raise Exception('Error removing experimenter: ' + str(e))
 
 
 def select_experimenter(parameters, session):
-    experimenter_aux = session.query(Experimenter).filter(Experimenter.id == parameters[0]).first()
-    session.close()
-    msg_rspt = Message(action=2, information=[])
-    msg_rspt.information.append(experimenter_aux.name)
-    msg_rspt.information.append(experimenter_aux.surname)
-    msg_rspt.information.append(experimenter_aux.email)
-    msg_rspt.information.append(experimenter_aux.password)
-    return msg_rspt
+    """
+        Retrieve information of an 'Experimenter' from the DB.
+
+        Parameters
+        ----------
+        parameters: Message.information [int]
+           -> parameters[0] has Experimenter.id
+        session: Session
+            Session of connection with the database
+
+        Returns
+        -------
+        msg_rspt: Message
+            Message with information of the 'Experimenter'
+
+        Raises
+        ------
+        Exception:
+            If any of the lines of code generates an error
+        """
+    try:
+        experimenter_aux = session.query(Experimenter).filter(Experimenter.id == parameters[0]).first()
+        session.close()
+        msg_rspt = Message(action=2, information=[])
+        msg_rspt.information.append(experimenter_aux.name)
+        msg_rspt.information.append(experimenter_aux.surname)
+        msg_rspt.information.append(experimenter_aux.email)
+        msg_rspt.information.append(experimenter_aux.password)
+        return msg_rspt
+    except Exception as e:
+        raise Exception('Error selecting experimenter: ' + str(e))
 
 
 def create_designer(parameters, session):
-    designer_aux = Designer(parameters[0], parameters[1], parameters[2], parameters[3])
-    session.add(designer_aux)
-    session.commit()
-    session.close()
-    msg_rspt = Message(action=2, comment='Register created successfully')
-    return msg_rspt
+    """
+       Creates an 'Designer' object and stores it into the DB, the data for the
+       object is inside the 'parameters'
+
+       Parameters
+       ----------
+       parameters: Message.information [string, string, string, string]
+           -> parameters[0] has Designer.name
+           -> parameters[1] has Designer.surname
+           -> parameters[2] has Designer.email
+           -> parameters[3] has Designer.password
+       session: Session
+           Session of connection with the database
+
+       Returns
+       -------
+       msg_rspt: Message
+           Message with information of the fail or success of the operation
+
+       Raises
+       ------
+       Exception:
+           If any of the lines of code generates an error
+       """
+    try:
+        designer_aux = Designer(parameters[0], parameters[1], parameters[2], parameters[3])
+        session.add(designer_aux)
+        session.commit()
+        session.close()
+        msg_rspt = Message(action=2, comment='Register created successfully')
+        return msg_rspt
+    except Exception as e:
+        raise Exception('Error creating designer: ' + str(e))
 
 
 def read_designer(parameters, session):
-    designers = session.query(Designer).all()
-    session.close()
-    msg_rspt = Message(action=2, information=[])
-    for designer in designers:
-        msg_rspt.information.append(designer.__str__())
-    return msg_rspt
+    """
+        Retreive a list with al the 'Designers' registered into the DB. The list
+        contains a string representation of each 'Designer' (__str__())
+
+        Parameters
+        ----------
+        parameters: Message.information [] (not used)
+        session: Session
+            Session of connection with the database
+
+        Returns
+        -------
+        msg_rspt: Message
+            Message with the list of experimenters
+
+        Raises
+        ------
+        Exception:
+            If any of the lines of code generates an error
+        """
+    try:
+        designers = session.query(Designer).all()
+        session.close()
+        msg_rspt = Message(action=2, information=[])
+        for designer in designers:
+            msg_rspt.information.append(designer.__str__())
+        return msg_rspt
+    except Exception as e:
+        raise Exception('Error retrieving designers: ' + str(e))
 
 
 def update_designer(parameters, session):
-    designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
-    designer_aux.name = parameters[1]
-    designer_aux.surname = parameters[2]
-    designer_aux.email = parameters[3]
-    designer_aux.password = parameters[4]
-    session.commit()
-    session.close()
-    msg_rspt = Message(action=2, comment='Register updated successfully')
-    return msg_rspt
+    """
+        Update information of an 'Designer' registered into the DB.
+
+        Parameters
+        ----------
+        parameters: Message.information [int, string, string, string, string]
+           -> parameters[0] has Designer.id
+           -> parameters[1] has Designer.name
+           -> parameters[2] has Designer.surname
+           -> parameters[3] has Designer.email
+           -> parameters[4] has Designer.password
+        session: Session
+            Session of connection with the database
+
+        Returns
+        -------
+        msg_rspt: Message
+            Message with information of the fail or success of the operation
+
+        Raises
+        ------
+        Exception:
+            If any of the lines of code generates an error
+        """
+    try:
+        designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
+        designer_aux.name = parameters[1]
+        designer_aux.surname = parameters[2]
+        designer_aux.email = parameters[3]
+        designer_aux.password = parameters[4]
+        session.commit()
+        session.close()
+        msg_rspt = Message(action=2, comment='Register updated successfully')
+        return msg_rspt
+    except Exception as e:
+        raise Exception('Error updating designer: ' + str(e))
 
 
 def delete_designer(parameters, session):
-    designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
-    session.delete(designer_aux)
-    session.commit()
-    session.close()
-    msg_rspt = Message(action=2, comment='Register deleted successfully')
-    return msg_rspt
+    """
+        Remove an 'Designer' from the DB.
+
+        Parameters
+        ----------
+        parameters: Message.information [int]
+           -> parameters[0] has Designer.id
+        session: Session
+            Session of connection with the database
+
+        Returns
+        -------
+        msg_rspt: Message
+            Message with information of the fail or success of the operation
+
+        Raises
+        ------
+        Exception:
+            If any of the lines of code generates an error
+        """
+    try:
+        designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
+        session.delete(designer_aux)
+        session.commit()
+        session.close()
+        msg_rspt = Message(action=2, comment='Register deleted successfully')
+        return msg_rspt
+    except Exception as e:
+        raise Exception('Error removing designer: ' + str(e))
 
 
 def select_designer(parameters, session):
-    designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
-    session.close()
-    msg_rspt = Message(action=2, information=[])
-    msg_rspt.information.append(designer_aux.name)
-    msg_rspt.information.append(designer_aux.surname)
-    msg_rspt.information.append(designer_aux.email)
-    msg_rspt.information.append(designer_aux.password)
-    return msg_rspt
+    """
+        Retrieve information of an 'Experimenter' from the DB.
+
+        Parameters
+        ----------
+        parameters: Message.information [int]
+           -> parameters[0] has Experimenter.id
+        session: Session
+            Session of connection with the database
+
+        Returns
+        -------
+        msg_rspt: Message
+            Message with information of the 'Experimenter'
+
+        Raises
+        ------
+        Exception:
+            If any of the lines of code generates an error
+        """
+    try:
+        designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
+        session.close()
+        msg_rspt = Message(action=2, information=[])
+        msg_rspt.information.append(designer_aux.name)
+        msg_rspt.information.append(designer_aux.surname)
+        msg_rspt.information.append(designer_aux.email)
+        msg_rspt.information.append(designer_aux.password)
+        return msg_rspt
+    except Exception as e:
+        raise Exception('Error selecting designer: ' + str(e))
 
 
 def create_designers_group(parameters, session):
     designers_group_aux = DesignersGroup(parameters[0], parameters[1])
-    for i in range(0,len(parameters[2])):
-        designer_aux = session.query(Designer).filter(Designer.id == parameters[2][i]).first()
-        designers_group_aux.designers += [designer_aux]
+    for item in parameters[2]:
+        designer_aux = session.query(Designer).filter(Designer.id == item).first()
+        designers_group_aux.designers.append(designer_aux)
     session.add(designers_group_aux)
     session.commit()
     session.close()
@@ -336,9 +582,9 @@ def update_designers_group(parameters, session):
     designers_group_aux.name = parameters[1]
     designers_group_aux.description = parameters[2]
     designers_group_aux.designers = []
-    for i in range(0,len(parameters[3])):
-        designer_aux = session.query(Designer).filter(Designer.id == parameters[3][i]).first()
-        designers_group_aux.designers += [designer_aux]
+    for item in parameters[3]:
+        designer_aux = session.query(Designer).filter(Designer.id == item).first()
+        designers_group_aux.designers.append(designer_aux)
     session.commit()
     session.close()
     msg_rspt = Message(action=2, comment='Register updated successfully')
@@ -394,6 +640,9 @@ def update_section(parameters, session):
     section_aux.name = parameters[1]
     section_aux.description = parameters[2]
     section_aux.data_type = parameters[3]
+    if len(parameters == 5):
+        classification_aux = session.query(Classification).filter(Classification.id == parameters[4]).first()
+        section_aux.classification = classification_aux
     session.commit()
     session.close()
     msg_rspt = Message(action=2, comment='Register updated successfully')
@@ -401,14 +650,15 @@ def update_section(parameters, session):
 
 
 def delete_section(parameters, session):
-    '''templates_secs_aux = session.query(TemplateSection).filter(TemplateSection.section_id == parameters[0]).all()
-    for i in range(0, len(templates_secs_aux)):
-        session.delete(templates_secs_aux[i])'''
     section_aux = session.query(Section).filter(Section.id == parameters[0]).first()
-    session.delete(section_aux)
-    session.commit()
-    session.close()
-    msg_rspt = Message(action=2, comment='Register deleted successfully')
+    try:
+        session.delete(section_aux)
+        session.commit()
+        msg_rspt = Message(action=2, comment='Register deleted successfully')
+    except:
+        msg_rspt = Message(action=5, comment='Error deleting register')
+    finally:
+        session.close()
     return msg_rspt
 
 
@@ -418,6 +668,7 @@ def select_section(parameters, session):
     msg_rspt.information.append(section_aux.name)
     msg_rspt.information.append(section_aux.description)
     msg_rspt.information.append(section_aux.data_type)
+    msg_rspt.information.append(section_aux.classification_id)
     session.close()
     return msg_rspt
 
@@ -470,14 +721,15 @@ def update_template(parameters, session):
 
 
 def delete_template(parameters, session):
-    '''templates_secs_aux = session.query(TemplateSection).filter(TemplateSection.template_id == parameters[0]).all()
-    for i in range(0, len(templates_secs_aux)):
-        session.delete(templates_secs_aux[i])'''
     template_aux = session.query(Template).filter(Template.id == parameters[0]).first()
-    session.delete(template_aux)
-    session.commit()
-    session.close()
-    msg_rspt = Message(action=2, comment='Register deleted successfully')
+    try:
+        session.delete(template_aux)
+        session.commit()
+        msg_rspt = Message(action=2, comment='Register deleted successfully')
+    except:
+        msg_rspt = Message(action=5, comment='Error deleting register')
+    finally:
+        session.close()
     return msg_rspt
 
 
@@ -700,6 +952,9 @@ def update_problem(parameters, session):
 def delete_problem(parameters, session):
     # Received --> [id_problem]
     problem_aux = session.query(Problem).filter(Problem.id == parameters[0]).first()
+    # Neccesary to remove diagram path
+    solution_aux = session.query(IdealSolution).filter(IdealSolution.id == problem_aux.ideal_solution_id).first()
+    delete_diagram([solution_aux.diagram_id, 'just remove path'], session)
     session.delete(problem_aux)
     session.commit()
     session.close()
@@ -719,30 +974,23 @@ def select_problem(parameters, session):
 
 
 def create_i_solution(parameters, session):
-    if len(parameters) == 3:
-        if parameters[2] is not list:
-            # Wthout patterns --> parameters=[name, description, id_diagram]
-            diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[2]).first()
-            i_solution_aux = IdealSolution(parameters[0], parameters[1], diagram_aux)
-        else:
-            # Without diagram --> parameters=[name, description, [id_pattern1, id_pattern2, ...]]
-            i_solution_aux = IdealSolution(parameters[0], parameters[1], None)
-            i_solution_aux.patterns = []
-            for i in range(0, len(parameters[2])):
-                pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[2][i]).first()
-                i_solution_aux.patterns += pattern_aux
+    if len(parameters) == 2:
+        # Wthout patterns --> parameters=[annotations, id_diagram]
+        diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[1]).first()
+        i_solution_aux = IdealSolution(parameters[0], diagram_aux)
     else:
-        # With diagram and patterns--> parameters=[name, description, id_diagram, [id_pattern1, id_pattern2, ...]]
-        diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[2]).first()
-        i_solution_aux = IdealSolution(parameters[0], parameters[1], diagram_aux)
+        # With patterns--> parameters=[annotations, id_diagram, [id_pattern1, id_pattern2, ...]]
+        diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[1]).first()
+        i_solution_aux = IdealSolution(parameters[0], diagram_aux)
         i_solution_aux.patterns = []
-        for i in range(0, len(parameters[2])):
-            pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[2][i]).first()
-            i_solution_aux.patterns += pattern_aux
+        for item in parameters[2]:
+            pattern_aux = session.query(Pattern).filter(Pattern.id == item).first()
+            i_solution_aux.patterns.append(pattern_aux)
     session.add(i_solution_aux)
     session.commit()
+    new_i_sol_aux = session.query(IdealSolution).order_by(IdealSolution.id.desc()).first()
     session.close()
-    msg_rspt = Message(action=2, comment='Register created successfully')
+    msg_rspt = Message(action=2, information=[new_i_sol_aux.id], comment='Register created successfully')
     return msg_rspt
 
 
@@ -756,37 +1004,19 @@ def create_i_solution(parameters, session):
 
 
 def update_i_solution(parameters, session):
+    i_solution_aux = session.query(IdealSolution).filter(IdealSolution.id == parameters[0]).first()
+    diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[2]).first()
+    i_solution_aux.annotations = parameters[1]
+    i_solution_aux.diagram = diagram_aux
+    i_solution_aux.patterns = []
     if len(parameters) == 4:
-        if parameters[3] is not list:
-            # Wthout patterns --> parameters=[id_i_solution, name, description, id_diagram]
-            i_solution_aux = session.query(IdealSolution).filter(IdealSolution.id == parameters[0]).first()
-            diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[3]).first()
-            i_solution_aux.name = parameters[1]
-            i_solution_aux.description = parameters[2]
-            i_solution_aux.diagram = diagram_aux
-        else:
-            # Without diagram --> parameters=[id_i_solution, name, description, [id_pattern1, id_pattern2, ...]]
-            i_solution_aux = session.query(IdealSolution).filter(IdealSolution.id == parameters[0]).first()
-            i_solution_aux.name = parameters[1]
-            i_solution_aux.description = parameters[2]
-            i_solution_aux.patterns = []
-            for i in range(0, len(parameters[3])):
-                pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[3][i]).first()
-                i_solution_aux.patterns += pattern_aux
-    else:
-        # With diagram and patterns--> parameters=[id_i_solution, name, description, id_diagram, [id_pattern1, id_pattern2, ...]]
-        i_solution_aux = session.query(IdealSolution).filter(IdealSolution.id == parameters[0]).first()
-        diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[3]).first()
-        i_solution_aux.name = parameters[1]
-        i_solution_aux.description = parameters[2]
-        i_solution_aux.diagram = diagram_aux
-        i_solution_aux.patterns = []
-        for i in range(0, len(parameters[4])):
-            pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[4][i]).first()
-            i_solution_aux.patterns += pattern_aux
+        # With patterns--> parameters=[id_i_solution, annotations, id_diagram, [id_pattern1, id_pattern2, ...]]
+        for item in parameters[3]:
+            pattern_aux = session.query(Pattern).filter(Pattern.id == item).first()
+            i_solution_aux.patterns.append(pattern_aux)
     session.commit()
     session.close()
-    msg_rspt = Message(action=2, comment='Register created successfully')
+    msg_rspt = Message(action=2, comment='Register updated successfully')
     return msg_rspt
 
 
@@ -802,8 +1032,7 @@ def delete_i_solution(parameters, session):
 def select_i_solution(parameters, session):
     i_solution_aux = session.query(IdealSolution).filter(IdealSolution.id == parameters[0]).first()
     msg_rspt = Message(action=2, information=[])
-    msg_rspt.information.append(i_solution_aux.name)
-    msg_rspt.information.append(i_solution_aux.description)
+    msg_rspt.information.append(i_solution_aux.annotations)
     msg_rspt.information.append(i_solution_aux.diagram_id)
     msg_rspt.information.append([])
     for i in range(0, len(i_solution_aux.patterns)):
@@ -862,34 +1091,16 @@ def read_diagram(parameters, session):
 
 
 def update_diagram(parameters, session):
-    if len(parameters) == 4:
-        if parameters[3] is not list:
-            # Wthout patterns --> parameters=[id_i_solution, name, description, id_diagram]
-            i_solution_aux = session.query(IdealSolution).filter(IdealSolution.id == parameters[0]).first()
-            diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[3]).first()
-            i_solution_aux.name = parameters[1]
-            i_solution_aux.description = parameters[2]
-            i_solution_aux.diagram = diagram_aux
-        else:
-            # Without diagram --> parameters=[id_i_solution, name, description, [id_pattern1, id_pattern2, ...]]
-            i_solution_aux = session.query(IdealSolution).filter(IdealSolution.id == parameters[0]).first()
-            i_solution_aux.name = parameters[1]
-            i_solution_aux.description = parameters[2]
-            i_solution_aux.patterns = []
-            for i in range(0, len(parameters[3])):
-                pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[3][i]).first()
-                i_solution_aux.patterns += pattern_aux
-    else:
-        # With diagram and patterns--> parameters=[id_i_solution, name, description, id_diagram, [id_pattern1, id_pattern2, ...]]
-        i_solution_aux = session.query(IdealSolution).filter(IdealSolution.id == parameters[0]).first()
-        diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[3]).first()
-        i_solution_aux.name = parameters[1]
-        i_solution_aux.description = parameters[2]
-        i_solution_aux.diagram = diagram_aux
-        i_solution_aux.patterns = []
-        for i in range(0, len(parameters[4])):
-            pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[4][i]).first()
-            i_solution_aux.patterns += pattern_aux
+    # Received --> [id_diagram, file_content, filename]
+    diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[0]).first()
+    os.remove(diagram_aux.file_path)
+    path = './Resources/Diagrams/'
+    file = path + parameters[2]
+    myfile = open(file, 'wb')
+    myfile.write(parameters[1])
+    myfile.close()
+    diagram_aux.name = parameters[2]
+    diagram_aux.file_path = file
     session.commit()
     session.close()
     msg_rspt = Message(action=2, comment='Register created successfully')
@@ -923,7 +1134,7 @@ def create_classification(parameters, session):
     session.commit()
     calssification_aux = session.query(Classification).order_by(Classification.id.desc()).first()
     session.close()
-    msg_rspt = Message(action=2, information=[calssification_aux.__str__()], comment='Register created successfully')
+    msg_rspt = Message(action=2, information=[calssification_aux.id], comment='Register created successfully')
     return msg_rspt
 
 
@@ -937,10 +1148,8 @@ def read_classification(parameters, session):
 
 
 def update_classification(parameters, session):
-    section_aux = session.query(Section).filter(Section.id == parameters[0]).first()
-    section_aux.name = parameters[1]
-    section_aux.description = parameters[2]
-    section_aux.data_type = parameters[3]
+    calssification_aux = session.query(Classification).filter(Classification.id == parameters[0]).first()
+    calssification_aux.name = parameters[1]
     session.commit()
     session.close()
     msg_rspt = Message(action=2, comment='Register updated successfully')
@@ -948,14 +1157,15 @@ def update_classification(parameters, session):
 
 
 def delete_classification(parameters, session):
-    '''templates_secs_aux = session.query(TemplateSection).filter(TemplateSection.section_id == parameters[0]).all()
-    for i in range(0, len(templates_secs_aux)):
-        session.delete(templates_secs_aux[i])'''
-    section_aux = session.query(Section).filter(Section.id == parameters[0]).first()
-    session.delete(section_aux)
-    session.commit()
-    session.close()
-    msg_rspt = Message(action=2, comment='Register deleted successfully')
+    section_aux = session.query(Classification).filter(Classification.id == parameters[0]).first()
+    try:
+        session.delete(section_aux)
+        session.commit()
+        msg_rspt = Message(action=2, comment='Register deleted successfully')
+    except:
+        msg_rspt = Message(action=5, comment='Error deleting register')
+    finally:
+        session.close()
     return msg_rspt
 
 
@@ -963,6 +1173,9 @@ def select_classification(parameters, session):
     classification_aux = session.query(Classification).filter(Classification.id == parameters[0]).first()
     msg_rspt = Message(action=2, information=[])
     msg_rspt.information.append(classification_aux.name)
+    msg_rspt.information.append([])
+    for item in classification_aux.categories:
+        msg_rspt.information[1].append(item.__str__())
     session.close()
     return msg_rspt
 
@@ -1000,11 +1213,10 @@ def update_category(parameters, session):
 
 
 def delete_category(parameters, session):
-    '''templates_secs_aux = session.query(TemplateSection).filter(TemplateSection.section_id == parameters[0]).all()
-    for i in range(0, len(templates_secs_aux)):
-        session.delete(templates_secs_aux[i])'''
-    section_aux = session.query(Section).filter(Section.id == parameters[0]).first()
-    session.delete(section_aux)
+    # Received --> [id_classification]
+    categories_aux = session.query(Category).filter(Category.classification_id == parameters[0]).all()
+    for item in categories_aux:
+        session.delete(item)
     session.commit()
     session.close()
     msg_rspt = Message(action=2, comment='Register deleted successfully')

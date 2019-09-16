@@ -23,6 +23,7 @@ from Modules.Classes.Template import Template
 from Modules.Classes.TemplateSection import TemplateSection
 
 # Create tables in DB or access them if they exist
+
 Base.metadata.create_all(engine)
 
 # Create session with DB
@@ -72,7 +73,7 @@ section_demo3 = Section('Solution', 'The solution proposed for the proposed prob
 section_demo4 = Section('Consequences', 'Direct and indirect, positive and negative consequences after the application '
                                         'of the proposed solution.', 'Text', None)
 section_demo5 = Section('Diagram', 'Schematic representation of the pattern', 'File', None)
-section_demo6 = Section(classification_demo1.name, '', 'Classification', classification_demo1)
+section_demo6 = Section(classification_demo1.name, 'NA', 'Classification', classification_demo1)
 section_demo7 = Section('Name', 'Text that describes the pattern', 'Text', None)
 
 template_demo1 = Template('Control template', 'Not defined')
@@ -96,7 +97,7 @@ t3_section2 = TemplateSection(True, 3, template_demo3, section_demo2)
 t3_section3 = TemplateSection(True, 4, template_demo3, section_demo6)
 t3_section4 = TemplateSection(True, 1, template_demo3, section_demo7)
 
-diagram_demo = Diagram('diagram_demo.jpg', '.\Resources\Diagrams\diagram_demo.jpg')
+diagram_demo = Diagram('diagram_demo.jpg', './Resources/Diagrams/diagram_demo.jpg')
 
 pattern_demo1 = Pattern(template_demo1)
 pattern_demo2 = Pattern(template_demo2)
@@ -168,10 +169,10 @@ pattern_section10 = PatternSection('Beneﬁts: Policies can be propagated throug
 pattern_section13 = PatternSection('<' + category_demo2.name + '>', pattern_demo3, t3_section3, None, category_demo2)
 pattern_section14 = PatternSection('Sticky Policies', pattern_demo3, t3_section4, None, None)
 
-#ideal_sol_demo = IdealSolution('demo_name', 'demo_description', diagram_demo)
-#ideal_sol_demo.patterns = [pattern_demo1, pattern_demo2]
+ideal_sol_demo = IdealSolution('demo_annotation', diagram_demo)
+ideal_sol_demo.patterns = [pattern_demo1, pattern_demo2]
 
-#problem_demo = Problem('demo_name', 'demo_description', ideal_sol_demo)
+problem_demo = Problem('demo_name', 'demo_description', ideal_sol_demo)
 #scenario_component_demo = ScenarioComponent(experimental_sc_demo, problem_demo)
 #scc_pattern_demo1 = ScenarioComponentPattern('demo_type1', scenario_component_demo, pattern_demo1)
 #scc_pattern_demo2 = ScenarioComponentPattern('demo_type2', scenario_component_demo, pattern_demo2)
@@ -240,8 +241,8 @@ session.add(pattern_section11)
 session.add(pattern_section12)
 session.add(pattern_section13)
 session.add(pattern_section14)
-#session.add(ideal_sol_demo)
-#session.add(problem_demo)
+session.add(ideal_sol_demo)
+session.add(problem_demo)
 #session.add(scenario_component_demo)
 #session.add(sent_sol_demo)
 #session.add(scc_pattern_demo1)

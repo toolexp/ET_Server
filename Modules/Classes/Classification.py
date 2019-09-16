@@ -15,5 +15,5 @@ class Classification(Base):
         self.name = name
 
     def __str__(self):
-        cadena = '{}¥{}'.format(self.id, self.name)
+        cadena = '{}¥{}¥{}'.format(self.id, self.name, len(self.categories))
         return cadena

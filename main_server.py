@@ -6,7 +6,7 @@ PORT = 65450        # Port to listen on (non-privileged ports are > 1023)
 HEADER_SIZE = 10    # Length that indicates the number of characters in the received message
 
 connection = Connection()
-try:
+if True:
     connection.create_connection(HOST, PORT)
     connection.listen_connections(5)
     connection.accept_connection()
@@ -19,8 +19,8 @@ try:
         msg_rspt = handle_decision(connection)
         connection.create_message(msg_rspt)
         connection.send_message()
-except Exception as e:
+'''except Exception as e:
     error = 'Error with the server: ' + str(e)
     print(error)
 finally:
-    connection.close_connection()
+    connection.close_connection()'''

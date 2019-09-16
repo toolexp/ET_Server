@@ -22,10 +22,7 @@ class Section(Base):
         self.description = description
         self.data_type = data_type
         self.classification = classification
-        if self.classification is not None:
-            self.name = classification.name
-            self.description = ''
 
     def __str__(self):
-        cadena = '{}¥{}¥{}¥{}'.format(self.id, self.name, self.description, self.data_type)
+        cadena = '{}¥{}¥{}¥{}¥{}'.format(self.id, self.name, self.description, self.data_type, self.classification_id)
         return cadena

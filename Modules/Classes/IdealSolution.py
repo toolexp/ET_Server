@@ -16,21 +16,20 @@ class IdealSolution(Base):
     __tablename__ = 'ideal_solutions'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String)
-    description = Column(String)
+    annotations = Column(String)
     diagram_id = Column(Integer, ForeignKey('diagrams.id'))
 
-    diagram = relationship("Diagram", backref=backref("ideal_solutions", cascade="all, delete-orphan",
-                                                      single_parent=True))
+    #diagram = relationship("Diagram", backref=backref("ideal_solutions", cascade="all, delete-orphan",
+                                                      #single_parent=True))
+    diagram = relationship("Diagram", backref="ideal_solution", cascade="all, delete-orphan", single_parent=True, uselist=False)
 
     # Relation many to many
     patterns = relationship("Pattern", secondary=ideal_solutions_patterns_association, backref='ideal_solutions')
 
-    def __init__(self, name, description, diagram):
-        self.name = name
-        self.description = description
+    def __init__(self, annotations, diagram):
+        self.annotations = annotations
         self.diagram = diagram
 
     def __str__(self):
-        cadena = '{}¥{}¥{}¥{}'.format(self.id, self.name, self.description, self.diagram_id)
+        cadena = '{}¥{}¥{}'.format(self.id, self.annotations, self.diagram_id)
         return cadena

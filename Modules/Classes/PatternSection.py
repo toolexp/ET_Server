@@ -19,8 +19,10 @@ class PatternSection(Base):
                                                       single_parent=True))
     temp_section = relationship("TemplateSection", backref=backref("pattern_sections", cascade="all, delete-orphan",
                                                                    single_parent=True))
-    diagram = relationship("Diagram", foreign_keys=diagram_id, post_update=True, cascade="all, delete-orphan",
-                           single_parent=True)
+    '''diagram = relationship("Diagram", foreign_keys=diagram_id, post_update=True, cascade="all, delete-orphan",
+                           single_parent=True)'''
+    diagram = relationship("Diagram", backref="pattern_section", cascade="all, delete-orphan", single_parent=True,
+                           uselist=False)
     category = relationship("Category", backref=backref("pattern_sections", cascade="all, delete-orphan",
                                                         single_parent=True))
 

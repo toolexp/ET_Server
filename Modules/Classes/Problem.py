@@ -13,8 +13,13 @@ class Problem(Base):
     description = Column(String)
     ideal_solution_id = Column(Integer, ForeignKey('ideal_solutions.id'))
 
-    ideal_solution = relationship("IdealSolution", backref=backref("problems", cascade="all, delete-orphan",
-                                                                   single_parent=True))
+    #ideal_solution = relationship("IdealSolution", backref=backref("problems", cascade="all, delete-orphan",
+                                                                   #single_parent=True))
+
+    #ideal_solution = relationship("IdealSolution", foreign_keys=ideal_solution_id, post_update=True, cascade="all, delete-orphan",
+                                  #single_parent=True)
+    ideal_solution = relationship("IdealSolution", backref="problem", cascade="all, delete-orphan", single_parent=True,
+                                  uselist=False)
 
     def __init__(self, name, description, ideal_solution):
         self.name = name
