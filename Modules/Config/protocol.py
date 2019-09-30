@@ -1231,17 +1231,6 @@ def select_category(parameters, session):
     session.close()
     return msg_rspt
 
-'''def read_template_section(parameters, session):
-    if len(parameters) == 0:
-        categories = session.query(TemplateSection).all()
-    else:
-        categories = session.query(TemplateSection).filter(TemplateSection.classification_id == parameters[0]).all()
-    msg_rspt = Message(action=2, information=[])
-    for item in categories:
-        msg_rspt.information.append(item.__str__())
-    session.close()
-    return msg_rspt'''
-
 def read_template_section(parameters, session):
     if len(parameters) == 0:
         template_sections = session.query(TemplateSection).all()
@@ -1254,12 +1243,121 @@ def read_template_section(parameters, session):
     session.close()
     return msg_rspt
 
-def upload_file(parameters, session):
-    path = './Resources/Diagrams/'
-    file = path + parameters[1]
-    myfile = open(file, 'wb')
-    myfile.write(parameters[0])
-    myfile.close()
+def create_exp_scenario(parameters, session):
+    # Received --> [name, description, access_code, start_time, end_time, scenario_availability, scenario_lock, experiment_id, control_group_id, experimental_group_id]
+    control_group = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[8]).first()
+    experimental_group = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[9]).first()
+    exp_sc_aux = ExperimentalScenario(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4],
+                                       parameters[5], parameters[6], parameters[7], control_group, experimental_group)
+    session.add(exp_sc_aux)
+    session.commit()
+    new_exp_sc_aux = session.query(ExperimentalScenario).order_by(ExperimentalScenario.id.desc()).first()
+    session.close()
+    msg_rspt = Message(action=2, information=[new_exp_sc_aux.id], comment='Register created successfully')
+    return msg_rspt
+
+
+def read_exp_scenario(parameters, session):
+    exp_scenarios = session.query(ExperimentalScenario).all()
+    msg_rspt = Message(action=2, information=[])
+    for item in exp_scenarios:
+        msg_rspt.information.append(item.__str__())
+    session.close()
+    return msg_rspt
+
+
+def update_exp_scenario(parameters, session):
+    section_aux = session.query(Section).filter(Section.id == parameters[0]).first()
+    section_aux.name = parameters[1]
+    section_aux.description = parameters[2]
+    section_aux.data_type = parameters[3]
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register updated successfully')
+    return msg_rspt
+
+
+def delete_exp_scenario(parameters, session):
+    # Received --> [id_exp_scenario]
+    scenario_comp_aux = session.query(ScenarioComponent).filter(ScenarioComponent.experimental_scenario_id == parameters[0]).all()
+    for item in scenario_comp_aux:
+        session.delete(item)
+    exp_scenario_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[0]).first()
+    session.delete(exp_scenario_aux)
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register deleted successfully')
+    return msg_rspt
+
+
+def select_exp_scenario(parameters, session):
+    category_aux = session.query(Category).filter(Category.id == parameters[0]).first()
+    msg_rspt = Message(action=2, information=[])
+    msg_rspt.information.append(category_aux.name)
+    msg_rspt.information.append(category_aux.classification_id)
+    session.close()
+    return msg_rspt
+
+def create_sc_component(parameters, session):
+    # Received --> [experimental_scenario_id, problem_id, [cgroup_pattern_id1, cgroup_pattern_id2, ...], [egroup_pattern_id1, egroup_pattern_id2, ...]]
+    experimental_scenario_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[0]).first()
+    problem_aux = session.query(Problem).filter(Problem.id == parameters[1]).first()
+    sc_component_aux = ScenarioComponent(experimental_scenario_aux, problem_aux)
+    session.add(sc_component_aux)
+    # Creating association of scenario component and patterns for the control group
+    for item in parameters[2]:
+        pattern_aux = session.query(Pattern).filter(Pattern.id == item).first()
+        scc_pattern_aux = ScenarioComponentPattern(1, sc_component_aux, pattern_aux)
+        session.add(scc_pattern_aux)
+    # Creating association of scenario component and patterns for the experimental group
+    for item in parameters[3]:
+        pattern_aux = session.query(Pattern).filter(Pattern.id == item).first()
+        scc_pattern_aux = ScenarioComponentPattern(2, sc_component_aux, pattern_aux)
+        session.add(scc_pattern_aux)
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register created successfully')
+    return msg_rspt
+
+
+def read_sc_component(parameters, session):
+    exp_scenarios = session.query(ExperimentalScenario).all()
+    msg_rspt = Message(action=2, information=[])
+    for item in exp_scenarios:
+        msg_rspt.information.append(item.__str__())
+    session.close()
+    return msg_rspt
+
+
+def update_sc_component(parameters, session):
+    section_aux = session.query(Section).filter(Section.id == parameters[0]).first()
+    section_aux.name = parameters[1]
+    section_aux.description = parameters[2]
+    section_aux.data_type = parameters[3]
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register updated successfully')
+    return msg_rspt
+
+
+def delete_sc_component(parameters, session):
+    # Received --> [id_classification]
+    categories_aux = session.query(Category).filter(Category.classification_id == parameters[0]).all()
+    for item in categories_aux:
+        session.delete(item)
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register deleted successfully')
+    return msg_rspt
+
+
+def select_sc_component(parameters, session):
+    category_aux = session.query(Category).filter(Category.id == parameters[0]).first()
+    msg_rspt = Message(action=2, information=[])
+    msg_rspt.information.append(category_aux.name)
+    msg_rspt.information.append(category_aux.classification_id)
+    session.close()
+    return msg_rspt
 
 switcher_protocol = {
         11: create_admin,
@@ -1329,7 +1427,16 @@ switcher_protocol = {
         75: select_category,
         #71: create_category,
         77: read_template_section,
-        99: upload_file,
+        81: create_exp_scenario,
+        82: read_exp_scenario,
+        83: update_exp_scenario,
+        84: delete_exp_scenario,
+        85: select_exp_scenario,
+        86: create_sc_component,
+        87: read_sc_component,
+        88: update_sc_component,
+        89: delete_sc_component,
+        90: select_sc_component
     }
 
 

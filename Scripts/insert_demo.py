@@ -1,6 +1,8 @@
 # coding=utf-8
 
 # Import necessary modules
+from datetime import time
+
 from Modules.Config.base import Session, engine, Base
 from Modules.Classes.Administrator import Administrator
 from Modules.Classes.Category import Category
@@ -50,9 +52,6 @@ experiment_demo = Experiment('Template 1 vs Template 2', 'Does using patterns of
 experimenter_demo1.experiments = [experiment_demo]
 experimenter_demo2.experiments = [experiment_demo]
 
-#experimental_sc_demo = ExperimentalScenario('demo_name', 'demo_description', 'acces_code_demo', date(2000, 1, 1),
-                                            #date(2000, 1, 2), True, False, experiment_demo, designers_group_demo1,
-                                            #designers_group_demo2)
 classification_demo1 = Classification('Control')
 category_demo1 = Category('Consent', classification_demo1)
 category_demo2 = Category('Retract', classification_demo1)
@@ -169,13 +168,22 @@ pattern_section10 = PatternSection('Beneﬁts: Policies can be propagated throug
 pattern_section13 = PatternSection('<' + category_demo2.name + '>', pattern_demo3, t3_section3, None, category_demo2)
 pattern_section14 = PatternSection('Sticky Policies', pattern_demo3, t3_section4, None, None)
 
-ideal_sol_demo = IdealSolution('demo_annotation', diagram_demo)
+diagram_demo2 = Diagram('diagram_demo2.jpg', './Resources/Diagrams/diagram_demo2.jpg')
+ideal_sol_demo = IdealSolution('May not necessarily require patterns, but will use them', diagram_demo2)
 ideal_sol_demo.patterns = [pattern_demo1, pattern_demo2]
+problem_demo = Problem('Software that is difficult to use', 'Many people have experienced first-hand the frustration of '
+                                                            'using software that is cumbersome, difficult to navigate, '
+                                                            'and requires several steps to perform simple tasks.',
+                       ideal_sol_demo)
 
-problem_demo = Problem('demo_name', 'demo_description', ideal_sol_demo)
-#scenario_component_demo = ScenarioComponent(experimental_sc_demo, problem_demo)
-#scc_pattern_demo1 = ScenarioComponentPattern('demo_type1', scenario_component_demo, pattern_demo1)
-#scc_pattern_demo2 = ScenarioComponentPattern('demo_type2', scenario_component_demo, pattern_demo2)
+
+experimental_sc_demo = ExperimentalScenario('Experimental scenario 1', 'NA', '000-111-222-333', time(1, 0, 0),
+                                            time(6, 0, 0), True, False, experiment_demo, designers_group_demo1,
+                                            designers_group_demo2)
+scenario_component_demo = ScenarioComponent(experimental_sc_demo, problem_demo)
+scc_pattern_demo1 = ScenarioComponentPattern(1, scenario_component_demo, pattern_demo1)
+scc_pattern_demo2 = ScenarioComponentPattern(2, scenario_component_demo, pattern_demo2)
+
 #sent_sol_demo = SentSolution('demo_name', 'demo_description', designer_demo1, scenario_component_demo, diagram_demo)
 
 # Make persistence in DB
@@ -189,7 +197,7 @@ session.add(designers_group_demo2)
 session.add(experimenter_demo1)
 session.add(experimenter_demo2)
 session.add(experiment_demo)
-#session.add(experimental_sc_demo)
+session.add(experimental_sc_demo)
 session.add(classification_demo1)
 session.add(category_demo1)
 session.add(category_demo2)
@@ -241,12 +249,13 @@ session.add(pattern_section11)
 session.add(pattern_section12)
 session.add(pattern_section13)
 session.add(pattern_section14)
+session.add(diagram_demo2)
 session.add(ideal_sol_demo)
 session.add(problem_demo)
-#session.add(scenario_component_demo)
+session.add(scenario_component_demo)
 #session.add(sent_sol_demo)
-#session.add(scc_pattern_demo1)
-#session.add(scc_pattern_demo2)
+session.add(scc_pattern_demo1)
+session.add(scc_pattern_demo2)
 
 # Save changes and close connection
 session.commit()

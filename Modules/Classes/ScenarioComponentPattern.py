@@ -12,7 +12,7 @@ class ScenarioComponentPattern(Base):
     }
 
     id = Column(Integer, primary_key=True)
-    pattern_type = Column(String)
+    pattern_type = Column(Integer)   # Indicates wheter the pattern association is for the control group or experimental group
     scenario_component_id = Column(Integer, ForeignKey('scenario_components.id'))
     pattern_id = Column(Integer, ForeignKey('patterns.id'))
 
@@ -23,7 +23,7 @@ class ScenarioComponentPattern(Base):
                                                       single_parent=True))
 
     def __init__(self, pattern_type, scenario_component, pattern):
-        self.pattern_type = pattern_type
+        self.pattern_type = pattern_type    # if pattern_type=1 --> control group, otherwise experimental group
         self.scenario_component = scenario_component
         self.pattern = pattern
 

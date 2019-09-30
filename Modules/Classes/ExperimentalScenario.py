@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from sqlalchemy import Column, String, Integer, Date, ForeignKey, Boolean
+from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, Time
 from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
 
@@ -12,8 +12,8 @@ class ExperimentalScenario(Base):
     name = Column(String)
     description = Column(String)
     access_code = Column(String)
-    start_time = Column(Date)
-    end_time = Column(Date)
+    start_time = Column(Time)
+    end_time = Column(Time)
     scenario_availability = Column(Boolean)
     scenario_lock = Column(Boolean)
     experiment_id = Column(Integer, ForeignKey('experiments.id'))
@@ -43,5 +43,5 @@ class ExperimentalScenario(Base):
         self.experimental_group = experimental_group
 
     def __str__(self):
-        cadena = '{}¥{}'.format(self.name, self.description)
+        cadena = '{}¥{}¥{}'.format(self.id, self.name, self.description)
         return cadena
