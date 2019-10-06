@@ -1,6 +1,7 @@
 # coding=utf-8
 
 # Import necessary modules
+import datetime
 from datetime import date
 import os
 
@@ -1042,31 +1043,31 @@ def select_i_solution(parameters, session):
 
 def create_diagram(parameters, session):
     """
-           Creates a 'Diagram' object and stores it into the DB, the data for the
-           object is inside the 'parameters'
+       Creates a 'Diagram' object and stores it into the DB, the data for the
+       object is inside the 'parameters'
 
-           Parameters
-           ----------
-           parameters: Message.information [string, string, string, string]
-               -> parameters[0] has Bytes: file content
-               -> parameters[1] has string: filename
-           session: Session
-               Session of connection with the database
+       Parameters
+       ----------
+       parameters: Message.information [string, string, string, string]
+           -> parameters[0] has Bytes: file content
+           -> parameters[1] has string: filename
+       session: Session
+           Session of connection with the database
 
-           Returns
-           -------
-           msg_rspt: Message
-               Message with information of the fail or success of the operation and the id of the
-               created register
+       Returns
+       -------
+       msg_rspt: Message
+           Message with information of the fail or success of the operation and the id of the
+           created register
 
-           Raises
-           ------
-           Exception:
-               If any of the lines of code generates an error
-           """
+       Raises
+       ------
+       Exception:
+           If any of the lines of code generates an error
+       """
     try:
         path = './Resources/Diagrams/'
-        file = path + parameters[1]
+        file = path + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + parameters[1]
         myfile = open(file, 'wb')
         myfile.write(parameters[0])
         myfile.close()
@@ -1267,10 +1268,20 @@ def read_exp_scenario(parameters, session):
 
 
 def update_exp_scenario(parameters, session):
-    section_aux = session.query(Section).filter(Section.id == parameters[0]).first()
-    section_aux.name = parameters[1]
-    section_aux.description = parameters[2]
-    section_aux.data_type = parameters[3]
+    # Received --> [id_exp_sc, name, description, access_code, start_time, end_time, scenario_availability, scenario_lock, experiment_id, control_group_id, experimental_group_id]
+    exp_sc_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[0]).first()
+    control_group = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[9]).first()
+    experimental_group = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[10]).first()
+    exp_sc_aux.name = parameters[1]
+    exp_sc_aux.description = parameters[2]
+    exp_sc_aux.access_code = parameters[3]
+    exp_sc_aux.start_time = parameters[4]
+    exp_sc_aux.end_time = parameters[5]
+    exp_sc_aux.scenario_availability = parameters[6]
+    exp_sc_aux.scenario_lock = parameters[7]
+    exp_sc_aux.experiment = parameters[8]
+    exp_sc_aux.control_group = control_group
+    exp_sc_aux.experimental_group = experimental_group
     session.commit()
     session.close()
     msg_rspt = Message(action=2, comment='Register updated successfully')
@@ -1279,9 +1290,6 @@ def update_exp_scenario(parameters, session):
 
 def delete_exp_scenario(parameters, session):
     # Received --> [id_exp_scenario]
-    scenario_comp_aux = session.query(ScenarioComponent).filter(ScenarioComponent.experimental_scenario_id == parameters[0]).all()
-    for item in scenario_comp_aux:
-        session.delete(item)
     exp_scenario_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[0]).first()
     session.delete(exp_scenario_aux)
     session.commit()
@@ -1291,10 +1299,19 @@ def delete_exp_scenario(parameters, session):
 
 
 def select_exp_scenario(parameters, session):
-    category_aux = session.query(Category).filter(Category.id == parameters[0]).first()
+    # Received --> [id_exp_scenario]
+    exp_sc_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[0]).first()
     msg_rspt = Message(action=2, information=[])
-    msg_rspt.information.append(category_aux.name)
-    msg_rspt.information.append(category_aux.classification_id)
+    msg_rspt.information.append(exp_sc_aux.name)
+    msg_rspt.information.append(exp_sc_aux.description)
+    msg_rspt.information.append(exp_sc_aux.access_code)
+    msg_rspt.information.append(exp_sc_aux.start_time)
+    msg_rspt.information.append(exp_sc_aux.end_time)
+    msg_rspt.information.append(exp_sc_aux.scenario_availability)
+    msg_rspt.information.append(exp_sc_aux.scenario_lock)
+    msg_rspt.information.append(exp_sc_aux.experiment_id)
+    msg_rspt.information.append(exp_sc_aux.control_group_id)
+    msg_rspt.information.append(exp_sc_aux.experimental_group_id)
     session.close()
     return msg_rspt
 
@@ -1321,19 +1338,47 @@ def create_sc_component(parameters, session):
 
 
 def read_sc_component(parameters, session):
-    exp_scenarios = session.query(ExperimentalScenario).all()
+    # Received --> []
+    if len(parameters) == 0:
+        sc_components = session.query(ScenarioComponent).all()
+    else:
+        # Received --> [id_exp_scenario, 1]
+        # Ask for the scenario components associated with an experimental scenario
+        if parameters[1] == 1:
+            sc_components = session.query(ScenarioComponent).filter(
+                ScenarioComponent.experimental_scenario_id == parameters[0]).all()
+        # Received --> [id_sc_component, 2]
+        # Ask for the patterns associated with an scenario components
+        else:
+            sc_components = session.query(ScenarioComponentPattern).filter(
+                ScenarioComponentPattern.scenario_component_id == parameters[0]).all()
     msg_rspt = Message(action=2, information=[])
-    for item in exp_scenarios:
+    for item in sc_components:
         msg_rspt.information.append(item.__str__())
     session.close()
     return msg_rspt
 
 
 def update_sc_component(parameters, session):
-    section_aux = session.query(Section).filter(Section.id == parameters[0]).first()
-    section_aux.name = parameters[1]
-    section_aux.description = parameters[2]
-    section_aux.data_type = parameters[3]
+    # Received --> [sc_comp_id, problem_id, [cgroup_pattern_id1, cgroup_pattern_id2, ...], [egroup_pattern_id1, egroup_pattern_id2, ...]]
+    sc_comp_aux = session.query(ScenarioComponent).filter(ScenarioComponent.id == parameters[0]).first()
+    problem_aux = session.query(Problem).filter(Problem.id == parameters[1]).first()
+    sc_comp_aux.problem = problem_aux
+    # Deleting association of scenario component with pattern
+    sc_comp_pat = session.query(ScenarioComponentPattern).\
+        filter(ScenarioComponentPattern.scenario_component_id == parameters[0]).all()
+    for item in sc_comp_pat:
+        session.delete(item)
+    # Creating association of scenario component and patterns for the control group
+    for item in parameters[2]:
+        pattern_aux = session.query(Pattern).filter(Pattern.id == item).first()
+        scc_pattern_aux = ScenarioComponentPattern(1, sc_comp_aux, pattern_aux)
+        session.add(scc_pattern_aux)
+    # Creating association of scenario component and patterns for the experimental group
+    for item in parameters[3]:
+        pattern_aux = session.query(Pattern).filter(Pattern.id == item).first()
+        scc_pattern_aux = ScenarioComponentPattern(2, sc_comp_aux, pattern_aux)
+        session.add(scc_pattern_aux)
     session.commit()
     session.close()
     msg_rspt = Message(action=2, comment='Register updated successfully')
@@ -1341,10 +1386,9 @@ def update_sc_component(parameters, session):
 
 
 def delete_sc_component(parameters, session):
-    # Received --> [id_classification]
-    categories_aux = session.query(Category).filter(Category.classification_id == parameters[0]).all()
-    for item in categories_aux:
-        session.delete(item)
+    # Received --> [id_sc_component]
+    sc_comp_aux = session.query(ScenarioComponent).filter(ScenarioComponent.id == parameters[0]).first()
+    session.delete(sc_comp_aux)
     session.commit()
     session.close()
     msg_rspt = Message(action=2, comment='Register deleted successfully')

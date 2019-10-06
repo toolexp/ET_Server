@@ -17,7 +17,8 @@ class ScenarioComponent(Base):
                                                                                  single_parent=True))
     problem = relationship("Problem", backref=backref("scenario_components", cascade="all, delete-orphan",
                                                       single_parent=True))
-    patterns = relationship("Pattern", secondary="scenario_components_patterns", backref="templates")
+    #patterns = relationship("Pattern", secondary="scenario_components_patterns", backref="scenario_components")
+    patterns = relationship("Pattern", secondary="scenario_components_patterns", viewonly=True)
 
     def __init__(self, experimental_scenario, problem):
         self.experimental_scenario = experimental_scenario

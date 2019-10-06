@@ -178,7 +178,7 @@ problem_demo = Problem('Software that is difficult to use', 'Many people have ex
 
 
 experimental_sc_demo = ExperimentalScenario('Experimental scenario 1', 'NA', '000-111-222-333', time(1, 0, 0),
-                                            time(6, 0, 0), True, False, experiment_demo, designers_group_demo1,
+                                            time(6, 0, 0), True, False, None, designers_group_demo1,
                                             designers_group_demo2)
 scenario_component_demo = ScenarioComponent(experimental_sc_demo, problem_demo)
 scc_pattern_demo1 = ScenarioComponentPattern(1, scenario_component_demo, pattern_demo1)

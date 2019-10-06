@@ -12,8 +12,6 @@ class Pattern(Base):
     template_id = Column(Integer, ForeignKey('templates.id'))
 
     template = relationship("Template", backref=backref("patterns", cascade="all, delete-orphan", single_parent=True))
-    scenario_components = relationship("ScenarioComponentPattern", back_populates="pattern", cascade="all, delete-orphan",
-                                       single_parent=True)
 
     def __init__(self,template):
         self.template = template

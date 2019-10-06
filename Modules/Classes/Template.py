@@ -12,7 +12,8 @@ class Template(Base):
     name = Column(String)
     description = Column(String)
 
-    sections = relationship("Section", secondary="templates_sections", backref="templates")
+    # sections = relationship("Section", secondary="templates_sections", backref="templates")
+    sections = relationship("Section", secondary="templates_sections", viewonly=True)
 
     def __init__(self, name, description):
         self.name = name
