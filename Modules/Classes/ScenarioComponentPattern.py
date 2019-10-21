@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from sqlalchemy import Column, String, Integer, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
 

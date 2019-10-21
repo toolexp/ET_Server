@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from sqlalchemy import Column, String, Integer, Table, ForeignKey
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship
 from Modules.Config.base import Base
 
 

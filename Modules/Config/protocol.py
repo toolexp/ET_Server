@@ -1,9 +1,8 @@
 # coding=utf-8
 
 # Import necessary modules
-import datetime
-from datetime import date
-import os
+from datetime import datetime
+from os import remove
 
 from sqlalchemy import and_
 
@@ -1067,7 +1066,7 @@ def create_diagram(parameters, session):
        """
     try:
         path = './Resources/Diagrams/'
-        file = path + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + parameters[1]
+        file = path + datetime.now().strftime("%Y%m%d_%H%M%S") + parameters[1]
         myfile = open(file, 'wb')
         myfile.write(parameters[0])
         myfile.close()
@@ -1094,7 +1093,7 @@ def read_diagram(parameters, session):
 def update_diagram(parameters, session):
     # Received --> [id_diagram, file_content, filename]
     diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[0]).first()
-    os.remove(diagram_aux.file_path)
+    remove(diagram_aux.file_path)
     path = './Resources/Diagrams/'
     file = path + parameters[2]
     myfile = open(file, 'wb')
@@ -1110,7 +1109,7 @@ def update_diagram(parameters, session):
 
 def delete_diagram(parameters, session):
     diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[0]).first()
-    os.remove(diagram_aux.file_path)
+    remove(diagram_aux.file_path)
     if len(parameters) == 1:
         session.delete(diagram_aux)
         session.commit()
@@ -1403,6 +1402,55 @@ def select_sc_component(parameters, session):
     session.close()
     return msg_rspt
 
+def create_experiment(parameters, session):
+    # Received --> [name, description]
+    experiment_aux = Experiment(parameters[0], parameters[1])
+    session.add(experiment_aux)
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register created successfully')
+    return msg_rspt
+
+
+def read_experiment(parameters, session):
+    # Received --> []
+    experiments = session.query(Experiment).all()
+    msg_rspt = Message(action=2, information=[])
+    for item in experiments:
+        msg_rspt.information.append(item.__str__())
+    session.close()
+    return msg_rspt
+
+
+def update_experiment(parameters, session):
+    # Received --> [id_experiment, name, description]
+    experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
+    experiment_aux.name = parameters[1]
+    experiment_aux.description = parameters[2]
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register updated successfully')
+    return msg_rspt
+
+
+def delete_experiment(parameters, session):
+    # Received --> [id_experiment]
+    experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
+    session.delete(experiment_aux)
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register deleted successfully')
+    return msg_rspt
+
+
+def select_experiment(parameters, session):
+    experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
+    msg_rspt = Message(action=2, information=[])
+    msg_rspt.information.append(experiment_aux.name)
+    msg_rspt.information.append(experiment_aux.description)
+    session.close()
+    return msg_rspt
+
 switcher_protocol = {
         11: create_admin,
         12: read_admin,
@@ -1480,7 +1528,12 @@ switcher_protocol = {
         87: read_sc_component,
         88: update_sc_component,
         89: delete_sc_component,
-        90: select_sc_component
+        90: select_sc_component,
+        91: create_experiment,
+        92: read_experiment,
+        93: update_experiment,
+        94: delete_experiment,
+        95: select_experiment
     }
 
 

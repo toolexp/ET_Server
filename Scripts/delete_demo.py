@@ -5,7 +5,7 @@ from datetime import date
 from Modules.Config.base import Session, engine, Base
 
 from Modules.Classes.Administrator import Administrator
-from Modules.Classes.Section import Attribute
+from Modules.Classes.Section import Section
 from Modules.Classes.Designer import Designer
 from Modules.Classes.DesignersGroup import DesignersGroup
 from Modules.Classes.Diagram import Diagram
