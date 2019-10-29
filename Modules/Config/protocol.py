@@ -779,7 +779,14 @@ def create_pattern(parameters, session):
 
 
 def read_pattern(parameters, session):
-    patterns = session.query(Pattern).all()
+    if len(parameters) == 0:
+        patterns = session.query(Pattern).all()
+    else:
+        # Received --> [id_designer, id_scenario_comp]
+        patterns = session.query(Pattern). \
+            join(ScenarioComponent.patterns). \
+            join(DesignersGroup.designers).filter(and_(Designer.id == parameters[0],
+                                                       ScenarioComponent.id == parameters[1])).all()
     msg_rspt = Message(action=2, information=[])
     for pattern in patterns:
         msg_rspt.information.append(pattern.__str__())
@@ -1245,10 +1252,11 @@ def read_template_section(parameters, session):
 
 def create_exp_scenario(parameters, session):
     # Received --> [name, description, access_code, start_time, end_time, scenario_availability, scenario_lock, experiment_id, control_group_id, experimental_group_id]
+    experiment = session.query(Experiment).filter(Experiment.id == parameters[7]).first()
     control_group = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[8]).first()
     experimental_group = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[9]).first()
     exp_sc_aux = ExperimentalScenario(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4],
-                                       parameters[5], parameters[6], parameters[7], control_group, experimental_group)
+                                       parameters[5], parameters[6], experiment, control_group, experimental_group)
     session.add(exp_sc_aux)
     session.commit()
     new_exp_sc_aux = session.query(ExperimentalScenario).order_by(ExperimentalScenario.id.desc()).first()
@@ -1258,7 +1266,25 @@ def create_exp_scenario(parameters, session):
 
 
 def read_exp_scenario(parameters, session):
-    exp_scenarios = session.query(ExperimentalScenario).all()
+    if len(parameters) == 0:
+        exp_scenarios = session.query(ExperimentalScenario).all()
+    elif len(parameters) == 1:
+        # Received --> [id_experiment]
+        exp_scenarios = session.query(ExperimentalScenario).filter(ExperimentalScenario.experiment_id == parameters[0]).all()
+    else:
+        # Received --> [id_designer] (When a designer retrieves available scenarios for him)
+        exp_scenarios_ctrl = session.query(ExperimentalScenario).\
+            join(ExperimentalScenario.control_group).\
+            join(DesignersGroup.designers).filter(and_(Designer.id == parameters[0],
+                                                       ExperimentalScenario.scenario_lock == False,
+                                                       ExperimentalScenario.scenario_availability == True)).all()
+        exp_scenarios_exp = session.query(ExperimentalScenario). \
+            join(ExperimentalScenario.experimental_group). \
+            join(DesignersGroup.designers).filter(and_(Designer.id == parameters[0],
+                                                       ExperimentalScenario.scenario_lock == False,
+                                                       ExperimentalScenario.scenario_availability == True)).all()
+        exp_scenarios_ctrl += exp_scenarios_exp
+        exp_scenarios = exp_scenarios_ctrl
     msg_rspt = Message(action=2, information=[])
     for item in exp_scenarios:
         msg_rspt.information.append(item.__str__())
@@ -1269,6 +1295,7 @@ def read_exp_scenario(parameters, session):
 def update_exp_scenario(parameters, session):
     # Received --> [id_exp_sc, name, description, access_code, start_time, end_time, scenario_availability, scenario_lock, experiment_id, control_group_id, experimental_group_id]
     exp_sc_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[0]).first()
+    experiment = session.query(Experiment).filter(Experiment.id == parameters[8]).first()
     control_group = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[9]).first()
     experimental_group = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[10]).first()
     exp_sc_aux.name = parameters[1]
@@ -1278,7 +1305,7 @@ def update_exp_scenario(parameters, session):
     exp_sc_aux.end_time = parameters[5]
     exp_sc_aux.scenario_availability = parameters[6]
     exp_sc_aux.scenario_lock = parameters[7]
-    exp_sc_aux.experiment = parameters[8]
+    exp_sc_aux.experiment = experiment
     exp_sc_aux.control_group = control_group
     exp_sc_aux.experimental_group = experimental_group
     session.commit()
@@ -1448,6 +1475,9 @@ def select_experiment(parameters, session):
     msg_rspt = Message(action=2, information=[])
     msg_rspt.information.append(experiment_aux.name)
     msg_rspt.information.append(experiment_aux.description)
+    msg_rspt.information.append([])
+    for item in experiment_aux.experimental_scenarios:
+        msg_rspt.information[2].append(item.__str__())
     session.close()
     return msg_rspt
 
