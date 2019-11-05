@@ -12,8 +12,8 @@ class ExperimentalScenario(Base):
     name = Column(String)
     description = Column(String)
     access_code = Column(String)
-    start_time = Column(Time)
-    end_time = Column(Time)
+    #start_time = Column(Time)
+    #end_time = Column(Time)
     scenario_availability = Column(Boolean)
     scenario_lock = Column(Boolean)
     experiment_id = Column(Integer, ForeignKey('experiments.id'))
@@ -29,18 +29,29 @@ class ExperimentalScenario(Base):
                                       backref=backref("eg_experimental_scenarios", cascade="all, delete-orphan",
                                                       single_parent=True))
 
-    def __init__(self, name, description, access_code, start_time, end_time, scenario_availability, scenario_lock,
+    def __init__(self, name, description, access_code, scenario_availability, scenario_lock,
                  experiment, control_group, experimental_group):
         self.name = name
         self.description = description
         self.access_code = access_code
-        self.start_time = start_time
-        self.end_time = end_time
         self.scenario_availability = scenario_availability
         self.scenario_lock = scenario_lock
         self.experiment = experiment
         self.control_group = control_group
         self.experimental_group = experimental_group
+
+    '''def __init__(self, name, description, access_code, scenario_availability, scenario_lock, start_time, end_time,
+                 experiment, control_group, experimental_group):
+        self.name = name
+        self.description = description
+        self.access_code = access_code
+        self.scenario_availability = scenario_availability
+        self.scenario_lock = scenario_lock
+        self.start_time = start_time
+        self.end_time = end_time
+        self.experiment = experiment
+        self.control_group = control_group
+        self.experimental_group = experimental_group'''
 
     def __str__(self):
         cadena = '{}¥{}¥{}'.format(self.id, self.name, self.description)

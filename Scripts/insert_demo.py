@@ -14,6 +14,8 @@ from Modules.Classes.Experiment import Experiment
 from Modules.Classes.ExperimentalScenario import ExperimentalScenario
 from Modules.Classes.Experimenter import Experimenter
 from Modules.Classes.IdealSolution import IdealSolution
+from Modules.Classes.Measurement import Measurement
+from Modules.Classes.Metric import Metric
 from Modules.Classes.Pattern import Pattern
 from Modules.Classes.PatternSection import PatternSection
 from Modules.Classes.Problem import Problem
@@ -168,22 +170,53 @@ pattern_section13 = PatternSection('<' + category_demo2.name + '>', pattern_demo
 pattern_section14 = PatternSection('Sticky Policies', pattern_demo3, t3_section4, None, None)
 
 diagram_demo2 = Diagram('diagram_demo2.jpg', './Resources/Diagrams/diagram_demo2.jpg')
-ideal_sol_demo = IdealSolution('May not necessarily require patterns, but will use them', diagram_demo2)
-ideal_sol_demo.patterns = [pattern_demo1, pattern_demo2]
-problem_demo = Problem('Software that is difficult to use', 'Many people have experienced first-hand the frustration of '
+diagram_demo3 = Diagram('diagram_demo2.jpg', './Resources/Diagrams/diagram_demo2.jpg')
+ideal_sol_demo1 = IdealSolution('May not necessarily require patterns, but will use them', diagram_demo2)
+ideal_sol_demo1.patterns = [pattern_demo1, pattern_demo2]
+
+ideal_sol_demo2 = IdealSolution('No requiered annotations', diagram_demo3)
+ideal_sol_demo2.patterns = [pattern_demo1, pattern_demo3]
+
+
+problem_demo1 = Problem('Software that is difficult to use', 'Many people have experienced first-hand the frustration of '
                                                             'using software that is cumbersome, difficult to navigate, '
                                                             'and requires several steps to perform simple tasks.',
-                       ideal_sol_demo)
+                       ideal_sol_demo1)
+problem_demo2 = Problem('Median of Two Sorted Arrays', 'There are two sorted arrays nums1 and nums2 of size m and n '
+                                                       'respectively. Find the median of the two sorted arrays. The '
+                                                       'overall run time complexity should be O(log (m+n)). You may '
+                                                       'assume nums1 and nums2 cannot be both empty.', ideal_sol_demo2)
 
+#experimental_sc_demo = ExperimentalScenario('Experimental scenario 1', 'NA', '000-111-222-333', time(1, 0, 0),
+ #                                           time(6, 0, 0), True, False, experiment_demo, designers_group_demo1,
+   #                                         designers_group_demo2)
 
-experimental_sc_demo = ExperimentalScenario('Experimental scenario 1', 'NA', '000-111-222-333', time(1, 0, 0),
-                                            time(6, 0, 0), True, False, experiment_demo, designers_group_demo1,
-                                            designers_group_demo2)
-scenario_component_demo = ScenarioComponent(experimental_sc_demo, problem_demo)
-scc_pattern_demo1 = ScenarioComponentPattern(1, scenario_component_demo, pattern_demo1)
-scc_pattern_demo2 = ScenarioComponentPattern(2, scenario_component_demo, pattern_demo2)
+experimental_sc_demo = ExperimentalScenario('Experimental scenario 1', 'NA', '1234567890', True, False,
+                                            experiment_demo, designers_group_demo1, designers_group_demo2)
 
-#sent_sol_demo = SentSolution('demo_name', 'demo_description', designer_demo1, scenario_component_demo, diagram_demo)
+scenario_component_demo1 = ScenarioComponent(experimental_sc_demo, problem_demo1)
+scc_pattern_demo1 = ScenarioComponentPattern(1, scenario_component_demo1, pattern_demo1)
+scc_pattern_demo2 = ScenarioComponentPattern(2, scenario_component_demo1, pattern_demo2)
+
+scenario_component_demo2 = ScenarioComponent(experimental_sc_demo, problem_demo2)
+scc_pattern_demo3 = ScenarioComponentPattern(1, scenario_component_demo2, pattern_demo1)
+scc_pattern_demo4 = ScenarioComponentPattern(2, scenario_component_demo2, pattern_demo3)
+
+metric_demo1 = Metric('Selection time', 'time in seconds required to select a PDP solution')
+metric_demo2 = Metric('Selection efficiency', 'ratio between the number of PDPs added to the solution and the total '
+                                              'number of PDPs displayed')
+metric_demo3 = Metric('Solution time', 'total time in seconds that the resolution of a problem lasts')
+
+measurement_demo1 = Measurement('123', metric_demo1, designer_demo1, scenario_component_demo1)
+measurement_demo2 = Measurement('90', metric_demo2, designer_demo1, scenario_component_demo1)
+measurement_demo3 = Measurement('12345', metric_demo3, designer_demo1, scenario_component_demo1)
+measurement_demo4 = Measurement('110', metric_demo1, designer_demo1, scenario_component_demo2)
+measurement_demo5 = Measurement('80', metric_demo2, designer_demo1, scenario_component_demo2)
+measurement_demo6 = Measurement('2341', metric_demo3, designer_demo1, scenario_component_demo2)
+
+sent_sol_demo = SentSolution('NA', diagram_demo3, designer_demo1, scenario_component_demo1)
+sent_sol_demo.patterns = [pattern_demo2, pattern_demo3]
+
 
 # Make persistence in DB
 session.add(admin_demo)
@@ -249,12 +282,27 @@ session.add(pattern_section12)
 session.add(pattern_section13)
 session.add(pattern_section14)
 session.add(diagram_demo2)
-session.add(ideal_sol_demo)
-session.add(problem_demo)
-session.add(scenario_component_demo)
-#session.add(sent_sol_demo)
+session.add(diagram_demo3)
+session.add(ideal_sol_demo1)
+session.add(ideal_sol_demo2)
+session.add(problem_demo1)
+session.add(problem_demo2)
+session.add(scenario_component_demo1)
+session.add(scenario_component_demo2)
 session.add(scc_pattern_demo1)
 session.add(scc_pattern_demo2)
+session.add(scc_pattern_demo3)
+session.add(scc_pattern_demo4)
+session.add(metric_demo1)
+session.add(metric_demo2)
+session.add(metric_demo3)
+session.add(measurement_demo1)
+session.add(measurement_demo2)
+session.add(measurement_demo3)
+session.add(measurement_demo4)
+session.add(measurement_demo5)
+session.add(measurement_demo6)
+session.add(sent_sol_demo)
 
 # Save changes and close connection
 session.commit()

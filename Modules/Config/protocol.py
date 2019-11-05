@@ -18,6 +18,8 @@ from Modules.Classes.Experiment import Experiment
 from Modules.Classes.ExperimentalScenario import ExperimentalScenario
 from Modules.Classes.Experimenter import Experimenter
 from Modules.Classes.IdealSolution import IdealSolution
+from Modules.Classes.Measurement import Measurement
+from Modules.Classes.Metric import Metric
 from Modules.Classes.Pattern import Pattern
 from Modules.Classes.PatternSection import PatternSection
 from Modules.Classes.Problem import Problem
@@ -1251,12 +1253,12 @@ def read_template_section(parameters, session):
     return msg_rspt
 
 def create_exp_scenario(parameters, session):
-    # Received --> [name, description, access_code, start_time, end_time, scenario_availability, scenario_lock, experiment_id, control_group_id, experimental_group_id]
-    experiment = session.query(Experiment).filter(Experiment.id == parameters[7]).first()
-    control_group = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[8]).first()
-    experimental_group = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[9]).first()
+    # Received --> [name, description, access_code, scenario_availability, scenario_lock, experiment_id, control_group_id, experimental_group_id]
+    experiment = session.query(Experiment).filter(Experiment.id == parameters[5]).first()
+    control_group = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[6]).first()
+    experimental_group = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[7]).first()
     exp_sc_aux = ExperimentalScenario(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4],
-                                       parameters[5], parameters[6], experiment, control_group, experimental_group)
+                                      experiment, control_group, experimental_group)
     session.add(exp_sc_aux)
     session.commit()
     new_exp_sc_aux = session.query(ExperimentalScenario).order_by(ExperimentalScenario.id.desc()).first()
@@ -1293,18 +1295,16 @@ def read_exp_scenario(parameters, session):
 
 
 def update_exp_scenario(parameters, session):
-    # Received --> [id_exp_sc, name, description, access_code, start_time, end_time, scenario_availability, scenario_lock, experiment_id, control_group_id, experimental_group_id]
+    # Received --> [id_exp_sc, name, description, access_code, scenario_availability, scenario_lock, experiment_id, control_group_id, experimental_group_id]
     exp_sc_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[0]).first()
-    experiment = session.query(Experiment).filter(Experiment.id == parameters[8]).first()
-    control_group = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[9]).first()
-    experimental_group = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[10]).first()
+    experiment = session.query(Experiment).filter(Experiment.id == parameters[6]).first()
+    control_group = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[7]).first()
+    experimental_group = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[8]).first()
     exp_sc_aux.name = parameters[1]
     exp_sc_aux.description = parameters[2]
     exp_sc_aux.access_code = parameters[3]
-    exp_sc_aux.start_time = parameters[4]
-    exp_sc_aux.end_time = parameters[5]
-    exp_sc_aux.scenario_availability = parameters[6]
-    exp_sc_aux.scenario_lock = parameters[7]
+    exp_sc_aux.scenario_availability = parameters[4]
+    exp_sc_aux.scenario_lock = parameters[5]
     exp_sc_aux.experiment = experiment
     exp_sc_aux.control_group = control_group
     exp_sc_aux.experimental_group = experimental_group
@@ -1331,8 +1331,6 @@ def select_exp_scenario(parameters, session):
     msg_rspt.information.append(exp_sc_aux.name)
     msg_rspt.information.append(exp_sc_aux.description)
     msg_rspt.information.append(exp_sc_aux.access_code)
-    msg_rspt.information.append(exp_sc_aux.start_time)
-    msg_rspt.information.append(exp_sc_aux.end_time)
     msg_rspt.information.append(exp_sc_aux.scenario_availability)
     msg_rspt.information.append(exp_sc_aux.scenario_lock)
     msg_rspt.information.append(exp_sc_aux.experiment_id)
@@ -1481,6 +1479,140 @@ def select_experiment(parameters, session):
     session.close()
     return msg_rspt
 
+
+def create_measurement(parameters, session):
+    # Received --> [value, metric_id, designer_id, scenario_comp_id]
+    metric_aux = session.query(Metric).filter(Metric.id == parameters[1]).first()
+    designer_aux = session.query(Designer).filter(Designer.id == parameters[2]).first()
+    scenario_comp_aux = session.query(ScenarioComponent).filter(ScenarioComponent.id == parameters[3]).first()
+    measurement_aux = Measurement(parameters[0], metric_aux, designer_aux, scenario_comp_aux)
+    session.add(measurement_aux)
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register created successfully')
+    return msg_rspt
+
+
+def read_measurement(parameters, session):
+    # Received --> []
+    measurements = session.query(Measurement).all()
+    msg_rspt = Message(action=2, information=[])
+    for item in measurements:
+        msg_rspt.information.append(item.__str__())
+    session.close()
+    return msg_rspt
+
+
+def update_measurement(parameters, session):
+    # Received --> [id_measurement, value, metric_id, designer_id, scenario_comp_id]
+    measurement_aux = session.query(Measurement).filter(Measurement.id == parameters[0]).first()
+    metric_aux = session.query(Metric).filter(Metric.id == parameters[2]).first()
+    designer_aux = session.query(Designer).filter(Designer.id == parameters[3]).first()
+    scenario_comp_aux = session.query(ScenarioComponent).filter(ScenarioComponent.id == parameters[4]).first()
+    measurement_aux.value = parameters[1]
+    measurement_aux.metric = metric_aux
+    measurement_aux.designer = designer_aux
+    measurement_aux.scenario_component = scenario_comp_aux
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register updated successfully')
+    return msg_rspt
+
+
+def delete_measurement(parameters, session):
+    # Received --> [id_measurement]
+    measurement_aux = session.query(Measurement).filter(Measurement.id == parameters[0]).first()
+    session.delete(measurement_aux)
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register deleted successfully')
+    return msg_rspt
+
+
+def select_measurement(parameters, session):
+    measurement_aux = session.query(Measurement).filter(Measurement.id == parameters[0]).first()
+    msg_rspt = Message(action=2, information=[])
+    msg_rspt.information.append(measurement_aux.value)
+    msg_rspt.information.append(measurement_aux.metric_id)
+    msg_rspt.information.append(measurement_aux.designer_id)
+    msg_rspt.information.append(measurement_aux.scenario_component_id)
+    session.close()
+    return msg_rspt
+
+
+def create_s_solution(parameters, session):
+    # Wthout patterns --> parameters=[annotations, id_diagram, id_designer, id_scenario_comp]
+    diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[1]).first()
+    designer_aux = session.query(Designer).filter(Designer.id == parameters[2]).first()
+    scenario_comp_aux = session.query(ScenarioComponent).filter(ScenarioComponent.id == parameters[3]).first()
+    s_solution_aux = SentSolution(parameters[0], diagram_aux, designer_aux, scenario_comp_aux)
+    if len(parameters) == 5:
+        # With patterns--> parameters=[annotations, id_diagram, id_designer, id_scenario_comp, [id_pattern1, id_pattern2, ...]]
+        s_solution_aux.patterns = []
+        for item in parameters[4]:
+            pattern_aux = session.query(Pattern).filter(Pattern.id == item).first()
+            s_solution_aux.patterns.append(pattern_aux)
+    session.add(s_solution_aux)
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register created successfully')
+    return msg_rspt
+
+
+def read_s_solution(parameters, session):
+    sent_sols = session.query(SentSolution).all()
+    msg_rspt = Message(action=2, information=[])
+    for solutions in sent_sols:
+        msg_rspt.information.append(solutions.__str__())
+    session.close()
+    return msg_rspt
+
+
+def update_s_solution(parameters, session):
+    s_solution_aux = session.query(SentSolution).filter(SentSolution.id == parameters[0]).first()
+    diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[2]).first()
+    designer_aux = session.query(Designer).filter(Designer.id == parameters[3]).first()
+    scenario_comp_aux = session.query(ScenarioComponent).filter(ScenarioComponent.id == parameters[4]).first()
+    s_solution_aux.annotations = parameters[1]
+    s_solution_aux.diagram = diagram_aux
+    s_solution_aux.designer = designer_aux
+    s_solution_aux.scenario_component = scenario_comp_aux
+    s_solution_aux.patterns = []
+    if len(parameters) == 6:
+        # With patterns--> parameters=[id_s_solution, annotations, id_diagram, id_designer, id_scenario_comp,
+        # [id_pattern1, id_pattern2, ...]]
+        for item in parameters[5]:
+            pattern_aux = session.query(Pattern).filter(Pattern.id == item).first()
+            s_solution_aux.patterns.append(pattern_aux)
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register updated successfully')
+    return msg_rspt
+
+
+def delete_s_solution(parameters, session):
+    s_solution_aux = session.query(SentSolution).filter(SentSolution.id == parameters[0]).first()
+    session.delete(s_solution_aux)
+    session.commit()
+    session.close()
+    msg_rspt = Message(action=2, comment='Register deleted successfully')
+    return msg_rspt
+
+
+def select_s_solution(parameters, session):
+    s_solution_aux = session.query(SentSolution).filter(SentSolution.id == parameters[0]).first()
+    msg_rspt = Message(action=2, information=[])
+    msg_rspt.information.append(s_solution_aux.annotations)
+    msg_rspt.information.append(s_solution_aux.diagram_id)
+    msg_rspt.information.append(s_solution_aux.designer_id)
+    msg_rspt.information.append(s_solution_aux.scenario_component_id)
+    msg_rspt.information.append([])
+    for i in range(0, len(s_solution_aux.patterns)):
+        msg_rspt.information[2].append(s_solution_aux.patterns[i].__str__())
+    session.close()
+    return msg_rspt
+
+
 switcher_protocol = {
         11: create_admin,
         12: read_admin,
@@ -1563,7 +1695,17 @@ switcher_protocol = {
         92: read_experiment,
         93: update_experiment,
         94: delete_experiment,
-        95: select_experiment
+        95: select_experiment,
+        96: create_measurement,
+        97: read_measurement,
+        98: update_measurement,
+        99: delete_measurement,
+        100: select_measurement,
+        101: create_s_solution,
+        102: read_s_solution,
+        103: update_s_solution,
+        104: delete_s_solution,
+        105: select_s_solution
     }
 
 
