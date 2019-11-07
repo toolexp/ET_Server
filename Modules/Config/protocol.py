@@ -1481,11 +1481,11 @@ def select_experiment(parameters, session):
 
 
 def create_measurement(parameters, session):
-    # Received --> [value, metric_id, designer_id, scenario_comp_id]
-    metric_aux = session.query(Metric).filter(Metric.id == parameters[1]).first()
-    designer_aux = session.query(Designer).filter(Designer.id == parameters[2]).first()
-    scenario_comp_aux = session.query(ScenarioComponent).filter(ScenarioComponent.id == parameters[3]).first()
-    measurement_aux = Measurement(parameters[0], metric_aux, designer_aux, scenario_comp_aux)
+    # Received --> [value, date_acquisition, metric_id, designer_id, scenario_comp_id]
+    metric_aux = session.query(Metric).filter(Metric.id == parameters[2]).first()
+    designer_aux = session.query(Designer).filter(Designer.id == parameters[3]).first()
+    scenario_comp_aux = session.query(ScenarioComponent).filter(ScenarioComponent.id == parameters[4]).first()
+    measurement_aux = Measurement(parameters[0], parameters[1], metric_aux, designer_aux, scenario_comp_aux)
     session.add(measurement_aux)
     session.commit()
     session.close()
@@ -1504,12 +1504,13 @@ def read_measurement(parameters, session):
 
 
 def update_measurement(parameters, session):
-    # Received --> [id_measurement, value, metric_id, designer_id, scenario_comp_id]
+    # Received --> [id_measurement, value, date_acquisition, metric_id, designer_id, scenario_comp_id]
     measurement_aux = session.query(Measurement).filter(Measurement.id == parameters[0]).first()
-    metric_aux = session.query(Metric).filter(Metric.id == parameters[2]).first()
-    designer_aux = session.query(Designer).filter(Designer.id == parameters[3]).first()
-    scenario_comp_aux = session.query(ScenarioComponent).filter(ScenarioComponent.id == parameters[4]).first()
+    metric_aux = session.query(Metric).filter(Metric.id == parameters[3]).first()
+    designer_aux = session.query(Designer).filter(Designer.id == parameters[4]).first()
+    scenario_comp_aux = session.query(ScenarioComponent).filter(ScenarioComponent.id == parameters[5]).first()
     measurement_aux.value = parameters[1]
+    measurement_aux.date_acquisition = parameters[2]
     measurement_aux.metric = metric_aux
     measurement_aux.designer = designer_aux
     measurement_aux.scenario_component = scenario_comp_aux
@@ -1533,6 +1534,7 @@ def select_measurement(parameters, session):
     measurement_aux = session.query(Measurement).filter(Measurement.id == parameters[0]).first()
     msg_rspt = Message(action=2, information=[])
     msg_rspt.information.append(measurement_aux.value)
+    msg_rspt.information.append(measurement_aux.date_acquisition)
     msg_rspt.information.append(measurement_aux.metric_id)
     msg_rspt.information.append(measurement_aux.designer_id)
     msg_rspt.information.append(measurement_aux.scenario_component_id)

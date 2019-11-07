@@ -1,7 +1,7 @@
 # coding=utf-8
 
 # Import necessary modules
-from datetime import time
+from datetime import datetime
 
 from Modules.Config.base import Session, engine, Base
 from Modules.Classes.Administrator import Administrator
@@ -202,20 +202,18 @@ scenario_component_demo2 = ScenarioComponent(experimental_sc_demo, problem_demo2
 scc_pattern_demo3 = ScenarioComponentPattern(1, scenario_component_demo2, pattern_demo1)
 scc_pattern_demo4 = ScenarioComponentPattern(2, scenario_component_demo2, pattern_demo3)
 
-metric_demo1 = Metric('Selection time', 'time in seconds required to select a PDP solution')
-metric_demo2 = Metric('Selection efficiency', 'ratio between the number of PDPs added to the solution and the total '
-                                              'number of PDPs displayed')
-metric_demo3 = Metric('Solution time', 'total time in seconds that the resolution of a problem lasts')
+metric_demo1 = Metric('Solution time', 'total time in seconds that the resolution of a problem lasts')
+metric_demo2 = Metric('Selection time', 'time in seconds required to select a PDP solution')
+metric_demo3 = Metric('Viewed patterns', 'total number of PDPs displayed')
+metric_demo4 = Metric('Chosen patterns', 'number of PDPs added to the solution')
 
-measurement_demo1 = Measurement('123', metric_demo1, designer_demo1, scenario_component_demo1)
-measurement_demo2 = Measurement('90', metric_demo2, designer_demo1, scenario_component_demo1)
-measurement_demo3 = Measurement('12345', metric_demo3, designer_demo1, scenario_component_demo1)
-measurement_demo4 = Measurement('110', metric_demo1, designer_demo1, scenario_component_demo2)
-measurement_demo5 = Measurement('80', metric_demo2, designer_demo1, scenario_component_demo2)
-measurement_demo6 = Measurement('2341', metric_demo3, designer_demo1, scenario_component_demo2)
+measurement_demo1 = Measurement('200', datetime.now(), metric_demo1, designer_demo1, scenario_component_demo1)
+measurement_demo2 = Measurement('90', datetime.now(), metric_demo2, designer_demo1, scenario_component_demo1)
+measurement_demo3 = Measurement('3', datetime.now(), metric_demo3, designer_demo1, scenario_component_demo1)
+measurement_demo4 = Measurement('1', datetime.now(), metric_demo4, designer_demo1, scenario_component_demo1)
 
 sent_sol_demo = SentSolution('NA', diagram_demo3, designer_demo1, scenario_component_demo1)
-sent_sol_demo.patterns = [pattern_demo2, pattern_demo3]
+sent_sol_demo.patterns = [pattern_demo2]
 
 
 # Make persistence in DB
@@ -296,12 +294,11 @@ session.add(scc_pattern_demo4)
 session.add(metric_demo1)
 session.add(metric_demo2)
 session.add(metric_demo3)
+session.add(metric_demo4)
 session.add(measurement_demo1)
 session.add(measurement_demo2)
 session.add(measurement_demo3)
 session.add(measurement_demo4)
-session.add(measurement_demo5)
-session.add(measurement_demo6)
 session.add(sent_sol_demo)
 
 # Save changes and close connection
