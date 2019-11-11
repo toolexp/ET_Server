@@ -16,5 +16,4 @@ class Metric(Base):
         self.description = description
 
     def __str__(self):
-        cadena = '{}¥{}¥{}'.format(self.id, self.name, self.description)
-        return cadena
+        return '{}¥{}¥{}'.format(self.id, self.name, self.description)

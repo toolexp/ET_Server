@@ -2,6 +2,7 @@
 
 from sqlalchemy import Column, String, Integer
 from Modules.Config.base import Base
+from Modules.Config.Data import Message
 
 
 class Experiment(Base):
@@ -16,5 +17,57 @@ class Experiment(Base):
         self.description = description
 
     def __str__(self):
-        cadena = '{}¥{}¥{}'.format(self.id, self.name, self.description)
-        return cadena
+        return '{}¥{}¥{}'.format(self.id, self.name, self.description)
+
+    @staticmethod
+    def create(parameters, session):
+        # Received --> [name, description]
+        experiment_aux = Experiment(parameters[0], parameters[1])
+        session.add(experiment_aux)
+        session.commit()
+        session.close()
+        msg_rspt = Message(action=2, comment='Register created successfully')
+        return msg_rspt
+
+    @staticmethod
+    def read(parameters, session):
+        # Received --> []
+        experiments = session.query(Experiment).all()
+        msg_rspt = Message(action=2, information=[])
+        for item in experiments:
+            msg_rspt.information.append(item.__str__())
+        session.close()
+        return msg_rspt
+
+    @staticmethod
+    def update(parameters, session):
+        # Received --> [id_experiment, name, description]
+        experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
+        experiment_aux.name = parameters[1]
+        experiment_aux.description = parameters[2]
+        session.commit()
+        session.close()
+        msg_rspt = Message(action=2, comment='Register updated successfully')
+        return msg_rspt
+
+    @staticmethod
+    def delete(parameters, session):
+        # Received --> [id_experiment]
+        experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
+        session.delete(experiment_aux)
+        session.commit()
+        session.close()
+        msg_rspt = Message(action=2, comment='Register deleted successfully')
+        return msg_rspt
+
+    @staticmethod
+    def select(parameters, session):
+        experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
+        msg_rspt = Message(action=2, information=[])
+        msg_rspt.information.append(experiment_aux.name)
+        msg_rspt.information.append(experiment_aux.description)
+        msg_rspt.information.append([])
+        for item in experiment_aux.experimental_scenarios:
+            msg_rspt.information[2].append(item.__str__())
+        session.close()
+        return msg_rspt

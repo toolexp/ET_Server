@@ -4,6 +4,7 @@ from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
 
+
 class ScenarioComponentPattern(Base):
     __tablename__ = 'scenario_components_patterns'
 
@@ -23,8 +24,7 @@ class ScenarioComponentPattern(Base):
         self.pattern = pattern
 
     def __str__(self):
-        cadena = '{}¥{}¥{}¥{}'.format(self.id, self.pattern_type, self.scenario_component_id, self.pattern_id)
-        return cadena
+        return '{}¥{}¥{}¥{}'.format(self.id, self.pattern_type, self.scenario_component_id, self.pattern_id)
 
 '''class ScenarioComponentPattern(Base):
     __tablename__ = 'scenario_components_patterns'
