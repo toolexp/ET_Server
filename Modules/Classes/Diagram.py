@@ -5,7 +5,6 @@ from os import remove
 from sqlalchemy import Column, String, Integer
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
-from Modules.Classes.Template import Template
 
 
 
@@ -34,6 +33,7 @@ class Diagram(Base):
            parameters: Message.information [string, string, string, string]
                -> parameters[0] has Bytes: file content
                -> parameters[1] has string: filename
+               -> parameters[2] has string: type of diagram to be saved
            session: Session
                Session of connection with the database
 
@@ -49,7 +49,14 @@ class Diagram(Base):
                If any of the lines of code generates an error
            """
         try:
-            path = './Resources/Diagrams/'
+            if parameters[2] == 'pattern':
+                path = './Resources/Diagrams/Patterns/'
+            elif parameters[2] == 'ideal sol':
+                path = './Resources/Diagrams/IdealSolutions/'
+            elif parameters[2] == 'sent sol':
+                path = './Resources/Diagrams/SentSolutions/'
+            else:
+                path = './Resources/Diagrams/'
             file = path + datetime.now().strftime("%Y%m%d_%H%M%S") + parameters[1]
             myfile = open(file, 'wb')
             myfile.write(parameters[0])
@@ -66,19 +73,26 @@ class Diagram(Base):
 
     @staticmethod
     def read(parameters, session):
-        templates = session.query(Template).all()
+        diagrams = session.query(Diagram).all()
         msg_rspt = Message(action=2, information=[])
-        for template in templates:
-            msg_rspt.information.append(template.__str__())
+        for diagram in diagrams:
+            msg_rspt.information.append(diagram.__str__())
         session.close()
         return msg_rspt
 
     @staticmethod
     def update(parameters, session):
-        # Received --> [id_diagram, file_content, filename]
+        # Received --> [id_diagram, file_content, filename, type_diagram]
+        if parameters[3] == 'pattern':
+            path = './Resources/Diagrams/Patterns/'
+        elif parameters[3] == 'ideal sol':
+            path = './Resources/Diagrams/IdealSolutions/'
+        elif parameters[3] == 'sent sol':
+            path = './Resources/Diagrams/SentSolutions/'
+        else:
+            path = './Resources/Diagrams/'
         diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[0]).first()
         remove(diagram_aux.file_path)
-        path = './Resources/Diagrams/'
         file = path + parameters[2]
         myfile = open(file, 'wb')
         myfile.write(parameters[1])

@@ -85,15 +85,15 @@ class ExperimentalScenario(Base):
             exp_scenarios = session.query(ExperimentalScenario).filter(
                 ExperimentalScenario.experiment_id == parameters[0]).all()
         else:
-            # Received --> [id_designer] (When a designer retrieves available scenarios for him)
+            # Received --> ['my scenarios', id_designer] (When a designer retrieves available scenarios for him)
             exp_scenarios_ctrl = session.query(ExperimentalScenario). \
                 join(ExperimentalScenario.control_group). \
-                join(DesignersGroup.designers).filter(and_(Designer.id == parameters[0],
+                join(DesignersGroup.designers).filter(and_(Designer.id == parameters[1],
                                                            ExperimentalScenario.scenario_lock == False,
                                                            ExperimentalScenario.scenario_availability == True)).all()
             exp_scenarios_exp = session.query(ExperimentalScenario). \
                 join(ExperimentalScenario.experimental_group). \
-                join(DesignersGroup.designers).filter(and_(Designer.id == parameters[0],
+                join(DesignersGroup.designers).filter(and_(Designer.id == parameters[1],
                                                            ExperimentalScenario.scenario_lock == False,
                                                            ExperimentalScenario.scenario_availability == True)).all()
             exp_scenarios_ctrl += exp_scenarios_exp

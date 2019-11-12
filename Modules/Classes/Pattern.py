@@ -46,11 +46,11 @@ class Pattern(Base):
         if len(parameters) == 0:
             patterns = session.query(Pattern).all()
         else:
-            # Received --> [id_designer, id_scenario_comp]
+            # Received --> [id_scenario_comp, pattern_type]
             patterns = session.query(Pattern). \
-                join(ScenarioComponent.patterns). \
-                join(DesignersGroup.designers).filter(and_(Designer.id == parameters[0],
-                                                           ScenarioComponent.id == parameters[1])).all()
+                join(ScenarioComponentPattern.pattern).\
+                filter(and_(ScenarioComponentPattern.scenario_component_id == parameters[0],
+                            ScenarioComponentPattern.pattern_type == parameters[1])).all()
         msg_rspt = Message(action=2, information=[])
         for pattern in patterns:
             msg_rspt.information.append(pattern.__str__())

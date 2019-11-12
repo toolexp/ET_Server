@@ -180,8 +180,9 @@ class Designer(Base):
 
             Parameters
             ----------
-            parameters: Message.information [int]
-               -> parameters[0] has Experimenter.id
+            parameters: Message.information [int] or [string, 'login']
+               -> parameters[0] has Designer.id when only one parameter
+               -> parameters[0] has Designer.e-mail when two parameters
             session: Session
                 Session of connection with the database
 
@@ -196,13 +197,20 @@ class Designer(Base):
                 If any of the lines of code generates an error
             """
         try:
-            designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
-            session.close()
             msg_rspt = Message(action=2, information=[])
+            if len(parameters) == 1:
+                designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
+            else:   # Asking for info in login form
+                designer_aux = session.query(Designer).filter(Designer.email == parameters[0]).first()
+                if not designer_aux:
+                    return Message(action=5, information=['The designer is not registered in the system'],
+                                   comment='Error selecting register')
+                msg_rspt.information.append(designer_aux.id)
             msg_rspt.information.append(designer_aux.name)
             msg_rspt.information.append(designer_aux.surname)
             msg_rspt.information.append(designer_aux.email)
             msg_rspt.information.append(designer_aux.password)
+            session.close()
             return msg_rspt
         except Exception as e:
             raise Exception('Error selecting designer: ' + str(e))

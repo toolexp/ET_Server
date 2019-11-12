@@ -209,7 +209,7 @@ metric_demo4 = Metric('Chosen patterns', 'number of PDPs added to the solution')
 
 measurement_demo1 = Measurement('200', datetime.now(), metric_demo1, designer_demo1, scenario_component_demo1)
 measurement_demo2 = Measurement('90', datetime.now(), metric_demo2, designer_demo1, scenario_component_demo1)
-measurement_demo3 = Measurement('3', datetime.now(), metric_demo3, designer_demo1, scenario_component_demo1)
+measurement_demo3 = Measurement('1', datetime.now(), metric_demo3, designer_demo1, scenario_component_demo1)
 measurement_demo4 = Measurement('1', datetime.now(), metric_demo4, designer_demo1, scenario_component_demo1)
 
 sent_sol_demo = SentSolution('NA', diagram_demo3, designer_demo1, scenario_component_demo1)

@@ -62,8 +62,8 @@ class Experiment(Base):
 
     @staticmethod
     def select(parameters, session):
-        experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
         msg_rspt = Message(action=2, information=[])
+        experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
         msg_rspt.information.append(experiment_aux.name)
         msg_rspt.information.append(experiment_aux.description)
         msg_rspt.information.append([])
