@@ -5,7 +5,6 @@ from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
 from Modules.Classes.Template import Template
-from Modules.Classes.DesignersGroup import DesignersGroup
 from Modules.Classes.PatternSection import PatternSection
 from Modules.Classes.Diagram import Diagram
 from Modules.Classes.ScenarioComponentPattern import ScenarioComponentPattern
@@ -41,8 +40,6 @@ class Pattern(Base):
 
     @staticmethod
     def read(parameters, session):
-        from Modules.Classes.ScenarioComponent import ScenarioComponent
-        from Modules.Classes.Designer import Designer
         if len(parameters) == 0:
             patterns = session.query(Pattern).all()
         else:

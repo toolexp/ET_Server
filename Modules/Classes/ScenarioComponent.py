@@ -5,7 +5,6 @@ from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
 from Modules.Classes.Category import Category
-from Modules.Classes.ExperimentalScenario import ExperimentalScenario
 from Modules.Classes.Pattern import Pattern
 from Modules.Classes.Problem import Problem
 from Modules.Classes.ScenarioComponentPattern import ScenarioComponentPattern
@@ -36,6 +35,7 @@ class ScenarioComponent(Base):
 
     @staticmethod
     def create(parameters, session):
+        from Modules.Classes.ExperimentalScenario import ExperimentalScenario
         # Received --> [experimental_scenario_id, problem_id, [cgroup_pattern_id1, cgroup_pattern_id2, ...], [egroup_pattern_id1, egroup_pattern_id2, ...]]
         experimental_scenario_aux = session.query(ExperimentalScenario).filter(
             ExperimentalScenario.id == parameters[0]).first()
