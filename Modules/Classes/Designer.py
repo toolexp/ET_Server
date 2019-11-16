@@ -198,8 +198,18 @@ class Designer(Base):
             """
         try:
             msg_rspt = Message(action=2, information=[])
-            if len(parameters) == 1:
+            if parameters[1] == 'validate':
                 designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
+                designers_group_aux = session.query(DesignersGroup).all()
+                for item in designers_group_aux:
+                    if designer_aux in item.designers:
+                        return Message(action=5,
+                                       information=['The designer is associated to one or more designers groups'],
+                                       comment='Error selecting register')
+                measurement_aux = session.query(Measurement).filter(Measurement.designer_id == parameters[0]).first()
+                if measurement_aux:
+                    return Message(action=5, information=['The designer is associated to one or more measurements'],
+                                   comment='Error selecting register')
             else:   # Asking for info in login form
                 designer_aux = session.query(Designer).filter(Designer.email == parameters[0]).first()
                 if not designer_aux:

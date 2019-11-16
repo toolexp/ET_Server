@@ -87,6 +87,13 @@ class Problem(Base):
     @staticmethod
     def select(parameters, session):
         # Received --> [id_problem]
+        if len(parameters) == 2:
+            from Modules.Classes.ScenarioComponent import ScenarioComponent
+            scenario_comp_aux = session.query(ScenarioComponent).filter(
+                ScenarioComponent.problem_id == parameters[0]).first()
+            if scenario_comp_aux:
+                return Message(action=5, information=['The problem is associated to one or more experimental scenarios'],
+                               comment='Error selecting register')
         problem_aux = session.query(Problem).filter(Problem.id == parameters[0]).first()
         msg_rspt = Message(action=2, information=[])
         msg_rspt.information.append(problem_aux.name)

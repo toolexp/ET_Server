@@ -96,6 +96,24 @@ class Pattern(Base):
     @staticmethod
     def select(parameters, session):
         pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[0]).first()
+        if len(parameters) == 2:
+            scenario_comp_aux = session.query(ScenarioComponentPattern).filter(ScenarioComponentPattern.pattern_id ==
+                                                                               parameters[0]).first()
+            if scenario_comp_aux:
+                return Message(action=5,
+                               information=['The pattern is associated to one or more experimental scenarios'],
+                               comment='Error selecting register')
+            ideal_sols = session.query(IdealSolution).all()
+            for item in ideal_sols:
+                if pattern_aux in item.patterns:
+                    return Message(action=5, information=['The pattern is associated to one or more ideal solutions'],
+                                   comment='Error selecting register')
+            sent_sols = session.query(SentSolution).all()
+            for item in sent_sols:
+                if pattern_aux in item.patterns:
+                    return Message(action=5, information=['The pattern is associated to one or more sent solutions'],
+                                   comment='Error selecting register')
+        pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[0]).first()
         msg_rspt = Message(action=2, information=[])
         msg_rspt.information.append(pattern_aux.name)
         msg_rspt.information.append(pattern_aux.template.__str__())

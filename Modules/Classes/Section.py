@@ -82,6 +82,11 @@ class Section(Base):
 
     @staticmethod
     def select(parameters, session):
+        if len(parameters) == 2:
+            template_aux = session.query(TemplateSection).filter(TemplateSection.section_id == parameters[0]).first()
+            if template_aux:
+                return Message(action=5, information=['The section is associated to one or more templates'],
+                               comment='Error selecting register')
         section_aux = session.query(Section).filter(Section.id == parameters[0]).first()
         msg_rspt = Message(action=2, information=[])
         msg_rspt.information.append(section_aux.name)

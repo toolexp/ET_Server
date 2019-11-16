@@ -89,6 +89,12 @@ class Template(Base):
     @staticmethod
     def select(parameters, session):
         # Received --> parameters = [id_template]
+        from Modules.Classes.Pattern import Pattern
+        if len(parameters) == 2:
+            pattern_aux = session.query(Pattern).filter(Pattern.template_id == parameters[0]).first()
+            if pattern_aux:
+                return Message(action=5, information=['The template is associated to one or more patterns'],
+                               comment='Error deleting register')
         # Return --> msg_rspt = [2, '', [template_name, template_description, [section1._str_(), section2._str_(), ...]]]
         template_aux = session.query(Template).filter(Template.id == parameters[0]).first()
         msg_rspt = Message(action=2, information=[])

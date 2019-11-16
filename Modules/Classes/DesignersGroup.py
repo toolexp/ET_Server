@@ -4,7 +4,6 @@ from sqlalchemy import Column, String, Integer, Table, ForeignKey, or_
 from sqlalchemy.orm import relationship
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
-
 from Modules.Classes.ExperimentalScenario import ExperimentalScenario
 
 designers_groups_designers_association = Table(
@@ -54,6 +53,7 @@ class DesignersGroup(Base):
 
     @staticmethod
     def update(parameters, session):
+        from Modules.Classes.Designer import Designer
         designers_group_aux = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[0]).first()
         designers_group_aux.name = parameters[1]
         designers_group_aux.description = parameters[2]
@@ -83,6 +83,14 @@ class DesignersGroup(Base):
 
     @staticmethod
     def select(parameters, session):
+        if len(parameters) == 2:
+            experimental_scenario = session.query(ExperimentalScenario). \
+                filter(or_(ExperimentalScenario.control_group_id == parameters[0],
+                           ExperimentalScenario.experimental_group_id == parameters[0])).first()
+            if experimental_scenario:
+                return Message(action=5,
+                               information=['The designers group is associated to one or more experimental scenarios'],
+                               comment='Error selecting register')
         designers_group_aux = session.query(DesignersGroup).filter(DesignersGroup.id == parameters[0]).first()
         msg_rspt = Message(action=2, information=[])
         msg_rspt.information.append(designers_group_aux.name)

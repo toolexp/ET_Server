@@ -19,7 +19,7 @@ class Measurement(Base):
     scenario_component_id = Column(Integer, ForeignKey('scenario_components.id'))
 
     metric = relationship("Metric", backref=backref("measurements", cascade="all, delete-orphan",
-                                                      single_parent=True))
+                                                    single_parent=True))
     designer = relationship("Designer", backref=backref("measurements", cascade="all, delete-orphan",
                                                         single_parent=True))
     scenario_component = relationship("ScenarioComponent", backref=backref("measurements",
@@ -62,6 +62,7 @@ class Measurement(Base):
 
     @staticmethod
     def update(parameters, session):
+        from Modules.Classes.Designer import Designer
         # Received --> [id_measurement, value, date_acquisition, metric_id, designer_id, scenario_comp_id]
         measurement_aux = session.query(Measurement).filter(Measurement.id == parameters[0]).first()
         metric_aux = session.query(Metric).filter(Metric.id == parameters[3]).first()

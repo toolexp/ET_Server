@@ -53,8 +53,8 @@ class Classification(Base):
         if section_aux:
             return Message(action=5, information=['The classification is associated to one or more sections'],
                            comment='Error deleting register')
-        section_aux = session.query(Classification).filter(Classification.id == parameters[0]).first()
-        session.delete(section_aux)
+        classification_aux = session.query(Classification).filter(Classification.id == parameters[0]).first()
+        session.delete(classification_aux)
         session.commit()
         msg_rspt = Message(action=2, comment='Register deleted successfully')
         session.close()
@@ -62,6 +62,11 @@ class Classification(Base):
 
     @staticmethod
     def select(parameters, session):
+        if len(parameters) == 2:
+            section_aux = session.query(Section).filter(Section.classification_id == parameters[0]).first()
+            if section_aux:
+                return Message(action=5, information=['The classification is associated to one or more sections'],
+                               comment='Error selecting register')
         classification_aux = session.query(Classification).filter(Classification.id == parameters[0]).first()
         msg_rspt = Message(action=2, information=[])
         msg_rspt.information.append(classification_aux.name)
