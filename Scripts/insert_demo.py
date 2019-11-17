@@ -40,15 +40,20 @@ designer_demo2 = Designer('Andrea', 'Rubio', 'arubio@epn.ec', 'arubio1234')
 designer_demo3 = Designer('Ramiro', 'Valencia', 'rvalencia@epn.ec', 'rvalencia1234')
 designer_demo4 = Designer('Camilo', 'Arteaga', 'carteaga@epn.ec', 'carteaga1234')
 
-designers_group_demo1 = DesignersGroup('Alpha group', 'Group with skills in security')
+metric_demo1 = Metric('Solution time', 'total time in seconds that the resolution of a problem lasts')
+metric_demo2 = Metric('Selection time', 'time in seconds required to select a PDP solution')
+metric_demo3 = Metric('Viewed patterns', 'total number of PDPs displayed')
+metric_demo4 = Metric('Chosen patterns', 'number of PDPs added to the solution')
+
+"""designers_group_demo1 = DesignersGroup('Alpha group', 'Group with skills in security')
 designers_group_demo2 = DesignersGroup('Betta group', 'Group with skills in connectivity')
 
 designers_group_demo1.designers = [designer_demo1, designer_demo3]
-designers_group_demo2.designers = [designer_demo2, designer_demo4]
+designers_group_demo2.designers = [designer_demo2, designer_demo4]"""
 
 experimenter_demo1 = Experimenter('Natalia', 'Vargas', 'nvargas@epn.ec', 'nvargas1234')
 experimenter_demo2 = Experimenter('Julian', 'Moreno', 'jmoreno@epn.ec', 'jmoreno1234')
-experiment_demo = Experiment('Template 1 vs Template 2', 'Does using patterns of Template 1 reduce time vs using '
+"""experiment_demo = Experiment('Template 1 vs Template 2', 'Does using patterns of Template 1 reduce time vs using '
                                                          'patterns of Template 2?')
 experimenter_demo1.experiments = [experiment_demo]
 experimenter_demo2.experiments = [experiment_demo]
@@ -202,18 +207,13 @@ scenario_component_demo2 = ScenarioComponent(experimental_sc_demo, problem_demo2
 scc_pattern_demo3 = ScenarioComponentPattern(1, scenario_component_demo2, pattern_demo1)
 scc_pattern_demo4 = ScenarioComponentPattern(2, scenario_component_demo2, pattern_demo3)
 
-metric_demo1 = Metric('Solution time', 'total time in seconds that the resolution of a problem lasts')
-metric_demo2 = Metric('Selection time', 'time in seconds required to select a PDP solution')
-metric_demo3 = Metric('Viewed patterns', 'total number of PDPs displayed')
-metric_demo4 = Metric('Chosen patterns', 'number of PDPs added to the solution')
-
 measurement_demo1 = Measurement('200', datetime.now(), metric_demo1, designer_demo1, scenario_component_demo1)
 measurement_demo2 = Measurement('90', datetime.now(), metric_demo2, designer_demo1, scenario_component_demo1)
 measurement_demo3 = Measurement('1', datetime.now(), metric_demo3, designer_demo1, scenario_component_demo1)
 measurement_demo4 = Measurement('1', datetime.now(), metric_demo4, designer_demo1, scenario_component_demo1)
 
 sent_sol_demo = SentSolution('NA', diagram_demo3, designer_demo1, scenario_component_demo1)
-sent_sol_demo.patterns = [pattern_demo2]
+sent_sol_demo.patterns = [pattern_demo2]"""
 
 
 # Make persistence in DB
@@ -222,11 +222,15 @@ session.add(designer_demo1)
 session.add(designer_demo2)
 session.add(designer_demo3)
 session.add(designer_demo4)
-session.add(designers_group_demo1)
-session.add(designers_group_demo2)
+#session.add(designers_group_demo1)
+#session.add(designers_group_demo2)
 session.add(experimenter_demo1)
 session.add(experimenter_demo2)
-session.add(experiment_demo)
+session.add(metric_demo1)
+session.add(metric_demo2)
+session.add(metric_demo3)
+session.add(metric_demo4)
+"""session.add(experiment_demo)
 session.add(experimental_sc_demo)
 session.add(classification_demo1)
 session.add(category_demo1)
@@ -291,15 +295,11 @@ session.add(scc_pattern_demo1)
 session.add(scc_pattern_demo2)
 session.add(scc_pattern_demo3)
 session.add(scc_pattern_demo4)
-session.add(metric_demo1)
-session.add(metric_demo2)
-session.add(metric_demo3)
-session.add(metric_demo4)
 session.add(measurement_demo1)
 session.add(measurement_demo2)
 session.add(measurement_demo3)
 session.add(measurement_demo4)
-session.add(sent_sol_demo)
+session.add(sent_sol_demo)"""
 
 # Save changes and close connection
 session.commit()

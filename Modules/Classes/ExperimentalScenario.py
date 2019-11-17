@@ -162,6 +162,7 @@ class ExperimentalScenario(Base):
     def select(parameters, session):
         msg_rspt = Message(action=2, information=[])
         if len(parameters) == 1:
+            # Received --> [id_exp_scenario]
             exp_sc_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[0]).first()
             msg_rspt.information.append(exp_sc_aux.name)
             msg_rspt.information.append(exp_sc_aux.description)

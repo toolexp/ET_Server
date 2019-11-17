@@ -53,6 +53,11 @@ class Experiment(Base):
     @staticmethod
     def delete(parameters, session):
         # Received --> [id_experiment]
+        from Modules.Classes.ExperimentalScenario import ExperimentalScenario
+        experimetal_sc = session.query(ExperimentalScenario).filter(ExperimentalScenario.experiment_id == parameters[0]).first()
+        if experimetal_sc:
+            return Message(action=5, information=['The experiment is associated to one or more experimental scenarios'],
+                           comment='Error deleting register')
         experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
         session.delete(experiment_aux)
         session.commit()
@@ -62,7 +67,15 @@ class Experiment(Base):
 
     @staticmethod
     def select(parameters, session):
+        from Modules.Classes.ExperimentalScenario import ExperimentalScenario
         msg_rspt = Message(action=2, information=[])
+        # Received --> [id_experiment, 'validate']
+        if len(parameters) == 2:
+            experimetal_sc = session.query(ExperimentalScenario).filter(
+                ExperimentalScenario.experiment_id == parameters[0]).first()
+            if experimetal_sc:
+                return Message(action=5, information=['The experiment is associated to one or more experimental scenarios'],
+                               comment='Error selecting register')
         experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
         msg_rspt.information.append(experiment_aux.name)
         msg_rspt.information.append(experiment_aux.description)
