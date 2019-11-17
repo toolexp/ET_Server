@@ -1,5 +1,4 @@
 from Modules.Config.Connection import Connection
-from Modules.Config.protocol import handle_decision
 from Modules.Config.Data import verify_ip, verify_port
 
 HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
@@ -18,20 +17,14 @@ try:
         connection.create_connection(HOST, PORT)
         print("Can't verify inserted values...")
         print('Server set to listen with IP {} in PORT {}'.format(HOST, str(PORT)))
+        print('\nType: "exit" to close server\n')
     connection.listen_connections(5)
-    connection.accept_connection()
     while True:
-        connection.receive_message()
-        if connection.message.comment == 'close_connection':
-            connection.close_connection()
-            print('Connection closed by the client')
+        connection.accept_connection()
+        if input() == 'exit':
             break
-        msg_rspt = handle_decision(connection)
-        connection.create_message(msg_rspt)
-        connection.send_message()
-    connection.close_connection()
 except Exception as e:
     error = 'Error with the server: ' + str(e)
     print(error)
 finally:
-    connection.close_connection()
+    connection.close_server_connection()

@@ -24,12 +24,12 @@ from Modules.Classes.Template import Template
 from Modules.Classes.TemplateSection import TemplateSection
 
 
-def handle_decision(connection):
+def handle_decision(message):
     Base.metadata.create_all(engine)
     session = Session()
-    argument = connection.message.action
+    argument = message.action
     func = switcher_protocol.get(argument, 'nothing')
-    return func(connection.message.information, session)
+    return func(message.information, session)
 
 
 switcher_protocol = {
