@@ -1,7 +1,7 @@
 # coding=utf-8
 
 # Import necessary modules
-from datetime import datetime
+import hashlib
 
 from Modules.Config.base import Session, engine, Base
 from Modules.Classes.Administrator import Administrator
@@ -33,12 +33,12 @@ Base.metadata.create_all(engine)
 session = Session()
 
 # Create objects
-admin_demo = Administrator('Juan', 'Perez', 'jperez@epn.ec', 'jperez1234')
+admin_demo = Administrator('Juan', 'Perez', 'jperez@epn.ec', hashlib.sha1('jperez1234'.encode()).hexdigest())
 
-designer_demo1 = Designer('Lorena', 'Zambrano', 'lzambrano@epn.ec', 'lzambrano1234')
-designer_demo2 = Designer('Andrea', 'Rubio', 'arubio@epn.ec', 'arubio1234')
-designer_demo3 = Designer('Ramiro', 'Valencia', 'rvalencia@epn.ec', 'rvalencia1234')
-designer_demo4 = Designer('Camilo', 'Arteaga', 'carteaga@epn.ec', 'carteaga1234')
+designer_demo1 = Designer('Lorena', 'Zambrano', 'lzambrano@epn.ec', hashlib.sha1('lzambrano1234'.encode()).hexdigest())
+designer_demo2 = Designer('Andrea', 'Rubio', 'arubio@epn.ec',  hashlib.sha1('arubio1234'.encode()).hexdigest())
+designer_demo3 = Designer('Ramiro', 'Valencia', 'rvalencia@epn.ec',  hashlib.sha1('rvalencia1234'.encode()).hexdigest())
+designer_demo4 = Designer('Camilo', 'Arteaga', 'carteaga@epn.ec',  hashlib.sha1('carteaga1234'.encode()).hexdigest())
 
 metric_demo1 = Metric('Solution time', 'total time in seconds that the resolution of a problem lasts')
 metric_demo2 = Metric('Selection time', 'time in seconds required to select a PDP solution')
@@ -51,8 +51,8 @@ designers_group_demo2 = DesignersGroup('Betta group', 'Group with skills in conn
 designers_group_demo1.designers = [designer_demo1, designer_demo3]
 designers_group_demo2.designers = [designer_demo2, designer_demo4]"""
 
-experimenter_demo1 = Experimenter('Natalia', 'Vargas', 'nvargas@epn.ec', 'nvargas1234')
-experimenter_demo2 = Experimenter('Julian', 'Moreno', 'jmoreno@epn.ec', 'jmoreno1234')
+experimenter_demo1 = Experimenter('Natalia', 'Vargas', 'nvargas@epn.ec', hashlib.sha1('nvargas1234'.encode()).hexdigest())
+experimenter_demo2 = Experimenter('Julian', 'Moreno', 'jmoreno@epn.ec', hashlib.sha1('jmoreno1234'.encode()).hexdigest())
 """experiment_demo = Experiment('Template 1 vs Template 2', 'Does using patterns of Template 1 reduce time vs using '
                                                          'patterns of Template 2?')
 experimenter_demo1.experiments = [experiment_demo]
