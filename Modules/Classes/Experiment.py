@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, Integer, Boolean
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
 
@@ -11,13 +11,19 @@ class Experiment(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     description = Column(String)
+    finished = Column(Boolean)
 
     def __init__(self, name, description):
         self.name = name
         self.description = description
+        self.finished = False
 
     def __str__(self):
-        return '{}¥{}¥{}'.format(self.id, self.name, self.description)
+        if self.finished:
+            aux = '✓'
+        else:
+            aux = ''
+        return '{}¥{}¥{}¥{}'.format(self.id, self.name, self.description, aux)
 
     @staticmethod
     def create(parameters, session):
@@ -41,10 +47,19 @@ class Experiment(Base):
 
     @staticmethod
     def update(parameters, session):
-        # Received --> [id_experiment, name, description]
         experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
-        experiment_aux.name = parameters[1]
-        experiment_aux.description = parameters[2]
+        if len(parameters) == 3:
+            # Received --> [id_experiment, name, description]
+            experiment_aux.name = parameters[1]
+            experiment_aux.description = parameters[2]
+        else:
+            # Received --> [id_experiment, 'finish']
+            experiment_aux.finished = True
+            from Modules.Classes.ExperimentalScenario import ExperimentalScenario
+            experimental_sc_aux = session.query(ExperimentalScenario).\
+                filter(ExperimentalScenario.experiment_id == parameters[0]).all()
+            for item in experimental_sc_aux:
+                item.scenario_lock = True
         session.commit()
         session.close()
         msg_rspt = Message(action=2, comment='Register updated successfully')

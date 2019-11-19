@@ -1,7 +1,6 @@
 from socket import socket, AF_INET, SOCK_STREAM
 from pickle import dumps, loads
 from _thread import start_new_thread
-from Modules.Config.Data import Message
 from Modules.Config.protocol import handle_decision
 
 HEADER_SIZE = 10  # Length that indicates the number of characters in the stream
@@ -9,7 +8,7 @@ HEADER_SIZE = 10  # Length that indicates the number of characters in the stream
 
 def client_thread(current_client, address, port):
     while True:
-        message = receive_message(current_client)
+        message = receive_message(current_client, address, port)
         if message.comment == 'close_connection':
             current_client.close()
             print('Connection closed by the client {}:{}'.format(address, port))
@@ -23,7 +22,7 @@ def send_message(current_client, stream):
     current_client.sendall(stream)
 
 
-def receive_message(current_client):
+def receive_message(current_client, address, port):
     new_msg = True
     header_ctrl = True
     stream = b''
@@ -31,7 +30,7 @@ def receive_message(current_client):
         msg = current_client.recv(20)
         if header_ctrl:
             msg_len = int(msg[:HEADER_SIZE].decode('utf-8'))
-            print('The length of the stream is: {}'.format(str(msg_len)))
+            print('Client {}:{} sent stream of length: {}'.format(address, port, msg_len))
             header_ctrl = False
 
         stream += msg
@@ -53,11 +52,10 @@ def create_message(data):
 
 class Connection():
 
-    def __init__(self, c_socket=''):
+    def __init__(self, c_socket=socket(AF_INET, SOCK_STREAM)):
         self.c_socket = c_socket
 
     def create_connection(self, host, port):
-        self.c_socket = socket(AF_INET, SOCK_STREAM)
         self.c_socket.bind((host, port))
 
     def listen_connections(self, max):

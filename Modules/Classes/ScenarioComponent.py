@@ -10,7 +10,6 @@ from Modules.Classes.Problem import Problem
 from Modules.Classes.ScenarioComponentPattern import ScenarioComponentPattern
 
 
-
 class ScenarioComponent(Base):
     __tablename__ = 'scenario_components'
 

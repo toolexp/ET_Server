@@ -2,6 +2,7 @@
 
 # Import necessary modules
 import hashlib
+from datetime import datetime
 
 from Modules.Config.base import Session, engine, Base
 from Modules.Classes.Administrator import Administrator
@@ -33,7 +34,7 @@ Base.metadata.create_all(engine)
 session = Session()
 
 # Create objects
-admin_demo = Administrator('Juan', 'Perez', 'jperez@epn.ec', hashlib.sha1('jperez1234'.encode()).hexdigest())
+admin_demo = Administrator('Diego', 'Guzman', 'diego.guzman01@epn.ec', hashlib.sha1('dguzman'.encode()).hexdigest())
 
 designer_demo1 = Designer('Lorena', 'Zambrano', 'lzambrano@epn.ec', hashlib.sha1('lzambrano1234'.encode()).hexdigest())
 designer_demo2 = Designer('Andrea', 'Rubio', 'arubio@epn.ec',  hashlib.sha1('arubio1234'.encode()).hexdigest())
@@ -45,15 +46,15 @@ metric_demo2 = Metric('Selection time', 'time in seconds required to select a PD
 metric_demo3 = Metric('Viewed patterns', 'total number of PDPs displayed')
 metric_demo4 = Metric('Chosen patterns', 'number of PDPs added to the solution')
 
-"""designers_group_demo1 = DesignersGroup('Alpha group', 'Group with skills in security')
+designers_group_demo1 = DesignersGroup('Alpha group', 'Group with skills in security')
 designers_group_demo2 = DesignersGroup('Betta group', 'Group with skills in connectivity')
 
 designers_group_demo1.designers = [designer_demo1, designer_demo3]
-designers_group_demo2.designers = [designer_demo2, designer_demo4]"""
+designers_group_demo2.designers = [designer_demo2, designer_demo4]
 
-experimenter_demo1 = Experimenter('Natalia', 'Vargas', 'nvargas@epn.ec', hashlib.sha1('nvargas1234'.encode()).hexdigest())
+experimenter_demo1 = Experimenter('Julio', 'Caiza', 'julio.caiza@epn.ec', hashlib.sha1('jcaiza'.encode()).hexdigest())
 experimenter_demo2 = Experimenter('Julian', 'Moreno', 'jmoreno@epn.ec', hashlib.sha1('jmoreno1234'.encode()).hexdigest())
-"""experiment_demo = Experiment('Template 1 vs Template 2', 'Does using patterns of Template 1 reduce time vs using '
+experiment_demo = Experiment('Template 1 vs Template 2', 'Does using patterns of Template 1 reduce time vs using '
                                                          'patterns of Template 2?')
 experimenter_demo1.experiments = [experiment_demo]
 experimenter_demo2.experiments = [experiment_demo]
@@ -102,7 +103,7 @@ t3_section2 = TemplateSection(True, 3, template_demo3, section_demo2)
 t3_section3 = TemplateSection(True, 4, template_demo3, section_demo6)
 t3_section4 = TemplateSection(True, 1, template_demo3, section_demo7)
 
-diagram_demo = Diagram('diagram_demo.jpg', './Resources/Diagrams/diagram_demo.jpg')
+diagram_demo = Diagram('diagram_demo.jpg', './Resources/Diagrams/Patterns/diagram_demo.jpg')
 
 pattern_demo1 = Pattern(template_demo1)
 pattern_demo2 = Pattern(template_demo2)
@@ -174,8 +175,8 @@ pattern_section10 = PatternSection('Beneﬁts: Policies can be propagated throug
 pattern_section13 = PatternSection('<' + category_demo2.name + '>', pattern_demo3, t3_section3, None, category_demo2)
 pattern_section14 = PatternSection('Sticky Policies', pattern_demo3, t3_section4, None, None)
 
-diagram_demo2 = Diagram('diagram_demo2.jpg', './Resources/Diagrams/diagram_demo2.jpg')
-diagram_demo3 = Diagram('diagram_demo2.jpg', './Resources/Diagrams/diagram_demo2.jpg')
+diagram_demo2 = Diagram('diagram_demo.jpg', './Resources/Diagrams/IdealSolutions/diagram_demo.jpg')
+diagram_demo3 = Diagram('diagram_demo2.jpg', './Resources/Diagrams/IdealSolutions/diagram_demo2.jpg')
 ideal_sol_demo1 = IdealSolution('May not necessarily require patterns, but will use them', diagram_demo2)
 ideal_sol_demo1.patterns = [pattern_demo1, pattern_demo2]
 
@@ -212,8 +213,10 @@ measurement_demo2 = Measurement('90', datetime.now(), metric_demo2, designer_dem
 measurement_demo3 = Measurement('1', datetime.now(), metric_demo3, designer_demo1, scenario_component_demo1)
 measurement_demo4 = Measurement('1', datetime.now(), metric_demo4, designer_demo1, scenario_component_demo1)
 
-sent_sol_demo = SentSolution('NA', diagram_demo3, designer_demo1, scenario_component_demo1)
-sent_sol_demo.patterns = [pattern_demo2]"""
+diagram_demo4 = Diagram('diagram_demo.jpg', './Resources/Diagrams/SentSolutions/diagram_demo.jpg')
+
+sent_sol_demo = SentSolution('NA', diagram_demo4, designer_demo1, scenario_component_demo1)
+sent_sol_demo.patterns = [pattern_demo2]
 
 
 # Make persistence in DB
@@ -222,15 +225,15 @@ session.add(designer_demo1)
 session.add(designer_demo2)
 session.add(designer_demo3)
 session.add(designer_demo4)
-#session.add(designers_group_demo1)
-#session.add(designers_group_demo2)
+session.add(designers_group_demo1)
+session.add(designers_group_demo2)
 session.add(experimenter_demo1)
 session.add(experimenter_demo2)
 session.add(metric_demo1)
 session.add(metric_demo2)
 session.add(metric_demo3)
 session.add(metric_demo4)
-"""session.add(experiment_demo)
+session.add(experiment_demo)
 session.add(experimental_sc_demo)
 session.add(classification_demo1)
 session.add(category_demo1)
@@ -285,6 +288,7 @@ session.add(pattern_section13)
 session.add(pattern_section14)
 session.add(diagram_demo2)
 session.add(diagram_demo3)
+session.add(diagram_demo4)
 session.add(ideal_sol_demo1)
 session.add(ideal_sol_demo2)
 session.add(problem_demo1)
@@ -299,7 +303,7 @@ session.add(measurement_demo1)
 session.add(measurement_demo2)
 session.add(measurement_demo3)
 session.add(measurement_demo4)
-session.add(sent_sol_demo)"""
+session.add(sent_sol_demo)
 
 # Save changes and close connection
 session.commit()
