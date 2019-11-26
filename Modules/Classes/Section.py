@@ -59,7 +59,8 @@ class Section(Base):
         section_aux.name = parameters[1]
         section_aux.description = parameters[2]
         section_aux.data_type = parameters[3]
-        if len(parameters == 5):
+        section_aux.classification = None
+        if len(parameters) == 5:
             classification_aux = session.query(Classification).filter(Classification.id == parameters[4]).first()
             section_aux.classification = classification_aux
         session.commit()

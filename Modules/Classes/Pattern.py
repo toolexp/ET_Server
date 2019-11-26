@@ -115,7 +115,6 @@ class Pattern(Base):
                                    comment='Error selecting register')
         pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[0]).first()
         msg_rspt = Message(action=2, information=[])
-        msg_rspt.information.append(pattern_aux.name)
         msg_rspt.information.append(pattern_aux.template.__str__())
         '''if pattern_aux.diagram is not None:
             msg_rspt.information.append(pattern_aux.diagram.__str__())'''

@@ -22,11 +22,8 @@ try:
         connection.create_connection(HOST, PORT)
         print("Can't verify inserted values...")
         print('Server set to listen with IP {} in PORT {}'.format(HOST, str(PORT)))
-    #print('\nType: "exit" to close server\n')
     connection.listen_connections(int(clients))
     while True:
-        #if input() == 'exit':
-            #break
         connection.accept_connection()
 except Exception as e:
     error = 'Error with the server: ' + str(e)
