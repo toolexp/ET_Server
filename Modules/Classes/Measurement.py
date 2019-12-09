@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
 from Modules.Classes.Metric import Metric
-from Modules.Classes.ScenarioComponent import ScenarioComponent
+from Modules.Classes.Problem import Problem
 
 
 class Measurement(Base):
@@ -13,37 +13,35 @@ class Measurement(Base):
 
     id = Column(Integer, primary_key=True)
     value = Column(String)
-    date_acquisition = Column(DateTime)
+    acquisition_date = Column(DateTime)
     metric_id = Column(Integer, ForeignKey('metrics.id'))
     designer_id = Column(Integer, ForeignKey('designers.id'))
-    scenario_component_id = Column(Integer, ForeignKey('scenario_components.id'))
+    problem_id = Column(Integer, ForeignKey('problems.id'))
 
     metric = relationship("Metric", backref=backref("measurements", cascade="all, delete-orphan",
                                                     single_parent=True))
     designer = relationship("Designer", backref=backref("measurements", cascade="all, delete-orphan",
                                                         single_parent=True))
-    scenario_component = relationship("ScenarioComponent", backref=backref("measurements",
-                                                                           cascade="all, delete-orphan",
-                                                                           single_parent=True))
+    problem = relationship("Problem", backref=backref("measurements", cascade="all, delete-orphan", single_parent=True))
 
-    def __init__(self, value, date_acquisition, metric, designer, scenario_component):
+    def __init__(self, value, acquisition_date, metric, designer, problem):
         self.value = value
-        self.date_acquisition = date_acquisition
+        self.acquisition_date = acquisition_date
         self.metric = metric
         self.designer = designer
-        self.scenario_component = scenario_component
+        self.problem = problem
 
     def __str__(self):
-        return '{}¥{}'.format(self.id, self.value, self.date_acquisition)
+        return '{}¥{}¥{}'.format(self.id, self.value, self.acquisition_date)
 
     @staticmethod
     def create(parameters, session):
         from Modules.Classes.Designer import Designer
-        # Received --> [value, date_acquisition, metric_id, designer_id, scenario_comp_id]
+        # Received --> [value, date_acquisition, metric_id, designer_id, problem_id]
         metric_aux = session.query(Metric).filter(Metric.id == parameters[2]).first()
         designer_aux = session.query(Designer).filter(Designer.id == parameters[3]).first()
-        scenario_comp_aux = session.query(ScenarioComponent).filter(ScenarioComponent.id == parameters[4]).first()
-        measurement_aux = Measurement(parameters[0], parameters[1], metric_aux, designer_aux, scenario_comp_aux)
+        problem_aux = session.query(Problem).filter(Problem.id == parameters[4]).first()
+        measurement_aux = Measurement(parameters[0], parameters[1], metric_aux, designer_aux, problem_aux)
         session.add(measurement_aux)
         session.commit()
         session.close()
@@ -67,12 +65,12 @@ class Measurement(Base):
         measurement_aux = session.query(Measurement).filter(Measurement.id == parameters[0]).first()
         metric_aux = session.query(Metric).filter(Metric.id == parameters[3]).first()
         designer_aux = session.query(Designer).filter(Designer.id == parameters[4]).first()
-        scenario_comp_aux = session.query(ScenarioComponent).filter(ScenarioComponent.id == parameters[5]).first()
+        problem_aux = session.query(Problem).filter(Problem.id == parameters[5]).first()
         measurement_aux.value = parameters[1]
         measurement_aux.date_acquisition = parameters[2]
         measurement_aux.metric = metric_aux
         measurement_aux.designer = designer_aux
-        measurement_aux.scenario_component = scenario_comp_aux
+        measurement_aux.scenario_component = problem_aux
         session.commit()
         session.close()
         msg_rspt = Message(action=2, comment='Register updated successfully')

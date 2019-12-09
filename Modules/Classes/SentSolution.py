@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
 from Modules.Classes.Diagram import Diagram
+from Modules.Classes.Problem import Problem
 
 
 sent_solutions_patterns_association = Table(
@@ -21,25 +22,22 @@ class SentSolution(Base):
     annotations = Column(String)
     diagram_id = Column(Integer, ForeignKey('diagrams.id'))
     designer_id = Column(Integer, ForeignKey('designers.id'))
-    scenario_component_id = Column(Integer, ForeignKey('scenario_components.id'))
+    problem_id = Column(Integer, ForeignKey('problems.id'))
 
     diagram = relationship("Diagram", backref="sent_solutions", cascade="all, delete-orphan", single_parent=True,
                            uselist=False)
     designer = relationship("Designer", backref=backref("sent_solutions", cascade="all, delete-orphan",
                                                         single_parent=True))
-    scenario_component = relationship("ScenarioComponent", backref=backref("sent_solutions",
-                                                                           cascade="all, delete-orphan",
-                                                                           single_parent=True))
-    #diagram = relationship("Diagram", backref=backref("sent_solutions", cascade="all, delete-orphan",
-                                                      #single_parent=True))
+    problem = relationship("Problem", backref=backref("sent_solutions", cascade="all, delete-orphan",
+                                                      single_parent=True))
     # Relation many to many
     patterns = relationship("Pattern", secondary=sent_solutions_patterns_association, backref='sent_solutions')
 
-    def __init__(self, annotations, diagram, designer, scenario_component):
+    def __init__(self, annotations, diagram, designer, problem):
         self.annotations = annotations
         self.diagram = diagram
         self.designer = designer
-        self.scenario_component = scenario_component
+        self.problem = problem
 
     def __str__(self):
         return '{}¥{}'.format(self.id, self.annotations)
@@ -48,14 +46,13 @@ class SentSolution(Base):
     def create(parameters, session):
         from Modules.Classes.Designer import Designer
         from Modules.Classes.Pattern import Pattern
-        from Modules.Classes.ScenarioComponent import ScenarioComponent
-        # Wthout patterns --> parameters=[annotations, id_diagram, id_designer, id_scenario_comp]
+        # Wthout patterns --> parameters=[annotations, id_diagram, id_designer, id_problem]
         diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[1]).first()
         designer_aux = session.query(Designer).filter(Designer.id == parameters[2]).first()
-        scenario_comp_aux = session.query(ScenarioComponent).filter(ScenarioComponent.id == parameters[3]).first()
-        s_solution_aux = SentSolution(parameters[0], diagram_aux, designer_aux, scenario_comp_aux)
+        problem_aux = session.query(Problem).filter(Problem.id == parameters[3]).first()
+        s_solution_aux = SentSolution(parameters[0], diagram_aux, designer_aux, problem_aux)
         if len(parameters) == 5:
-            # With patterns--> parameters=[annotations, id_diagram, id_designer, id_scenario_comp, [id_pattern1, id_pattern2, ...]]
+            # With patterns--> parameters=[annotations, id_diagram, id_designer, id_problem, [id_pattern1, id_pattern2, ...]]
             s_solution_aux.patterns = []
             for item in parameters[4]:
                 pattern_aux = session.query(Pattern).filter(Pattern.id == item).first()
@@ -79,18 +76,17 @@ class SentSolution(Base):
     def update(parameters, session):
         from Modules.Classes.Designer import Designer
         from Modules.Classes.Pattern import Pattern
-        from Modules.Classes.ScenarioComponent import ScenarioComponent
         s_solution_aux = session.query(SentSolution).filter(SentSolution.id == parameters[0]).first()
         diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[2]).first()
         designer_aux = session.query(Designer).filter(Designer.id == parameters[3]).first()
-        scenario_comp_aux = session.query(ScenarioComponent).filter(ScenarioComponent.id == parameters[4]).first()
+        problem_aux = session.query(Problem).filter(Problem.id == parameters[4]).first()
         s_solution_aux.annotations = parameters[1]
         s_solution_aux.diagram = diagram_aux
         s_solution_aux.designer = designer_aux
-        s_solution_aux.scenario_component = scenario_comp_aux
+        s_solution_aux.problem = problem_aux
         s_solution_aux.patterns = []
         if len(parameters) == 6:
-            # With patterns--> parameters=[id_s_solution, annotations, id_diagram, id_designer, id_scenario_comp,
+            # With patterns--> parameters=[id_s_solution, annotations, id_diagram, id_designer, id_problem,
             # [id_pattern1, id_pattern2, ...]]
             for item in parameters[5]:
                 pattern_aux = session.query(Pattern).filter(Pattern.id == item).first()
@@ -116,7 +112,7 @@ class SentSolution(Base):
         msg_rspt.information.append(s_solution_aux.annotations)
         msg_rspt.information.append(s_solution_aux.diagram_id)
         msg_rspt.information.append(s_solution_aux.designer_id)
-        msg_rspt.information.append(s_solution_aux.scenario_component_id)
+        msg_rspt.information.append(s_solution_aux.problem_id)
         msg_rspt.information.append([])
         for i in range(0, len(s_solution_aux.patterns)):
             msg_rspt.information[2].append(s_solution_aux.patterns[i].__str__())

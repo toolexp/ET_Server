@@ -9,7 +9,7 @@ from Modules.Classes.Administrator import Administrator
 from Modules.Classes.Category import Category
 from Modules.Classes.Classification import Classification
 from Modules.Classes.Designer import Designer
-from Modules.Classes.DesignersGroup import DesignersGroup
+from Modules.Classes.DesignerExperimentalScenario import DesignersGroup
 from Modules.Classes.Diagram import Diagram
 from Modules.Classes.Experiment import Experiment
 from Modules.Classes.ExperimentalScenario import ExperimentalScenario
@@ -21,7 +21,7 @@ from Modules.Classes.Pattern import Pattern
 from Modules.Classes.PatternSection import PatternSection
 from Modules.Classes.Problem import Problem
 from Modules.Classes.ScenarioComponent import ScenarioComponent
-from Modules.Classes.ScenarioComponentPattern import ScenarioComponentPattern
+from Modules.Classes.ExperimentalScenarioPattern import ScenarioComponentPattern
 from Modules.Classes.Section import Section
 from Modules.Classes.SentSolution import SentSolution
 from Modules.Classes.Template import Template

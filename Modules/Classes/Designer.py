@@ -3,7 +3,7 @@
 from sqlalchemy import Column, String, Integer
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
-from Modules.Classes.DesignersGroup import DesignersGroup
+from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
 from Modules.Classes.Measurement import Measurement
 
 
@@ -155,16 +155,16 @@ class Designer(Base):
                 If any of the lines of code generates an error
             """
         try:
-            designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
-            designers_group_aux = session.query(DesignersGroup).all()
-            for item in designers_group_aux:
-                if designer_aux in item.designers:
-                    return Message(action=5, information=['The designer is associated to one or more designers groups'],
-                                   comment='Error deleting register')
+            designer_exp_aux = session.query(DesignerExperimentalScenario).\
+                filter(DesignerExperimentalScenario.designer_id == parameters[0]).first()
+            if designer_exp_aux:
+                return Message(action=5, information=['The designer is associated to one or more experimental scenarios'],
+                               comment='Error deleting register')
             measurement_aux = session.query(Measurement).filter(Measurement.designer_id == parameters[0]).first()
             if measurement_aux:
                 return Message(action=5, information=['The designer is associated to one or more measurements'],
                                comment='Error deleting register')
+            designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
             session.delete(designer_aux)
             session.commit()
             session.close()
@@ -199,13 +199,12 @@ class Designer(Base):
         try:
             msg_rspt = Message(action=2, information=[])
             if parameters[1] == 'validate':
-                designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
-                designers_group_aux = session.query(DesignersGroup).all()
-                for item in designers_group_aux:
-                    if designer_aux in item.designers:
-                        return Message(action=5,
-                                       information=['The designer is associated to one or more designers groups'],
-                                       comment='Error selecting register')
+                designer_exp_aux = session.query(DesignerExperimentalScenario). \
+                    filter(DesignerExperimentalScenario.designer_id == parameters[0]).first()
+                if designer_exp_aux:
+                    return Message(action=5,
+                                   information=['The designer is associated to one or more experimental scenarios'],
+                                   comment='Error deleting register')
                 measurement_aux = session.query(Measurement).filter(Measurement.designer_id == parameters[0]).first()
                 if measurement_aux:
                     return Message(action=5, information=['The designer is associated to one or more measurements'],

@@ -7,9 +7,10 @@ from Modules.Config.Data import Message
 from Modules.Classes.Template import Template
 from Modules.Classes.PatternSection import PatternSection
 from Modules.Classes.Diagram import Diagram
-from Modules.Classes.ScenarioComponentPattern import ScenarioComponentPattern
 from Modules.Classes.IdealSolution import IdealSolution
 from Modules.Classes.SentSolution import SentSolution
+from Modules.Classes.ExperimentalScenarioPattern import ExperimentalScenarioPattern
+
 
 class Pattern(Base):
     __tablename__ = 'patterns'
@@ -43,11 +44,11 @@ class Pattern(Base):
         if len(parameters) == 0:
             patterns = session.query(Pattern).all()
         else:
-            # Received --> [id_scenario_comp, pattern_type]
+            # Received --> [id_exp_scenario, pattern_type]
             patterns = session.query(Pattern). \
-                join(ScenarioComponentPattern.pattern).\
-                filter(and_(ScenarioComponentPattern.scenario_component_id == parameters[0],
-                            ScenarioComponentPattern.pattern_type == parameters[1])).all()
+                join(ExperimentalScenarioPattern.pattern).\
+                filter(and_(ExperimentalScenarioPattern.experimental_scenario_id == parameters[0],
+                            ExperimentalScenarioPattern.pattern_type == parameters[1])).all()
         msg_rspt = Message(action=2, information=[])
         for pattern in patterns:
             msg_rspt.information.append(pattern.__str__())
@@ -67,9 +68,9 @@ class Pattern(Base):
 
     @staticmethod
     def delete(parameters, session):
-        scenario_comp_aux = session.query(ScenarioComponentPattern).filter(ScenarioComponentPattern.pattern_id ==
-                                                                           parameters[0]).first()
-        if scenario_comp_aux:
+        exp_scenario_aux = session.query(ExperimentalScenarioPattern).filter(ExperimentalScenarioPattern.pattern_id ==
+                                                                             parameters[0]).first()
+        if exp_scenario_aux:
             return Message(action=5, information=['The pattern is associated to one or more experimental scenarios'],
                            comment='Error deleting register')
         pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[0]).first()
@@ -97,9 +98,9 @@ class Pattern(Base):
     def select(parameters, session):
         pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[0]).first()
         if len(parameters) == 2:
-            scenario_comp_aux = session.query(ScenarioComponentPattern).filter(ScenarioComponentPattern.pattern_id ==
-                                                                               parameters[0]).first()
-            if scenario_comp_aux:
+            exp_scenario_aux = session.query(ExperimentalScenarioPattern).\
+                filter(ExperimentalScenarioPattern.pattern_id == parameters[0]).first()
+            if exp_scenario_aux:
                 return Message(action=5,
                                information=['The pattern is associated to one or more experimental scenarios'],
                                comment='Error selecting register')
@@ -116,7 +117,5 @@ class Pattern(Base):
         pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[0]).first()
         msg_rspt = Message(action=2, information=[])
         msg_rspt.information.append(pattern_aux.template.__str__())
-        '''if pattern_aux.diagram is not None:
-            msg_rspt.information.append(pattern_aux.diagram.__str__())'''
         session.close()
         return msg_rspt

@@ -21,8 +21,6 @@ class IdealSolution(Base):
     annotations = Column(String)
     diagram_id = Column(Integer, ForeignKey('diagrams.id'))
 
-    #diagram = relationship("Diagram", backref=backref("ideal_solutions", cascade="all, delete-orphan",
-                                                      #single_parent=True))
     diagram = relationship("Diagram", backref="ideal_solution", cascade="all, delete-orphan", single_parent=True, uselist=False)
 
     # Relation many to many
@@ -56,16 +54,6 @@ class IdealSolution(Base):
         session.close()
         msg_rspt = Message(action=2, information=[new_i_sol_aux.id], comment='Register created successfully')
         return msg_rspt
-
-    '''
-    @staticmethod
-    def read(parameters, session):
-        templates = session.query(Template).all()
-        msg_rspt = Message(action=2, information=[])
-        for template in templates:
-            msg_rspt.information.append(template.__str__())
-        session.close()
-        return msg_rspt'''
 
     @staticmethod
     def update(parameters, session):

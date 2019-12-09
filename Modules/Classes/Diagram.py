@@ -7,7 +7,6 @@ from Modules.Config.base import Base
 from Modules.Config.Data import Message
 
 
-
 class Diagram(Base):
     __tablename__ = 'diagrams'
 
@@ -55,6 +54,8 @@ class Diagram(Base):
                 path = './Resources/Diagrams/IdealSolutions/'
             elif parameters[2] == 'sent sol':
                 path = './Resources/Diagrams/SentSolutions/'
+            elif parameters[2] == 'scen context':
+                path = './Resources/Diagrams/ContextDiagrams/'
             else:
                 path = './Resources/Diagrams/'
             file = path + datetime.now().strftime("%Y%m%d_%H%M%S") + parameters[1]
@@ -89,6 +90,8 @@ class Diagram(Base):
             path = './Resources/Diagrams/IdealSolutions/'
         elif parameters[3] == 'sent sol':
             path = './Resources/Diagrams/SentSolutions/'
+        elif parameters[3] == 'scen context':
+            path = './Resources/Diagrams/ContextDiagrams/'
         else:
             path = './Resources/Diagrams/'
         diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[0]).first()

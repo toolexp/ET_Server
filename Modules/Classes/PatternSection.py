@@ -24,8 +24,6 @@ class PatternSection(Base):
                                                       single_parent=True))
     temp_section = relationship("TemplateSection", backref=backref("pattern_sections", cascade="all, delete-orphan",
                                                                    single_parent=True))
-    '''diagram = relationship("Diagram", foreign_keys=diagram_id, post_update=True, cascade="all, delete-orphan",
-                           single_parent=True)'''
     diagram = relationship("Diagram", backref="pattern_section", cascade="all, delete-orphan", single_parent=True,
                            uselist=False)
     category = relationship("Category", backref=backref("pattern_sections", cascade="all, delete-orphan",
@@ -109,15 +107,3 @@ class PatternSection(Base):
         session.close()
         msg_rspt = Message(action=2, comment='Register deleted successfully')
         return msg_rspt
-
-    '''
-    @staticmethod
-    def select(parameters, session):
-        pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[0]).first()
-        msg_rspt = Message(action=2, information=[])
-        msg_rspt.information.append(pattern_aux.name)
-        msg_rspt.information.append(pattern_aux.template.__str__())
-        if pattern_aux.diagram is not None:
-            msg_rspt.information.append(pattern_aux.diagram.__str__())
-        session.close()
-        return msg_rspt'''

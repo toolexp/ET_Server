@@ -1,8 +1,9 @@
 # coding=utf-8
 
-from sqlalchemy import Column, String, Integer, Boolean
+from sqlalchemy import Column, String, Integer, DateTime
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
+from datetime import datetime
 
 
 class Experiment(Base):
@@ -11,24 +12,32 @@ class Experiment(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     description = Column(String)
-    finished = Column(Boolean)
+    design_type = Column(Integer)   # 1-> 'control design', 2-> 'experimental design' (control and experimental group)
+    state = Column(String)  # created, executed, finished
+    creation_date = Column(DateTime)
+    execution_date = Column(DateTime)
+    finished_date = Column(DateTime)
 
-    def __init__(self, name, description):
+    def __init__(self, name, description, design_type):
         self.name = name
         self.description = description
-        self.finished = False
+        self.design_type = design_type
+        self.state = 'created'
+        self.creation_date = datetime.now()
+        self.execution_date = None
+        self.finished_date = None
 
     def __str__(self):
-        if self.finished:
-            aux = '✓'
+        if self.design_type == 1:
+            aux = 'One group'
         else:
-            aux = ''
-        return '{}¥{}¥{}¥{}'.format(self.id, self.name, self.description, aux)
+            aux = 'Two groups'
+        return '{}¥{}¥{}¥{}¥{}'.format(self.id, self.name, self.description, aux, self.state)
 
     @staticmethod
     def create(parameters, session):
-        # Received --> [name, description]
-        experiment_aux = Experiment(parameters[0], parameters[1])
+        # Received --> [name, description, design_type]
+        experiment_aux = Experiment(parameters[0], parameters[1], parameters[2])
         session.add(experiment_aux)
         session.commit()
         session.close()
@@ -49,17 +58,40 @@ class Experiment(Base):
     def update(parameters, session):
         experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
         if len(parameters) == 3:
-            # Received --> [id_experiment, name, description]
+            # Received --> [id_experiment, name, description, design_type]
             experiment_aux.name = parameters[1]
             experiment_aux.description = parameters[2]
+            experiment_aux.design_type = parameters[3]
         else:
-            # Received --> [id_experiment, 'finish']
-            experiment_aux.finished = True
             from Modules.Classes.ExperimentalScenario import ExperimentalScenario
-            experimental_sc_aux = session.query(ExperimentalScenario).\
-                filter(ExperimentalScenario.experiment_id == parameters[0]).all()
-            for item in experimental_sc_aux:
-                item.scenario_lock = True
+            # Received --> [id_experiment, state]
+            if parameters[1] == 'executed' and experiment_aux.state == 'created':   # When an experiment goes from created to executed
+                experimental_sc_aux = session.query(ExperimentalScenario).\
+                    filter(ExperimentalScenario.experiment_id == parameters[0]).all()
+                if not experimental_sc_aux:
+                    return Message(action=5, information=['No experimental scenarios created for this experiment. '
+                                                          'Create al least one to execute the experiment'],
+                                   comment='Error updating register')
+                # Change experiment state
+                experiment_aux.state = 'executed'
+                experiment_aux.execution_date = datetime.now()
+                # Change experimental scenarios state, associated with current experiment
+                for item in experimental_sc_aux:
+                    item.state = 'executed'
+            elif parameters[1] == 'finished' and experiment_aux.state == 'executed':    # When an experiment goes from executed to finished
+
+                experimental_sc_aux = session.query(ExperimentalScenario). \
+                    filter(ExperimentalScenario.experiment_id == parameters[0]).all()
+                # Change experiment state
+                experiment_aux.state = 'finished'
+                experiment_aux.finished_date = datetime.now()
+                # Change experimental scenarios state, associated with current experiment
+                for item in experimental_sc_aux:
+                    item.state = 'finished'
+            else:
+                return Message(action=5, information=['The experiment is not in execution. To finish an experiment, it'
+                                                      'must be in execution first'],
+                               comment='Error updating register')
         session.commit()
         session.close()
         msg_rspt = Message(action=2, comment='Register updated successfully')

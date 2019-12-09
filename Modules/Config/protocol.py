@@ -5,10 +5,11 @@ from Modules.Classes.Administrator import Administrator
 from Modules.Classes.Category import Category
 from Modules.Classes.Classification import Classification
 from Modules.Classes.Designer import Designer
-from Modules.Classes.DesignersGroup import DesignersGroup
+from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
 from Modules.Classes.Diagram import Diagram
 from Modules.Classes.Experiment import Experiment
 from Modules.Classes.ExperimentalScenario import ExperimentalScenario
+from Modules.Classes.ExperimentalScenarioPattern import ExperimentalScenarioPattern
 from Modules.Classes.Experimenter import Experimenter
 from Modules.Classes.IdealSolution import IdealSolution
 from Modules.Classes.Measurement import Measurement
@@ -16,8 +17,6 @@ from Modules.Classes.Metric import Metric
 from Modules.Classes.Pattern import Pattern
 from Modules.Classes.PatternSection import PatternSection
 from Modules.Classes.Problem import Problem
-from Modules.Classes.ScenarioComponent import ScenarioComponent
-from Modules.Classes.ScenarioComponentPattern import ScenarioComponentPattern
 from Modules.Classes.Section import Section
 from Modules.Classes.SentSolution import SentSolution
 from Modules.Classes.Template import Template
@@ -48,11 +47,11 @@ switcher_protocol = {
         23: Designer.update,
         24: Designer.delete,
         25: Designer.select,
-        26: DesignersGroup.create,
-        27: DesignersGroup.read,
-        28: DesignersGroup.update,
-        29: DesignersGroup.delete,
-        30: DesignersGroup.select,
+        #26: DesignersGroup.create,
+        #27: DesignersGroup.read,
+        #28: DesignersGroup.update,
+        #29: DesignersGroup.delete,
+        #30: DesignersGroup.select,
         31: Section.create,
         32: Section.read,
         33: Section.update,
@@ -104,11 +103,11 @@ switcher_protocol = {
         83: ExperimentalScenario.update,
         84: ExperimentalScenario.delete,
         85: ExperimentalScenario.select,
-        86: ScenarioComponent.create,
-        87: ScenarioComponent.read,
-        88: ScenarioComponent.update,
-        89: ScenarioComponent.delete,
-        90: ScenarioComponent.select,
+        #86: ScenarioComponent.create,
+        #87: ScenarioComponent.read,
+        #88: ScenarioComponent.update,
+        #89: ScenarioComponent.delete,
+        #90: ScenarioComponent.select,
         91: Experiment.create,
         92: Experiment.read,
         93: Experiment.update,
