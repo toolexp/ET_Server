@@ -11,7 +11,7 @@ from Modules.Classes.Experiment import Experiment
 from Modules.Classes.ExperimentalScenario import ExperimentalScenario
 from Modules.Classes.ExperimentalScenarioPattern import ExperimentalScenarioPattern
 from Modules.Classes.Experimenter import Experimenter
-from Modules.Classes.IdealSolution import IdealSolution
+from Modules.Classes.ExpectedSolution import ExpectedSolution
 from Modules.Classes.Measurement import Measurement
 from Modules.Classes.Metric import Metric
 from Modules.Classes.Pattern import Pattern
@@ -77,11 +77,11 @@ switcher_protocol = {
         53: Problem.update,
         54: Problem.delete,
         55: Problem.select,
-        56: IdealSolution.create,
-        #57: IdealSolution.read,
-        58: IdealSolution.update,
-        59: IdealSolution.delete,
-        60: IdealSolution.select,
+        56: ExpectedSolution.create,
+        #57: ExpectedSolution.read,
+        58: ExpectedSolution.update,
+        59: ExpectedSolution.delete,
+        60: ExpectedSolution.select,
         61: Diagram.create,
         62: Diagram.read,
         63: Diagram.update,

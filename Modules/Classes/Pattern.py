@@ -7,7 +7,7 @@ from Modules.Config.Data import Message
 from Modules.Classes.Template import Template
 from Modules.Classes.PatternSection import PatternSection
 from Modules.Classes.Diagram import Diagram
-from Modules.Classes.IdealSolution import IdealSolution
+from Modules.Classes.ExpectedSolution import ExpectedSolution
 from Modules.Classes.SentSolution import SentSolution
 from Modules.Classes.ExperimentalScenarioPattern import ExperimentalScenarioPattern
 
@@ -74,8 +74,8 @@ class Pattern(Base):
             return Message(action=5, information=['The pattern is associated to one or more experimental scenarios'],
                            comment='Error deleting register')
         pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[0]).first()
-        ideal_sols = session.query(IdealSolution).all()
-        for item in ideal_sols:
+        expected_sols = session.query(ExpectedSolution).all()
+        for item in expected_sols:
             if pattern_aux in item.patterns:
                 return Message(action=5, information=['The pattern is associated to one or more ideal solutions'],
                                comment='Error deleting register')
@@ -104,8 +104,8 @@ class Pattern(Base):
                 return Message(action=5,
                                information=['The pattern is associated to one or more experimental scenarios'],
                                comment='Error selecting register')
-            ideal_sols = session.query(IdealSolution).all()
-            for item in ideal_sols:
+            expected_sols = session.query(ExpectedSolution).all()
+            for item in expected_sols:
                 if pattern_aux in item.patterns:
                     return Message(action=5, information=['The pattern is associated to one or more ideal solutions'],
                                    comment='Error selecting register')

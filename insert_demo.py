@@ -14,7 +14,7 @@ from Modules.Classes.Diagram import Diagram
 from Modules.Classes.Experiment import Experiment
 from Modules.Classes.ExperimentalScenario import ExperimentalScenario
 from Modules.Classes.Experimenter import Experimenter
-from Modules.Classes.IdealSolution import IdealSolution
+from Modules.Classes.ExpectedSolution import IdealSolution
 from Modules.Classes.Measurement import Measurement
 from Modules.Classes.Metric import Metric
 from Modules.Classes.Pattern import Pattern

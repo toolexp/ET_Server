@@ -116,18 +116,24 @@ class Experiment(Base):
     def select(parameters, session):
         from Modules.Classes.ExperimentalScenario import ExperimentalScenario
         msg_rspt = Message(action=2, information=[])
+        experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
         # Received --> [id_experiment, 'validate']
         if len(parameters) == 2:
+            if experiment_aux.state == 'finished' or experiment_aux.state == 'executed':
+                return Message(action=5, comment='The state of the experiment doesn\'t allow you to change it\'s '
+                                                 'information')
             experimetal_sc = session.query(ExperimentalScenario).filter(
                 ExperimentalScenario.experiment_id == parameters[0]).first()
             if experimetal_sc:
-                return Message(action=5, information=['The experiment is associated to one or more experimental scenarios'],
-                               comment='Error selecting register')
-        experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
+                msg_rspt.comment = 'The experiment has experimental scenarios associated to it. If you change its\' ' \
+                                   'design type, CONFIGURED INFORMATION MAY BE DELETED'
+                msg_rspt.action = 6
         msg_rspt.information.append(experiment_aux.name)
         msg_rspt.information.append(experiment_aux.description)
+        msg_rspt.information.append(experiment_aux.design_type)
+        msg_rspt.information.append(experiment_aux.state)
         msg_rspt.information.append([])
         for item in experiment_aux.experimental_scenarios:
-            msg_rspt.information[2].append(item.__str__())
+            msg_rspt.information[4].append(item.__str__())
         session.close()
         return msg_rspt

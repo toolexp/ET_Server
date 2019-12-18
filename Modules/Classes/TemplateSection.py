@@ -12,26 +12,32 @@ class TemplateSection(Base):
     id = Column(Integer, primary_key=True)
     mandatory = Column(Boolean)
     position = Column(Integer)
+    visual = Column(Boolean)    # This field indicates if the section is allowed to be shown as the 'name' of the pattern
     template_id = Column(Integer, ForeignKey('templates.id'))
     section_id = Column(Integer, ForeignKey('sections.id'))
 
     template = relationship("Template", backref=backref("section_associations", cascade="all, delete-orphan"))
     section = relationship("Section", backref=backref("template_associations", cascade="all, delete-orphan"))
 
-    def __init__(self, mandatory, position, template, section):
+    def __init__(self, mandatory, position, visual, template, section):
         self.mandatory = mandatory
         self.position = position
+        self.visual = visual
         self.template = template
         self.section = section
 
     def __str__(self):
         if self.mandatory:
-            aux = '✓'
+            aux_mand = '✓'
         else:
-            aux = ''
-        return '{}¥{}¥{}¥{}¥{}¥{}¥{}¥{}¥{}'.format(self.id, self.template_id, self.section_id, self.section.name,
-                                                   self.section.description, self.section.data_type, self.position,
-                                                   aux, self.section.classification_id)
+            aux_mand = ''
+        if self.visual:
+            aux_visual = '✓'
+        else:
+            aux_visual = ''
+        return '{}¥{}¥{}¥{}¥{}¥{}¥{}¥{}¥{}¥{}'.format(self.id, self.template_id, self.section_id, self.section.name,
+                                                      self.section.description, self.section.data_type, self.position,
+                                                      aux_mand, aux_visual, self.section.classification_id)
 
     @staticmethod
     def read(parameters, session):

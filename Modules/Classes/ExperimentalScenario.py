@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from sqlalchemy import Column, String, Integer, ForeignKey, and_
+from sqlalchemy import Column, String, Integer, ForeignKey, and_, Boolean
 from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
@@ -13,40 +13,46 @@ class ExperimentalScenario(Base):
     __tablename__ = 'experimental_scenarios'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String)
-    context = Column(String)
+    title = Column(String)
+    description = Column(String)
     access_code = Column(String)
     state = Column(String)  # created, executed, finished
-    diagram_context_id = Column(Integer, ForeignKey('diagrams.id'))
+    availability = Column(Boolean)
+    description_diagram_id = Column(Integer, ForeignKey('diagrams.id'))
     experiment_id = Column(Integer, ForeignKey('experiments.id'))
 
-    diagram_context = relationship("Diagram", backref="experimental_scenario", cascade="all, delete-orphan",
+    description_diagram = relationship("Diagram", backref="experimental_scenario", cascade="all, delete-orphan",
                                    single_parent=True, uselist=False)
     experiment = relationship("Experiment", backref=backref("experimental_scenarios", cascade="all, delete-orphan",
                                                             single_parent=True))
 
-    def __init__(self, name, context, access_code, diagram_context, experiment):
-        self.name = name
-        self.context = context
+    def __init__(self, title, description, access_code, description_diagram, experiment):
+        self.title = title
+        self.description = description
         self.access_code = access_code
         self.state = 'created'
-        self.diagram_context = diagram_context
+        self.availability = True
+        self.description_diagram = description_diagram
         self.experiment = experiment
 
     def __str__(self):
-        return '{}¥{}¥{}¥{}'.format(self.id, self.name, self.context, self.state)
+        if self.availability:
+            aux_av = '✓'
+        else:
+            aux_av = ''
+        return '{}¥{}¥{}¥{}¥{}'.format(self.id, self.title, self.description, self.state, aux_av)
 
     @staticmethod
     def create(parameters, session):
         from Modules.Classes.Designer import Designer
-        # Received --> [name, context, access_code, diagram_context_id, experiment_id, [control_designers_ids...],
+        # Received --> [title, description, access_code, description_diagram_id, experiment_id, [control_designers_ids...],
         # [experimental_designers_ids...]]
         experiment = session.query(Experiment).filter(Experiment.id == parameters[4]).first()
-        if parameters[3] is not None:   # Diagram context is optional
-            diagram_context = session.query(Diagram).filter(Diagram.id == parameters[3]).first()
+        if parameters[3] is not None:   # Description diagram is optional
+            description_diagram = session.query(Diagram).filter(Diagram.id == parameters[3]).first()
         else:
-            diagram_context = None
-        exp_sc_aux = ExperimentalScenario(parameters[0], parameters[1], parameters[2], diagram_context, experiment)
+            description_diagram = None
+        exp_sc_aux = ExperimentalScenario(parameters[0], parameters[1], parameters[2], description_diagram, experiment)
         session.add(exp_sc_aux)
         # Creation of designers group(s)
         for item in parameters[5]:  # Control group always exists
@@ -105,18 +111,18 @@ class ExperimentalScenario(Base):
             exp_sc_aux.scenario_lock = True
         else:
             from Modules.Classes.Designer import Designer
-            # Received --> [id_exp_sc, name, context, access_code, diagram_context_id, experiment_id,
+            # Received --> [id_exp_sc, title, description, access_code, description_diagram_id, experiment_id,
             # [control_designers_ids...], [experimental_designers_ids...]
             exp_sc_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[0]).first()
             experiment = session.query(Experiment).filter(Experiment.id == parameters[5]).first()
-            if parameters[4] is not None:  # Diagram context is optional
-                diagram_context = session.query(Diagram).filter(Diagram.id == parameters[4]).first()
+            if parameters[4] is not None:  # Description diagram is optional
+                description_diagram = session.query(Diagram).filter(Diagram.id == parameters[4]).first()
             else:
-                diagram_context = None
-            exp_sc_aux.name = parameters[1]
-            exp_sc_aux.context = parameters[2]
+                description_diagram = None
+            exp_sc_aux.title = parameters[1]
+            exp_sc_aux.description = parameters[2]
             exp_sc_aux.access_code = parameters[3]
-            exp_sc_aux.diagram_context = diagram_context
+            exp_sc_aux.description_diagram = description_diagram
             exp_sc_aux.experiment = experiment
             # Removing current associated designers
             designers_exp_aux = session.query(DesignerExperimentalScenario).\
@@ -154,10 +160,10 @@ class ExperimentalScenario(Base):
         if len(parameters) == 1:
             # Received --> [id_exp_scenario]
             exp_sc_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[0]).first()
-            msg_rspt.information.append(exp_sc_aux.name)
-            msg_rspt.information.append(exp_sc_aux.context)
+            msg_rspt.information.append(exp_sc_aux.title)
+            msg_rspt.information.append(exp_sc_aux.description)
             msg_rspt.information.append(exp_sc_aux.access_code)
-            msg_rspt.information.append(exp_sc_aux.diagram_context_id)
+            msg_rspt.information.append(exp_sc_aux.description_diagram_id)
             msg_rspt.information.append(exp_sc_aux.experiment_id)
             session.close()
             return msg_rspt
