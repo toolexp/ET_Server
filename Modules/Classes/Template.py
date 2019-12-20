@@ -115,7 +115,7 @@ class Template(Base):
         msg_rspt.information.append([])
         template_sections_aux = session.query(TemplateSection).filter(TemplateSection.template_id == parameters[0]). \
             order_by(TemplateSection.position).all()
-        for i in range(0, len(template_sections_aux)):
-            msg_rspt.information[2].append(template_sections_aux[i].__str__())
+        for item in template_sections_aux:
+            msg_rspt.information[2].append(item.__str__())
         session.close()
         return msg_rspt
