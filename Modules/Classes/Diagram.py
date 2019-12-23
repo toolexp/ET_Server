@@ -50,8 +50,8 @@ class Diagram(Base):
         try:
             if parameters[2] == 'pattern':
                 path = './Resources/Diagrams/Patterns/'
-            elif parameters[2] == 'ideal sol':
-                path = './Resources/Diagrams/IdealSolutions/'
+            elif parameters[2] == 'exp sol':
+                path = './Resources/Diagrams/ExpectedSolution/'
             elif parameters[2] == 'sent sol':
                 path = './Resources/Diagrams/SentSolutions/'
             elif parameters[2] == 'scen context':
@@ -86,8 +86,8 @@ class Diagram(Base):
         # Received --> [id_diagram, file_content, filename, type_diagram]
         if parameters[3] == 'pattern':
             path = './Resources/Diagrams/Patterns/'
-        elif parameters[3] == 'ideal sol':
-            path = './Resources/Diagrams/IdealSolutions/'
+        elif parameters[3] == 'exp sol':
+            path = './Resources/Diagrams/ExpectedSolutions/'
         elif parameters[3] == 'sent sol':
             path = './Resources/Diagrams/SentSolutions/'
         elif parameters[3] == 'scen context':

@@ -19,7 +19,7 @@ class DesignerExperimentalScenario(Base):
                                          backref=backref("designer_associations", cascade="all, delete-orphan"))
 
     def __init__(self, designer_type, designer, experimental_scenario):
-        self.designer_type = designer_type    # if designer_type=1 --> control group, otherwise experimental group
+        self.designer_type = designer_type    # if designer_type=1 --> experimental group, otherwise control group
         self.designer = designer
         self.experimental_scenario = experimental_scenario
 

@@ -7,7 +7,8 @@ from Modules.Config.Data import Message
 from Modules.Classes.Experiment import Experiment
 from Modules.Classes.Diagram import Diagram
 from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
-
+from Modules.Classes.ExperimentalScenarioPattern import ExperimentalScenarioPattern
+from Modules.Classes.Pattern import Pattern
 
 class ExperimentalScenario(Base):
     __tablename__ = 'experimental_scenarios'
@@ -45,8 +46,8 @@ class ExperimentalScenario(Base):
     @staticmethod
     def create(parameters, session):
         from Modules.Classes.Designer import Designer
-        # Received --> [title, description, access_code, description_diagram_id, experiment_id, [control_designers_ids...],
-        # [experimental_designers_ids...]]
+        # Received --> [title, description, access_code, description_diagram_id, experiment_id, [experimental_designers_ids...],
+        # [control_designers_ids...]]
         experiment = session.query(Experiment).filter(Experiment.id == parameters[4]).first()
         if parameters[3] is not None:   # Description diagram is optional
             description_diagram = session.query(Diagram).filter(Diagram.id == parameters[3]).first()
@@ -55,17 +56,27 @@ class ExperimentalScenario(Base):
         exp_sc_aux = ExperimentalScenario(parameters[0], parameters[1], parameters[2], description_diagram, experiment)
         session.add(exp_sc_aux)
         # Creation of designers group(s)
-        for item in parameters[5]:  # Control group always exists
+        for item in parameters[5]:  # Experimental group always exists
             designer_aux = session.query(Designer).filter(Designer.id == item).first()
             designer_exp_aux = DesignerExperimentalScenario(1, designer_aux, exp_sc_aux)
             session.add(designer_exp_aux)
         if experiment.design_type == 2:  # Experimental design (defined in experiment)
-            for item in parameters[6]:  # Experimental group may exist
+            for item in parameters[6]:  # Control group may exist
                 designer_aux = session.query(Designer).filter(Designer.id == item).first()
                 designer_exp_aux = DesignerExperimentalScenario(2, designer_aux, exp_sc_aux)
                 session.add(designer_exp_aux)
-        session.commit()
         new_exp_sc_aux = session.query(ExperimentalScenario).order_by(ExperimentalScenario.id.desc()).first()
+        # Creation of patterns for designers group(s)
+        for item in parameters[7]:  # Patterns for experimental group always exists
+            pattern_aux = session.query(Pattern).filter(Pattern.id == item).first()
+            exp_sc_pat = ExperimentalScenarioPattern(1, new_exp_sc_aux, pattern_aux)
+            session.add(exp_sc_pat)
+        if experiment.design_type == 2:  # Experimental design (defined in experiment)
+            for item in parameters[8]:  # Patterns for control group may exist
+                pattern_aux = session.query(Pattern).filter(Pattern.id == item).first()
+                exp_sc_pat = ExperimentalScenarioPattern(2, new_exp_sc_aux, pattern_aux)
+                session.add(exp_sc_pat)
+        session.commit()
         session.close()
         msg_rspt = Message(action=2, information=[new_exp_sc_aux.id], comment='Register created successfully')
         return msg_rspt

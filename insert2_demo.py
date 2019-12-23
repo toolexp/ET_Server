@@ -124,7 +124,7 @@ pattern_section7 = PatternSection('Secure passwords are very important in [an in
 pattern_section8 = PatternSection('<File>', pattern_demo2, t2_section5, diagram_demo, None)
 pattern_section12 = PatternSection('Informed Secure Passwords', pattern_demo2, t2_section6, None, None)
 
-diagram_demo2 = Diagram('diagram_demo.jpg', './Resources/Diagrams/IdealSolutions/diagram_demo.jpg')
+diagram_demo2 = Diagram('diagram_demo.jpg', './Resources/Diagrams/ExpectedSolution/diagram_demo.jpg')
 
 expected_sol_demo2 = ExpectedSolution('No requiered annotations', diagram_demo2)
 expected_sol_demo2.patterns = [pattern_demo2]

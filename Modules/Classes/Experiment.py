@@ -28,11 +28,7 @@ class Experiment(Base):
         self.finished_date = None
 
     def __str__(self):
-        if self.design_type == 1:
-            aux = 'One group'
-        else:
-            aux = 'Two groups'
-        return '{}¥{}¥{}¥{}¥{}'.format(self.id, self.name, self.description, aux, self.state)
+        return '{}¥{}¥{}¥{}¥{}'.format(self.id, self.name, self.description, self.design_type, self.state)
 
     @staticmethod
     def create(parameters, session):

@@ -18,7 +18,7 @@ class ExperimentalScenarioPattern(Base):
     pattern = relationship("Pattern", backref=backref("experimental_scenario_associations", cascade="all, delete-orphan"))
 
     def __init__(self, pattern_type, experimental_scenario, pattern):
-        self.pattern_type = pattern_type    # if pattern_type=1 --> control group, otherwise experimental group
+        self.pattern_type = pattern_type    # if pattern_type=1 --> experimental group, otherwise control group
         self.experimental_scenario = experimental_scenario
         self.pattern = pattern
 

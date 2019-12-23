@@ -175,8 +175,8 @@ pattern_section10 = PatternSection('Beneﬁts: Policies can be propagated throug
 pattern_section13 = PatternSection('<' + category_demo2.name + '>', pattern_demo3, t3_section3, None, category_demo2)
 pattern_section14 = PatternSection('Sticky Policies', pattern_demo3, t3_section4, None, None)
 
-diagram_demo2 = Diagram('diagram_demo.jpg', './Resources/Diagrams/IdealSolutions/diagram_demo.jpg')
-diagram_demo3 = Diagram('diagram_demo2.jpg', './Resources/Diagrams/IdealSolutions/diagram_demo2.jpg')
+diagram_demo2 = Diagram('diagram_demo.jpg', './Resources/Diagrams/ExpectedSolution/diagram_demo.jpg')
+diagram_demo3 = Diagram('diagram_demo2.jpg', './Resources/Diagrams/ExpectedSolution/diagram_demo2.jpg')
 ideal_sol_demo1 = IdealSolution('May not necessarily require patterns, but will use them', diagram_demo2)
 ideal_sol_demo1.patterns = [pattern_demo1, pattern_demo2]
 
