@@ -47,7 +47,7 @@ class ExperimentalScenario(Base):
     def create(parameters, session):
         from Modules.Classes.Designer import Designer
         # Received --> [title, description, access_code, description_diagram_id, experiment_id, [experimental_designers_ids...],
-        # [control_designers_ids...]]
+        # [control_designers_ids...], [experimental_patterns_ids...], [control_patterns_ids...]]
         experiment = session.query(Experiment).filter(Experiment.id == parameters[4]).first()
         if parameters[3] is not None:   # Description diagram is optional
             description_diagram = session.query(Diagram).filter(Diagram.id == parameters[3]).first()
@@ -77,6 +77,7 @@ class ExperimentalScenario(Base):
                 exp_sc_pat = ExperimentalScenarioPattern(2, new_exp_sc_aux, pattern_aux)
                 session.add(exp_sc_pat)
         session.commit()
+        new_exp_sc_aux = session.query(ExperimentalScenario).order_by(ExperimentalScenario.id.desc()).first()
         session.close()
         msg_rspt = Message(action=2, information=[new_exp_sc_aux.id], comment='Register created successfully')
         return msg_rspt

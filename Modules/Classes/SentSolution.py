@@ -5,7 +5,6 @@ from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
 from Modules.Classes.Diagram import Diagram
-from Modules.Classes.Problem import Problem
 
 
 sent_solutions_patterns_association = Table(
@@ -46,6 +45,7 @@ class SentSolution(Base):
     def create(parameters, session):
         from Modules.Classes.Designer import Designer
         from Modules.Classes.Pattern import Pattern
+        from Modules.Classes.Problem import Problem
         # Wthout patterns --> parameters=[annotations, id_diagram, id_designer, id_problem]
         diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[1]).first()
         designer_aux = session.query(Designer).filter(Designer.id == parameters[2]).first()
@@ -76,6 +76,7 @@ class SentSolution(Base):
     def update(parameters, session):
         from Modules.Classes.Designer import Designer
         from Modules.Classes.Pattern import Pattern
+        from Modules.Classes.Problem import Problem
         s_solution_aux = session.query(SentSolution).filter(SentSolution.id == parameters[0]).first()
         diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[2]).first()
         designer_aux = session.query(Designer).filter(Designer.id == parameters[3]).first()
