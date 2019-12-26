@@ -80,7 +80,7 @@ class ExpectedSolution(Base):
         session.delete(e_solution_aux)
         session.commit()
         session.close()
-        msg_rspt = Message(action=2, comment='Register deleted successfully')
+        msg_rspt = Message(action=  2, comment='Register deleted successfully')
         return msg_rspt
 
     @staticmethod
@@ -90,7 +90,7 @@ class ExpectedSolution(Base):
         msg_rspt.information.append(e_solution_aux.annotations)
         msg_rspt.information.append(e_solution_aux.diagram_id)
         msg_rspt.information.append([])
-        for i in range(0, len(e_solution_aux.patterns)):
-            msg_rspt.information[2].append(e_solution_aux.patterns[i].__str__())
+        for item in e_solution_aux.patterns:
+            msg_rspt.information[2].append(item.__str__())
         session.close()
         return msg_rspt

@@ -55,7 +55,7 @@ class Diagram(Base):
             elif parameters[2] == 'sent sol':
                 path = './Resources/Diagrams/SentSolutions/'
             elif parameters[2] == 'scen context':
-                path = './Resources/Diagrams/ContextDiagrams/'
+                path = './Resources/Diagrams/ContextDiagram/'
             else:
                 path = './Resources/Diagrams/'
             file = path + datetime.now().strftime("%Y%m%d_%H%M%S") + parameters[1]
@@ -91,7 +91,7 @@ class Diagram(Base):
         elif parameters[3] == 'sent sol':
             path = './Resources/Diagrams/SentSolutions/'
         elif parameters[3] == 'scen context':
-            path = './Resources/Diagrams/ContextDiagrams/'
+            path = './Resources/Diagrams/ContextDiagram/'
         else:
             path = './Resources/Diagrams/'
         diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[0]).first()

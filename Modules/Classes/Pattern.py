@@ -9,7 +9,6 @@ from Modules.Classes.PatternSection import PatternSection
 from Modules.Classes.Diagram import Diagram
 from Modules.Classes.ExpectedSolution import ExpectedSolution
 from Modules.Classes.SentSolution import SentSolution
-from Modules.Classes.ExperimentalScenarioPattern import ExperimentalScenarioPattern
 
 
 class Pattern(Base):
@@ -44,6 +43,7 @@ class Pattern(Base):
         if len(parameters) == 0:
             patterns = session.query(Pattern).all()
         else:
+            from Modules.Classes.ExperimentalScenarioPattern import ExperimentalScenarioPattern
             # Received --> [id_exp_scenario, pattern_type]
             patterns = session.query(Pattern). \
                 join(ExperimentalScenarioPattern.pattern).\
@@ -68,6 +68,7 @@ class Pattern(Base):
 
     @staticmethod
     def delete(parameters, session):
+        from Modules.Classes.ExperimentalScenarioPattern import ExperimentalScenarioPattern
         exp_scenario_aux = session.query(ExperimentalScenarioPattern).filter(ExperimentalScenarioPattern.pattern_id ==
                                                                              parameters[0]).first()
         if exp_scenario_aux:
@@ -98,6 +99,7 @@ class Pattern(Base):
     def select(parameters, session):
         pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[0]).first()
         if len(parameters) == 2:
+            from Modules.Classes.ExperimentalScenarioPattern import ExperimentalScenarioPattern
             exp_scenario_aux = session.query(ExperimentalScenarioPattern).\
                 filter(ExperimentalScenarioPattern.pattern_id == parameters[0]).first()
             if exp_scenario_aux:

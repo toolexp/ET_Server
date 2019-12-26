@@ -3,6 +3,9 @@
 from sqlalchemy import Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
+from Modules.Config.Data import Message
+
+from Modules.Classes.Pattern import Pattern
 
 
 class ExperimentalScenarioPattern(Base):
@@ -24,3 +27,27 @@ class ExperimentalScenarioPattern(Base):
 
     def __str__(self):
         return '{}¥{}¥{}¥{}'.format(self.id, self.pattern_type, self.experimental_scenario_id, self.pattern_id)
+
+    @staticmethod
+    def read(parameters, session):
+        msg_rspt = Message(action=2, information=[])
+        if len(parameters) == 0:
+            exp_scenarios_pat = session.query(ExperimentalScenarioPattern).all()
+            for item in exp_scenarios_pat:
+                msg_rspt.information.append(item.__str__())
+        else:  # return patterns separated in experimental and control group
+            # Received --> [id_exp_scenario]
+            exp_scenarios_pat = session.query(ExperimentalScenarioPattern).filter(
+                ExperimentalScenarioPattern.experimental_scenario_id == parameters[0]).all()
+            exp_patterns = []
+            ctrl_patterns = []
+            for item in exp_scenarios_pat:
+                pattern_aux = session.query(Pattern).filter(Pattern.id == item.pattern_id).first()
+                if item.pattern_type == 1:  # if pattern_type=1 --> experimental group, otherwise control group
+                    exp_patterns.append(pattern_aux.__str__())
+                else:
+                    ctrl_patterns.append(pattern_aux.__str__())
+            msg_rspt.information.append(exp_patterns)
+            msg_rspt.information.append(ctrl_patterns)
+        session.close()
+        return msg_rspt

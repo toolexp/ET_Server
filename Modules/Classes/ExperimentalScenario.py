@@ -116,7 +116,7 @@ class ExperimentalScenario(Base):
         if len(parameters) == 3:
             # Received --> ['change_availability', id_exp_sc, new_state]
             exp_sc_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[1]).first()
-            exp_sc_aux.scenario_availability = parameters[2]
+            exp_sc_aux.availability = parameters[2]
         elif len(parameters) == 2:
             # Received --> ['lock_scenario', id_exp_sc]
             exp_sc_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[1]).first()

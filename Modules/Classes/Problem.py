@@ -47,10 +47,22 @@ class Problem(Base):
 
     @staticmethod
     def read(parameters, session):
-        problems = session.query(Problem).all()
         msg_rspt = Message(action=2, information=[])
-        for problem in problems:
-            msg_rspt.information.append(problem.__str__())
+        if len(parameters) == 0:
+            problems = session.query(Problem).all()
+            for item in problems:
+                msg_rspt.information.append(item.__str__())
+        else:
+            # Received --> [id_exp_scenario]
+            problems_list = []
+            solutions_list = []
+            solution_diagrams = []
+            problems = session.query(Problem).filter(Problem.experimental_scenario_id == parameters[0]).all()
+            for item in problems:
+                problems_list.append(item.__str__())
+                solutions_list.append(item.expected_solution.__str__())
+            msg_rspt.information.append(problems_list)
+            msg_rspt.information.append(solutions_list)
         session.close()
         return msg_rspt
 
