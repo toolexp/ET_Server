@@ -53,7 +53,7 @@ class Experiment(Base):
     @staticmethod
     def update(parameters, session):
         experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
-        if len(parameters) == 3:
+        if len(parameters) == 4:
             # Received --> [id_experiment, name, description, design_type]
             experiment_aux.name = parameters[1]
             experiment_aux.description = parameters[2]
@@ -61,33 +61,51 @@ class Experiment(Base):
         else:
             from Modules.Classes.ExperimentalScenario import ExperimentalScenario
             # Received --> [id_experiment, state]
-            if parameters[1] == 'executed' and experiment_aux.state == 'created':   # When an experiment goes from created to executed
-                experimental_sc_aux = session.query(ExperimentalScenario).\
-                    filter(ExperimentalScenario.experiment_id == parameters[0]).all()
-                if not experimental_sc_aux:
-                    return Message(action=5, information=['No experimental scenarios created for this experiment. '
-                                                          'Create al least one to execute the experiment'],
+            if parameters[1] == 'executed':   # When an experiment goes from created to executed
+                if experiment_aux.state == 'created':
+                    experimental_sc_aux = session.query(ExperimentalScenario).\
+                        filter(ExperimentalScenario.experiment_id == parameters[0]).all()
+                    if not experimental_sc_aux:
+                        return Message(action=5, information=['No experimental scenarios created for this experiment. '
+                                                              'Create al least one to execute the experiment'],
+                                       comment='Error updating register')
+                    # Change experiment state
+                    experiment_aux.state = 'executed'
+                    experiment_aux.execution_date = datetime.now()
+                    # Change experimental scenarios state, associated with current experiment
+                    for item in experimental_sc_aux:
+                        item.state = 'executed'
+                elif experiment_aux.state == 'executed':
+                    experimental_sc_aux = session.query(ExperimentalScenario). \
+                        filter(ExperimentalScenario.experiment_id == parameters[0]).all()
+                    executed_scenarios = True
+                    for item in experimental_sc_aux:
+                        if item.state == 'created':
+                            item.state = 'executed'
+                            executed_scenarios = False
+                    if executed_scenarios:
+                        return Message(action=5, information=['All scenarios configured are already executed'],
+                                       comment='Error updating register')
+                else:   # Experimental scenario is finished
+                    return Message(action=5, information=['The experiment is finished, can not execute'],
                                    comment='Error updating register')
-                # Change experiment state
-                experiment_aux.state = 'executed'
-                experiment_aux.execution_date = datetime.now()
-                # Change experimental scenarios state, associated with current experiment
-                for item in experimental_sc_aux:
-                    item.state = 'executed'
-            elif parameters[1] == 'finished' and experiment_aux.state == 'executed':    # When an experiment goes from executed to finished
 
-                experimental_sc_aux = session.query(ExperimentalScenario). \
-                    filter(ExperimentalScenario.experiment_id == parameters[0]).all()
-                # Change experiment state
-                experiment_aux.state = 'finished'
-                experiment_aux.finished_date = datetime.now()
-                # Change experimental scenarios state, associated with current experiment
-                for item in experimental_sc_aux:
-                    item.state = 'finished'
-            else:
-                return Message(action=5, information=['The experiment is not in execution. To finish an experiment, it'
-                                                      'must be in execution first'],
-                               comment='Error updating register')
+            elif parameters[1] == 'finished':    # When an experiment goes from executed to finished
+                if experiment_aux.state == 'executed':
+                    experimental_sc_aux = session.query(ExperimentalScenario). \
+                        filter(ExperimentalScenario.experiment_id == parameters[0]).all()
+                    # Change experiment state
+                    experiment_aux.state = 'finished'
+                    experiment_aux.finished_date = datetime.now()
+                    # Change experimental scenarios state, associated with current experiment
+                    for item in experimental_sc_aux:
+                        item.state = 'finished'
+                elif experiment_aux.state == 'finished':
+                    return Message(action=5, information=['The experiment is already finished'],
+                                   comment='Error updating register')
+                else:   # Experimental scenario is created
+                    return Message(action=5, information=['The experiment is created, first execute to finish it'],
+                                   comment='Error updating register')
         session.commit()
         session.close()
         msg_rspt = Message(action=2, comment='Register updated successfully')

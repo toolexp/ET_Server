@@ -114,7 +114,7 @@ class Diagram(Base):
         if len(parameters) == 1:
             session.delete(diagram_aux)
             session.commit()
-        session.close()
+            session.close()
         msg_rspt = Message(action=2, comment='Register deleted successfully')
         return msg_rspt
 

@@ -1,10 +1,9 @@
 # coding=utf-8
 
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, Integer, ForeignKey, and_
 from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
-
 from Modules.Classes.Pattern import Pattern
 
 
@@ -50,4 +49,21 @@ class ExperimentalScenarioPattern(Base):
             msg_rspt.information.append(exp_patterns)
             msg_rspt.information.append(ctrl_patterns)
         session.close()
+        return msg_rspt
+
+    @staticmethod
+    def delete(parameters, session):
+        from Modules.Classes.ExperimentalScenario import ExperimentalScenario
+        # Received --> [id_exeriment]
+        # Remove all relations associated with experimental group of an experiment (designt type updated)
+        exp_sc = session.query(ExperimentalScenario).filter(ExperimentalScenario.experiment_id == parameters[0]).all()
+        for item in exp_sc:
+            exp_scenarios_pat = session.query(ExperimentalScenarioPattern).filter(and_(
+                ExperimentalScenarioPattern.experimental_scenario_id == item.id,
+                ExperimentalScenarioPattern.pattern_type == 2)).all()
+            for item2 in exp_scenarios_pat:
+                session.delete(item2)
+        session.commit()
+        session.close()
+        msg_rspt = Message(action=2, comment='Register deleted successfully')
         return msg_rspt
