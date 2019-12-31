@@ -198,6 +198,8 @@ class ExperimentalScenario(Base):
             msg_rspt.information.append(exp_sc_aux.title)
             msg_rspt.information.append(exp_sc_aux.description)
             msg_rspt.information.append(exp_sc_aux.access_code)
+            msg_rspt.information.append(exp_sc_aux.state)
+            msg_rspt.information.append(exp_sc_aux.availability)
             msg_rspt.information.append(exp_sc_aux.description_diagram_id)
             msg_rspt.information.append(exp_sc_aux.experiment_id)
             session.close()
