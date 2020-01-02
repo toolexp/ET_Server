@@ -9,6 +9,7 @@ from Modules.Classes.Diagram import Diagram
 from Modules.Classes.ExperimentalScenarioPattern import ExperimentalScenarioPattern
 from Modules.Classes.Pattern import Pattern
 
+
 class ExperimentalScenario(Base):
     __tablename__ = 'experimental_scenarios'
 
@@ -99,7 +100,8 @@ class ExperimentalScenario(Base):
             exp_scenarios = session.query(ExperimentalScenario). \
                 join(ExperimentalScenario.designer_associations). \
                 join(DesignerExperimentalScenario.designer).filter(and_(Designer.id == parameters[1],
-                                                                        ExperimentalScenario.state == 'executed')).all()
+                                                                        ExperimentalScenario.state == 'executed',
+                                                                        ExperimentalScenario.availability == True)).all()
             exp_scenarios_done = session.query(ExperimentalScenario). \
                 join(ExperimentalScenario.problems). \
                 join(Problem.measurements).filter(Measurement.designer_id == parameters[1]).all()
@@ -118,10 +120,31 @@ class ExperimentalScenario(Base):
             # Received --> ['change_availability', id_exp_sc, new_state]
             exp_sc_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[1]).first()
             exp_sc_aux.availability = parameters[2]
-        elif len(parameters) == 2:
-            # Received --> ['lock_scenario', id_exp_sc]
-            exp_sc_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[1]).first()
-            exp_sc_aux.scenario_lock = True
+        elif len(parameters) == 2:  # Finish an experimental scenario when all designers executed it
+            from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
+            from Modules.Classes.Measurement import Measurement
+            # Received --> ['finished', id_exp_sc]
+            change_state = True
+            designers_exp_sc = session.query(DesignerExperimentalScenario).\
+                filter(DesignerExperimentalScenario.experimental_scenario_id == parameters[1]).all()
+            for item in designers_exp_sc:   # Check if exist measurement for all designers in selected experimental scenarios
+                measurements_aux = session.query(Measurement).filter(Measurement.designer_id == item.designer_id).all()
+                if measurements_aux:
+                    num_measurements = 0
+                    for item2 in measurements_aux:
+                        if item2.problem.experimental_scenario_id == parameters[1]:
+                            break
+                        num_measurements += 1
+                    if num_measurements == len(measurements_aux):
+                        change_state = False
+                        break
+                else:
+                    change_state = False
+                    break
+            if change_state:
+                exp_sc_aux = session.query(ExperimentalScenario).filter(
+                    ExperimentalScenario.id == parameters[1]).first()
+                exp_sc_aux.state = parameters[0]
         else:
             from Modules.Classes.Designer import Designer
             from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
@@ -213,7 +236,7 @@ class ExperimentalScenario(Base):
                 filter(and_(DesignerExperimentalScenario.designer_id == parameters[0],
                             DesignerExperimentalScenario.experimental_scenario_id == parameters[1])).first()
             if exp_scenario.designer_type == 1:
-                msg_rspt.information.append('control')
-            else:
                 msg_rspt.information.append('experimental')
+            else:
+                msg_rspt.information.append('control')
             return msg_rspt
