@@ -17,6 +17,7 @@ from Modules.Classes.Metric import Metric
 from Modules.Classes.Pattern import Pattern
 from Modules.Classes.PatternSection import PatternSection
 from Modules.Classes.Problem import Problem
+from Modules.Classes.Report import Report
 from Modules.Classes.Section import Section
 from Modules.Classes.SentSolution import SentSolution
 from Modules.Classes.Template import Template
@@ -122,5 +123,10 @@ switcher_protocol = {
         102: SentSolution.read,
         103: SentSolution.update,
         104: SentSolution.delete,
-        105: SentSolution.select
+        105: SentSolution.select,
+        106: Report.create
+        #107: Report.read,
+        #108: Report.update,
+        #109: Report.delete,
+        #110: Report.select
     }

@@ -13,7 +13,8 @@ class Measurement(Base):
 
     id = Column(Integer, primary_key=True)
     value = Column(String)
-    acquisition_date = Column(DateTime)
+    acquisition_start_date = Column(DateTime)
+    acquisition_end_date = Column(DateTime)
     metric_id = Column(Integer, ForeignKey('metrics.id'))
     designer_id = Column(Integer, ForeignKey('designers.id'))
     problem_id = Column(Integer, ForeignKey('problems.id'))
@@ -24,24 +25,25 @@ class Measurement(Base):
                                                         single_parent=True))
     problem = relationship("Problem", backref=backref("measurements", cascade="all, delete-orphan", single_parent=True))
 
-    def __init__(self, value, acquisition_date, metric, designer, problem):
+    def __init__(self, value, acquisition_start_date, acquisition_end_date, metric, designer, problem):
         self.value = value
-        self.acquisition_date = acquisition_date
+        self.acquisition_start_date = acquisition_start_date
+        self.acquisition_end_date = acquisition_end_date
         self.metric = metric
         self.designer = designer
         self.problem = problem
 
     def __str__(self):
-        return '{}¥{}¥{}'.format(self.id, self.value, self.acquisition_date)
+        return '{}¥{}¥{}¥{}¥{}'.format(self.id, self.metric_id, self.problem_id, self.designer_id, self.value)
 
     @staticmethod
     def create(parameters, session):
         from Modules.Classes.Designer import Designer
-        # Received --> [value, date_acquisition, metric_id, designer_id, problem_id]
-        metric_aux = session.query(Metric).filter(Metric.id == parameters[2]).first()
-        designer_aux = session.query(Designer).filter(Designer.id == parameters[3]).first()
-        problem_aux = session.query(Problem).filter(Problem.id == parameters[4]).first()
-        measurement_aux = Measurement(parameters[0], parameters[1], metric_aux, designer_aux, problem_aux)
+        # Received --> [value, acquisition_start_date, acquisition_end_date, metric_id, designer_id, problem_id]
+        metric_aux = session.query(Metric).filter(Metric.id == parameters[3]).first()
+        designer_aux = session.query(Designer).filter(Designer.id == parameters[4]).first()
+        problem_aux = session.query(Problem).filter(Problem.id == parameters[5]).first()
+        measurement_aux = Measurement(parameters[0], parameters[1], parameters[2], metric_aux, designer_aux, problem_aux)
         session.add(measurement_aux)
         session.commit()
         session.close()
@@ -91,9 +93,10 @@ class Measurement(Base):
         measurement_aux = session.query(Measurement).filter(Measurement.id == parameters[0]).first()
         msg_rspt = Message(action=2, information=[])
         msg_rspt.information.append(measurement_aux.value)
-        msg_rspt.information.append(measurement_aux.date_acquisition)
+        msg_rspt.information.append(measurement_aux.acquisition_start_date)
+        msg_rspt.information.append(measurement_aux.acquisition_end_date)
         msg_rspt.information.append(measurement_aux.metric_id)
         msg_rspt.information.append(measurement_aux.designer_id)
-        msg_rspt.information.append(measurement_aux.scenario_component_id)
+        msg_rspt.information.append(measurement_aux.problem_id)
         session.close()
         return msg_rspt

@@ -21,6 +21,7 @@ from Modules.Classes.Pattern import Pattern
 from Modules.Classes.PatternSection import PatternSection
 from Modules.Classes.Problem import Problem
 from Modules.Classes.ExperimentalScenarioPattern import ExperimentalScenarioPattern
+from Modules.Classes.Report import Report
 from Modules.Classes.Section import Section
 from Modules.Classes.SentSolution import SentSolution
 from Modules.Classes.Template import Template

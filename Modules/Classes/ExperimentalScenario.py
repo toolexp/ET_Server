@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from sqlalchemy import Column, String, Integer, ForeignKey, and_, Boolean
+from sqlalchemy import Column, String, Integer, ForeignKey, and_, Boolean, DateTime
 from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
@@ -8,6 +8,7 @@ from Modules.Classes.Experiment import Experiment
 from Modules.Classes.Diagram import Diagram
 from Modules.Classes.ExperimentalScenarioPattern import ExperimentalScenarioPattern
 from Modules.Classes.Pattern import Pattern
+from datetime import datetime
 
 
 class ExperimentalScenario(Base):
@@ -19,11 +20,14 @@ class ExperimentalScenario(Base):
     access_code = Column(String)
     state = Column(String)  # created, executed, finished
     availability = Column(Boolean)
+    creation_date = Column(DateTime)
+    execution_date = Column(DateTime)
+    finished_date = Column(DateTime)
     description_diagram_id = Column(Integer, ForeignKey('diagrams.id'))
     experiment_id = Column(Integer, ForeignKey('experiments.id'))
 
     description_diagram = relationship("Diagram", backref="experimental_scenario", cascade="all, delete-orphan",
-                                   single_parent=True, uselist=False)
+                                       single_parent=True, uselist=False)
     experiment = relationship("Experiment", backref=backref("experimental_scenarios", cascade="all, delete-orphan",
                                                             single_parent=True))
 
@@ -35,6 +39,9 @@ class ExperimentalScenario(Base):
         self.availability = True
         self.description_diagram = description_diagram
         self.experiment = experiment
+        self.creation_date = datetime.now()
+        self.execution_date = None
+        self.finished_date = None
 
     def __str__(self):
         if self.availability:
@@ -117,6 +124,7 @@ class ExperimentalScenario(Base):
     @staticmethod
     def update(parameters, session):
         if len(parameters) == 3:
+            # To cahnge availability of scenario for designers
             # Received --> ['change_availability', id_exp_sc, new_state]
             exp_sc_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[1]).first()
             exp_sc_aux.availability = parameters[2]
@@ -145,6 +153,7 @@ class ExperimentalScenario(Base):
                 exp_sc_aux = session.query(ExperimentalScenario).filter(
                     ExperimentalScenario.id == parameters[1]).first()
                 exp_sc_aux.state = parameters[0]
+                exp_sc_aux.finished_date = datetime.now()
         else:
             from Modules.Classes.Designer import Designer
             from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario

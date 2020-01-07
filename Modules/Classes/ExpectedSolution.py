@@ -21,7 +21,7 @@ class ExpectedSolution(Base):
     annotations = Column(String)
     diagram_id = Column(Integer, ForeignKey('diagrams.id'))
 
-    diagram = relationship("Diagram", backref="expected_solutions", cascade="all, delete-orphan", single_parent=True,
+    diagram = relationship("Diagram", backref="expected_solution", cascade="all, delete-orphan", single_parent=True,
                            uselist=False)
 
     # Relation many to many

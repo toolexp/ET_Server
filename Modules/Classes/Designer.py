@@ -52,11 +52,17 @@ class Designer(Base):
                If any of the lines of code generates an error
            """
         try:
-            designer_aux = Designer(parameters[0], parameters[1], parameters[2], parameters[3])
-            session.add(designer_aux)
-            session.commit()
-            session.close()
+            # Check if username is available
             msg_rspt = Message(action=2, comment='Register created successfully')
+            current_designers = session.query(Designer).filter(Designer.email == parameters[2]).first()
+            if not current_designers:
+                designer_aux = Designer(parameters[0], parameters[1], parameters[2], parameters[3])
+                session.add(designer_aux)
+                session.commit()
+            else:
+                msg_rspt.action = 5
+                msg_rspt.comment = 'Provided email is already in use'
+            session.close()
             return msg_rspt
         except Exception as e:
             raise Exception('Error creating designer: ' + str(e))
@@ -120,14 +126,19 @@ class Designer(Base):
                 If any of the lines of code generates an error
             """
         try:
-            designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
-            designer_aux.name = parameters[1]
-            designer_aux.surname = parameters[2]
-            designer_aux.email = parameters[3]
-            designer_aux.password = parameters[4]
-            session.commit()
-            session.close()
             msg_rspt = Message(action=2, comment='Register updated successfully')
+            current_designers = session.query(Designer).filter(Designer.email == parameters[3]).first()
+            if not current_designers:
+                designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
+                designer_aux.name = parameters[1]
+                designer_aux.surname = parameters[2]
+                designer_aux.email = parameters[3]
+                designer_aux.password = parameters[4]
+                session.commit()
+            else:
+                msg_rspt.action = 5
+                msg_rspt.comment = 'Provided email is already in use'
+            session.close()
             return msg_rspt
         except Exception as e:
             raise Exception('Error updating designer: ' + str(e))

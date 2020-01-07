@@ -1,5 +1,7 @@
 from Modules.Config.Connection import Connection
 from Modules.Config.Data import verify_ip, verify_port
+import os
+import shutil
 
 HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
 PORT = 65450        # Port to listen on (non-privileged ports are > 1023)
@@ -31,3 +33,5 @@ except Exception as e:
 finally:
     print('Server is being disconnected...')
     connection.close_server_connection()
+    shutil.rmtree('./Resources/temp/')
+    os.mkdir('./Resources/temp/')

@@ -75,13 +75,15 @@ class Experiment(Base):
                     # Change experimental scenarios state, associated with current experiment
                     for item in experimental_sc_aux:
                         item.state = 'executed'
-                elif experiment_aux.state == 'executed':
+                        item.execution_date = datetime.now()
+                elif experiment_aux.state == 'executed':    # When need to execute new scenarios after having executed the experiment
                     experimental_sc_aux = session.query(ExperimentalScenario). \
                         filter(ExperimentalScenario.experiment_id == parameters[0]).all()
                     executed_scenarios = True
                     for item in experimental_sc_aux:
                         if item.state == 'created':
                             item.state = 'executed'
+                            item.execution_date = datetime.now()
                             executed_scenarios = False
                     if executed_scenarios:
                         return Message(action=5, information=['All scenarios configured are already executed'],
@@ -100,6 +102,7 @@ class Experiment(Base):
                     # Change experimental scenarios state, associated with current experiment
                     for item in experimental_sc_aux:
                         item.state = 'finished'
+                        item.finished_date = datetime.now()
                 elif experiment_aux.state == 'finished':
                     return Message(action=5, information=['The experiment is already finished'],
                                    comment='Error updating register')
