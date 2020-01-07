@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from sqlalchemy import Column, String, Integer, Table, ForeignKey
+from sqlalchemy import Column, String, Integer, Table, ForeignKey, and_
 from sqlalchemy.orm import relationship
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
@@ -59,11 +59,17 @@ class Experimenter(Base):
                If any of the lines of code generates an error
            """
         try:
-            experimenter_aux = Experimenter(parameters[0], parameters[1], parameters[2], parameters[3])
-            session.add(experimenter_aux)
-            session.commit()
-            session.close()
+            # Check if username is available
             msg_rspt = Message(action=2, comment='Register created successfully')
+            current_experimenter = session.query(Experimenter).filter(Experimenter.email == parameters[2]).first()
+            if not current_experimenter:
+                experimenter_aux = Experimenter(parameters[0], parameters[1], parameters[2], parameters[3])
+                session.add(experimenter_aux)
+                session.commit()
+            else:
+                msg_rspt.action = 5
+                msg_rspt.comment = 'Provided email is already in use'
+            session.close()
             return msg_rspt
         except Exception as e:
             raise Exception('Error creating experimenter: ' + str(e))
@@ -127,14 +133,20 @@ class Experimenter(Base):
                 If any of the lines of code generates an error
             """
         try:
-            experimenter_aux = session.query(Experimenter).filter(Experimenter.id == parameters[0]).first()
-            experimenter_aux.name = parameters[1]
-            experimenter_aux.surname = parameters[2]
-            experimenter_aux.email = parameters[3]
-            experimenter_aux.password = parameters[4]
-            session.commit()
-            session.close()
             msg_rspt = Message(action=2, comment='Register updated successfully')
+            current_experimenter = session.query(Experimenter).filter(and_(Experimenter.email == parameters[3],
+                                                                      Experimenter.id != parameters[0])).first()
+            if not current_experimenter:
+                experimenter_aux = session.query(Experimenter).filter(Experimenter.id == parameters[0]).first()
+                experimenter_aux.name = parameters[1]
+                experimenter_aux.surname = parameters[2]
+                experimenter_aux.email = parameters[3]
+                experimenter_aux.password = parameters[4]
+                session.commit()
+            else:
+                msg_rspt.action = 5
+                msg_rspt.comment = 'Provided email is already in use'
+            session.close()
             return msg_rspt
         except Exception as e:
             raise Exception('Error updating experimenter: ' + str(e))

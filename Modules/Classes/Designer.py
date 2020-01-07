@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, Integer, and_
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
 from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
@@ -127,7 +127,8 @@ class Designer(Base):
             """
         try:
             msg_rspt = Message(action=2, comment='Register updated successfully')
-            current_designers = session.query(Designer).filter(Designer.email == parameters[3]).first()
+            current_designers = session.query(Designer).filter(and_(Designer.email == parameters[3],
+                                                                    Designer.id != parameters[0])).first()
             if not current_designers:
                 designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
                 designer_aux.name = parameters[1]

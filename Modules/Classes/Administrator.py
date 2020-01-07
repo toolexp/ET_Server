@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, Integer, and_
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
 
@@ -50,14 +50,20 @@ class Administrator(Base):
            If any of the lines of code generates an error
        """
         try:
-            admin_aux = Administrator(parameters[0], parameters[1], parameters[2], parameters[3])
-            session.add(admin_aux)
-            session.commit()
-            session.close()
+            # Check if username is available
             msg_rspt = Message(action=2, comment='Register created successfully')
+            current_admin = session.query(Administrator).filter(Administrator.email == parameters[2]).first()
+            if not current_admin:
+                admin_aux = Administrator(parameters[0], parameters[1], parameters[2], parameters[3])
+                session.add(admin_aux)
+                session.commit()
+            else:
+                msg_rspt.action = 5
+                msg_rspt.comment = 'Provided email is already in use'
+            session.close()
             return msg_rspt
         except Exception as e:
-            raise Exception('Error creating an administrator: ' + str(e))
+            raise Exception('Error creating administrator: ' + str(e))
 
     @staticmethod
     def read(parameters, session):
@@ -118,14 +124,20 @@ class Administrator(Base):
                 If any of the lines of code generates an error
             """
         try:
-            admin_aux = session.query(Administrator).filter(Administrator.id == parameters[0]).first()
-            admin_aux.name = parameters[1]
-            admin_aux.surname = parameters[2]
-            admin_aux.email = parameters[3]
-            admin_aux.password = parameters[4]
-            session.commit()
-            session.close()
             msg_rspt = Message(action=2, comment='Register updated successfully')
+            current_admin = session.query(Administrator).filter(and_(Administrator.email == parameters[3],
+                                                                     Administrator.id != parameters[0])).first()
+            if not current_admin:
+                admin_aux = session.query(Administrator).filter(Administrator.id == parameters[0]).first()
+                admin_aux.name = parameters[1]
+                admin_aux.surname = parameters[2]
+                admin_aux.email = parameters[3]
+                admin_aux.password = parameters[4]
+                session.commit()
+            else:
+                msg_rspt.action = 5
+                msg_rspt.comment = 'Provided email is already in use'
+            session.close()
             return msg_rspt
         except Exception as e:
             raise Exception('Error updating administrator: ' + str(e))

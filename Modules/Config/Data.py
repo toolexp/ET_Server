@@ -78,11 +78,13 @@ def get_experiment_report(experiment=None, session=None):
                 join(DesignerExperimentalScenario.designer).join(Designer.measurements).join(Measurement.metric). \
                 join(Measurement.problem).filter(Problem.id == problem.id).statement
             current_df = pd.read_sql_query(current_query, session.bind)
+            current_df.loc[current_df['group_type'] == 1, 'group_type'] = 'experimental'
+            current_df.loc[current_df['group_type'] == 2, 'group_type'] = 'control'
             current_sheets.append(current_df)
             current_sheets_names.append(current_sheet_name)
         with pd.ExcelWriter(current_workbook_path + current_workbook_name) as writer:
             for i, current_sheet in enumerate(current_sheets):
-                current_sheet.to_excel(writer, sheet_name=current_sheets_names[i])
+                current_sheet.to_excel(writer, sheet_name=current_sheets_names[i], index=False)
 
     # Zip folder with all workbooks in it
     report_path = './Resources/Reports/'
