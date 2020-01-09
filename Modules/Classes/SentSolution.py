@@ -47,7 +47,10 @@ class SentSolution(Base):
         from Modules.Classes.Pattern import Pattern
         from Modules.Classes.Problem import Problem
         # Wthout patterns --> parameters=[annotations, id_diagram, id_designer, id_problem]
-        diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[1]).first()
+        if parameters[1] is not None:   # Solution diagram is optional
+            diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[1]).first()
+        else:
+            diagram_aux = None
         designer_aux = session.query(Designer).filter(Designer.id == parameters[2]).first()
         problem_aux = session.query(Problem).filter(Problem.id == parameters[3]).first()
         s_solution_aux = SentSolution(parameters[0], diagram_aux, designer_aux, problem_aux)
@@ -78,7 +81,10 @@ class SentSolution(Base):
         from Modules.Classes.Pattern import Pattern
         from Modules.Classes.Problem import Problem
         s_solution_aux = session.query(SentSolution).filter(SentSolution.id == parameters[0]).first()
-        diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[2]).first()
+        if parameters[2] is not None:  # Solution diagram is optional
+            diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[2]).first()
+        else:
+            diagram_aux = None
         designer_aux = session.query(Designer).filter(Designer.id == parameters[3]).first()
         problem_aux = session.query(Problem).filter(Problem.id == parameters[4]).first()
         s_solution_aux.annotations = parameters[1]

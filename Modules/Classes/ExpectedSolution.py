@@ -37,13 +37,15 @@ class ExpectedSolution(Base):
     @staticmethod
     def create(parameters, session):
         from Modules.Classes.Pattern import Pattern
+        if parameters[1] is not None:
+            diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[1]).first()
+        else:
+            diagram_aux = None
         if len(parameters) == 2:
             # Wthout patterns --> parameters=[annotations, id_diagram]
-            diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[1]).first()
             e_solution_aux = ExpectedSolution(parameters[0], diagram_aux)
         else:
             # With patterns--> parameters=[annotations, id_diagram, [id_pattern1, id_pattern2, ...]]
-            diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[1]).first()
             e_solution_aux = ExpectedSolution(parameters[0], diagram_aux)
             e_solution_aux.patterns = []
             for item in parameters[2]:
