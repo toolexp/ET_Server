@@ -42,9 +42,12 @@ class Experiment(Base):
 
     @staticmethod
     def read(parameters, session):
-        # Received --> []
-        experiments = session.query(Experiment).all()
+        # Received --> ['finished']
         msg_rspt = Message(action=2, information=[])
+        if len(parameters) == 1:    # Asking for finished experiments (reports)
+            experiments = session.query(Experiment).filter(Experiment.state == 'finished').all()
+        else:
+            experiments = session.query(Experiment).all()
         for item in experiments:
             msg_rspt.information.append(item.__str__())
         session.close()
@@ -134,7 +137,6 @@ class Experiment(Base):
         from Modules.Classes.ExperimentalScenario import ExperimentalScenario
         msg_rspt = Message(action=2, information=[])
         experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
-        # Received --> [id_experiment, 'validate']
         if len(parameters) == 2:
             if experiment_aux.state == 'finished' or experiment_aux.state == 'executed':
                 return Message(action=5, comment='The state of the experiment doesn\'t allow you to change it\'s '
@@ -150,6 +152,9 @@ class Experiment(Base):
         msg_rspt.information.append(experiment_aux.design_type)
         msg_rspt.information.append(experiment_aux.state)
         msg_rspt.information.append([])
+        msg_rspt.information.append(experiment_aux.creation_date)
+        msg_rspt.information.append(experiment_aux.execution_date)
+        msg_rspt.information.append(experiment_aux.finished_date)
         for item in experiment_aux.experimental_scenarios:
             msg_rspt.information[4].append(item.__str__())
         session.close()
