@@ -227,30 +227,15 @@ class ExperimentalScenario(Base):
         if len(parameters) == 2:
             from Modules.Classes.Designer import Designer
             from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
-            from Modules.Classes.Measurement import Measurement
-            from Modules.Classes.Problem import Problem
-            # Received --> [id_exp_scenario, 'report']
-            exp_sc_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[0]).first()
-            msg_rspt.information.append(exp_sc_aux.title)
-            msg_rspt.information.append(exp_sc_aux.description)
-            msg_rspt.information.append(exp_sc_aux.description_diagram_id)
-            msg_rspt.information.append([])
-            msg_rspt.information.append([])
-            designers_egroup = session.query(Designer). \
-                join(Designer.measurements).join(Measurement.problem).join(Problem.experimental_scenario).\
-                join(Designer.experimental_scenario_associations).filter(and_(ExperimentalScenario.state == 'finished',
-                                                                        ExperimentalScenario.id == parameters[0],
-                                                                        DesignerExperimentalScenario.designer_type == 1)).all()
-            designers_cgroup = session.query(Designer). \
-                join(Designer.measurements).join(Measurement.problem).join(Problem.experimental_scenario). \
-                join(Designer.experimental_scenario_associations).filter(and_(ExperimentalScenario.state == 'finished',
-                                                                        ExperimentalScenario.id == parameters[0],
-                                                                        DesignerExperimentalScenario.designer_type == 2)).all()
-            for item in designers_egroup:
-                msg_rspt.information[3].append(item.id)
-            for item in designers_cgroup:
-                msg_rspt.information[4].append(item.id)
-            session.close()
+            # Received --> [id_designer, id_exp_scenario] # Get role for current experimental scenario
+            # (control or experimental)
+            exp_scenario = session.query(DesignerExperimentalScenario). \
+                filter(and_(DesignerExperimentalScenario.designer_id == parameters[0],
+                            DesignerExperimentalScenario.experimental_scenario_id == parameters[1])).first()
+            if exp_scenario.designer_type == 1:
+                msg_rspt.information.append('experimental')
+            else:
+                msg_rspt.information.append('control')
             return msg_rspt
         elif len(parameters) == 1:
             # Received --> [id_exp_scenario]
@@ -267,13 +252,28 @@ class ExperimentalScenario(Base):
         else:
             from Modules.Classes.Designer import Designer
             from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
-            # Received --> [id_designer, id_exp_scenario] # Get role for current experimental scenario
-            # (control or experimental)
-            exp_scenario = session.query(DesignerExperimentalScenario).\
-                filter(and_(DesignerExperimentalScenario.designer_id == parameters[0],
-                            DesignerExperimentalScenario.experimental_scenario_id == parameters[1])).first()
-            if exp_scenario.designer_type == 1:
-                msg_rspt.information.append('experimental')
-            else:
-                msg_rspt.information.append('control')
+            from Modules.Classes.Measurement import Measurement
+            from Modules.Classes.Problem import Problem
+            # Received --> [id_exp_scenario, 'report', aux]
+            exp_sc_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[0]).first()
+            msg_rspt.information.append(exp_sc_aux.title)
+            msg_rspt.information.append(exp_sc_aux.description)
+            msg_rspt.information.append(exp_sc_aux.description_diagram_id)
+            msg_rspt.information.append([])
+            msg_rspt.information.append([])
+            designers_egroup = session.query(Designer). \
+                join(Designer.measurements).join(Measurement.problem).join(Problem.experimental_scenario). \
+                join(Designer.experimental_scenario_associations).filter(and_(ExperimentalScenario.state == 'finished',
+                                                                              ExperimentalScenario.id == parameters[0],
+                                                                              DesignerExperimentalScenario.designer_type == 1)).all()
+            designers_cgroup = session.query(Designer). \
+                join(Designer.measurements).join(Measurement.problem).join(Problem.experimental_scenario). \
+                join(Designer.experimental_scenario_associations).filter(and_(ExperimentalScenario.state == 'finished',
+                                                                              ExperimentalScenario.id == parameters[0],
+                                                                              DesignerExperimentalScenario.designer_type == 2)).all()
+            for item in designers_egroup:
+                msg_rspt.information[3].append(item.id)
+            for item in designers_cgroup:
+                msg_rspt.information[4].append(item.id)
+            session.close()
             return msg_rspt
