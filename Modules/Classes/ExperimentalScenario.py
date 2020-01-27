@@ -18,7 +18,7 @@ class ExperimentalScenario(Base):
     title = Column(String)
     description = Column(String)
     access_code = Column(String)
-    state = Column(String)  # created, executed, finished
+    state = Column(String)  # created, execution, finished
     availability = Column(Boolean)
     creation_date = Column(DateTime)
     execution_date = Column(DateTime)
@@ -107,7 +107,7 @@ class ExperimentalScenario(Base):
             exp_scenarios = session.query(ExperimentalScenario). \
                 join(ExperimentalScenario.designer_associations). \
                 join(DesignerExperimentalScenario.designer).filter(and_(Designer.id == parameters[1],
-                                                                        ExperimentalScenario.state == 'executed',
+                                                                        ExperimentalScenario.state == 'execution',
                                                                         ExperimentalScenario.availability == True)).all()
             exp_scenarios_done = session.query(ExperimentalScenario). \
                 join(ExperimentalScenario.problems). \
