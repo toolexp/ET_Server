@@ -31,11 +31,11 @@ class ExperimentalScenario(Base):
     experiment = relationship("Experiment", backref=backref("experimental_scenarios", cascade="all, delete-orphan",
                                                             single_parent=True))
 
-    def __init__(self, title, description, access_code, description_diagram, experiment):
+    def __init__(self, title, description, access_code, state, description_diagram, experiment):
         self.title = title
         self.description = description
         self.access_code = access_code
-        self.state = 'created'
+        self.state = state
         self.availability = True
         self.description_diagram = description_diagram
         self.experiment = experiment
@@ -54,36 +54,39 @@ class ExperimentalScenario(Base):
     def create(parameters, session):
         from Modules.Classes.Designer import Designer
         from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
-        # Received --> [title, description, access_code, description_diagram_id, experiment_id, [experimental_designers_ids...],
+        # Received --> [title, description, access_code, state, description_diagram_id, experiment_id, [experimental_designers_ids...],
         # [control_designers_ids...], [experimental_patterns_ids...], [control_patterns_ids...]]
-        experiment = session.query(Experiment).filter(Experiment.id == parameters[4]).first()
-        if parameters[3] is not None:   # Description diagram is optional
+        experiment = session.query(Experiment).filter(Experiment.id == parameters[5]).first()
+        if parameters[4] is not None:   # Description diagram is optional
             description_diagram = session.query(Diagram).filter(Diagram.id == parameters[3]).first()
         else:
             description_diagram = None
-        exp_sc_aux = ExperimentalScenario(parameters[0], parameters[1], parameters[2], description_diagram, experiment)
+        exp_sc_aux = ExperimentalScenario(parameters[0], parameters[1], parameters[2], parameters[3],
+                                          description_diagram, experiment)
         session.add(exp_sc_aux)
         # Creation of designers group(s)
-        for item in parameters[5]:  # Experimental group always exists
+        for item in parameters[6]:  # Experimental group always exists
             designer_aux = session.query(Designer).filter(Designer.id == item).first()
             designer_exp_aux = DesignerExperimentalScenario(1, designer_aux, exp_sc_aux)
             session.add(designer_exp_aux)
         if experiment.design_type == 2:  # Experimental design (defined in experiment)
-            for item in parameters[6]:  # Control group may exist
+            for item in parameters[7]:  # Control group may exist
                 designer_aux = session.query(Designer).filter(Designer.id == item).first()
                 designer_exp_aux = DesignerExperimentalScenario(2, designer_aux, exp_sc_aux)
                 session.add(designer_exp_aux)
         new_exp_sc_aux = session.query(ExperimentalScenario).order_by(ExperimentalScenario.id.desc()).first()
         # Creation of patterns for designers group(s)
-        for item in parameters[7]:  # Patterns for experimental group always exists
+        for item in parameters[8]:  # Patterns for experimental group always exists
             pattern_aux = session.query(Pattern).filter(Pattern.id == item).first()
             exp_sc_pat = ExperimentalScenarioPattern(1, new_exp_sc_aux, pattern_aux)
             session.add(exp_sc_pat)
         if experiment.design_type == 2:  # Experimental design (defined in experiment)
-            for item in parameters[8]:  # Patterns for control group may exist
+            for item in parameters[9]:  # Patterns for control group may exist
                 pattern_aux = session.query(Pattern).filter(Pattern.id == item).first()
                 exp_sc_pat = ExperimentalScenarioPattern(2, new_exp_sc_aux, pattern_aux)
                 session.add(exp_sc_pat)
+        if parameters[3] == 'execution':    # When an scenario is created with 'execution' state, the experiment containing it has to be in 'execution' as well
+            experiment.state = 'execution'
         session.commit()
         new_exp_sc_aux = session.query(ExperimentalScenario).order_by(ExperimentalScenario.id.desc()).first()
         session.close()
@@ -214,7 +217,8 @@ class ExperimentalScenario(Base):
         if exp_scenario_aux.description_diagram is not None:
             Diagram.delete([exp_scenario_aux.description_diagram_id, 'just remove path'], session)
         for item in exp_scenario_aux.problems:
-            Diagram.delete([item.expected_solution.diagram_id, 'just remove path'], session)
+            if item.expected_solution.diagram_id is not None:
+                Diagram.delete([item.expected_solution.diagram_id, 'just remove path'], session)
         session.delete(exp_scenario_aux)
         session.commit()
         session.close()
