@@ -39,7 +39,7 @@ metric_demo2 = Metric('Selection time', 'time in seconds required to select a PD
 metric_demo3 = Metric('Viewed patterns', 'total number of PDPs displayed')
 metric_demo4 = Metric('Chosen patterns', 'number of PDPs added to the solution')
 
-admin_demo = Administrator('Diego', 'Guzman', 'dguzman', hashlib.sha1('Carseda021527'.encode()).hexdigest())
+admin_demo = Administrator('Diego', 'Guzman', 'dguzman', hashlib.sha1('diego1234'.encode()).hexdigest())
 
 experimenter_demo1 = Experimenter('Julio', 'Caiza', 'jcaiza', hashlib.sha1('jcaiza1234'.encode()).hexdigest())
 experiment_demo = Experiment('Template 1 vs Template 2', 'Does using patterns of Template 1 reduce time vs using '
@@ -131,7 +131,7 @@ expected_sol_demo2 = ExpectedSolution('No requiered annotations', diagram_demo2)
 expected_sol_demo2.patterns = [pattern_demo2]
 
 diagram_demo3 = Diagram('diagram_demo.jpg', './Resources/Diagrams/ContextDiagram/diagram_demo.jpg')
-experimental_sc_demo = ExperimentalScenario('Experimental scenario 1', 'NA', '1234567890', diagram_demo3,
+experimental_sc_demo = ExperimentalScenario('Experimental scenario 1', 'NA', '1234567890', 'created', diagram_demo3,
                                             experiment_demo)
 
 problem_demo1 = Problem('Software that is difficult to use', 'Many people have experienced first-hand the frustration of '

@@ -39,7 +39,7 @@ metric_demo2 = Metric('Selection time', 'time in seconds required to select a PD
 metric_demo3 = Metric('Viewed patterns', 'total number of PDPs displayed')
 metric_demo4 = Metric('Chosen patterns', 'number of PDPs added to the solution')
 
-admin_demo = Administrator('Diego', 'Guzman', 'dguzman', hashlib.sha1('Carseda021527'.encode()).hexdigest())
+admin_demo = Administrator('Diego', 'Guzman', 'dguzman', hashlib.sha1('diego1234'.encode()).hexdigest())
 
 experimenter_demo1 = Experimenter('Julio', 'Caiza', 'jcaiza', hashlib.sha1('jcaiza1234'.encode()).hexdigest())
 
