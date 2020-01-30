@@ -198,14 +198,15 @@ class Administrator(Base):
             """
         try:
             msg_rspt = Message(action=2, information=[])
-            if len(parameters) == 1:
-                admin_aux = session.query(Administrator).filter(Administrator.id == parameters[0]).first()
-            else:  # Asking for info in login form
+            if len(parameters) == 2:    # Asking for info in login form
                 admin_aux = session.query(Administrator).filter(Administrator.email == parameters[0]).first()
                 if not admin_aux:
                     return Message(action=5, information=['The administrator is not registered in the system'],
                                    comment='Error selecting register')
+
                 msg_rspt.information.append(admin_aux.id)
+            else:
+                admin_aux = session.query(Administrator).filter(Administrator.id == parameters[0]).first()
             msg_rspt.information.append(admin_aux.name)
             msg_rspt.information.append(admin_aux.surname)
             msg_rspt.information.append(admin_aux.email)

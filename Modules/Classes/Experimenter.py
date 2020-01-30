@@ -208,14 +208,14 @@ class Experimenter(Base):
             """
         try:
             msg_rspt = Message(action=2, information=[])
-            if len(parameters) == 1:
-                experimenter_aux = session.query(Experimenter).filter(Experimenter.id == parameters[0]).first()
-            else:   # Asking for info in login form
+            if len(parameters) == 2:    # Asking for info in login form
                 experimenter_aux = session.query(Experimenter).filter(Experimenter.email == parameters[0]).first()
                 if not experimenter_aux:
                     return Message(action=5, information=['The experimenter is not registered in the system'],
                                    comment='Error selecting register')
                 msg_rspt.information.append(experimenter_aux.id)
+            else:
+                experimenter_aux = session.query(Experimenter).filter(Experimenter.id == parameters[0]).first()
             msg_rspt.information.append(experimenter_aux.name)
             msg_rspt.information.append(experimenter_aux.surname)
             msg_rspt.information.append(experimenter_aux.email)

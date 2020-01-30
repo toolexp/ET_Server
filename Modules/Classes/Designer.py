@@ -210,8 +210,8 @@ class Designer(Base):
             """
         try:
             msg_rspt = Message(action=2, information=[])
-            if parameters[1] == 'validate':
-                designer_exp_aux = session.query(DesignerExperimentalScenario). \
+            if len(parameters) == 2:    # Asking for info in login form
+                '''designer_exp_aux = session.query(DesignerExperimentalScenario). \
                     filter(DesignerExperimentalScenario.designer_id == parameters[0]).first()
                 if designer_exp_aux:
                     return Message(action=5,
@@ -221,13 +221,14 @@ class Designer(Base):
                 if measurement_aux:
                     return Message(action=5, information=['The designer is associated to one or more measurements'],
                                    comment='Error selecting register')
-                designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
-            else:   # Asking for info in login form
+                designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()'''
                 designer_aux = session.query(Designer).filter(Designer.email == parameters[0]).first()
                 if not designer_aux:
                     return Message(action=5, information=['The designer is not registered in the system'],
                                    comment='Error selecting register')
                 msg_rspt.information.append(designer_aux.id)
+            else:
+                designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
             msg_rspt.information.append(designer_aux.name)
             msg_rspt.information.append(designer_aux.surname)
             msg_rspt.information.append(designer_aux.email)
