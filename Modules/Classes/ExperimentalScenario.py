@@ -87,6 +87,7 @@ class ExperimentalScenario(Base):
                 session.add(exp_sc_pat)
         if parameters[3] == 'execution':    # When an scenario is created with 'execution' state, the experiment containing it has to be in 'execution' as well
             experiment.state = 'execution'
+            experiment.execution_date = datetime.now()
         session.commit()
         new_exp_sc_aux = session.query(ExperimentalScenario).order_by(ExperimentalScenario.id.desc()).first()
         session.close()

@@ -70,7 +70,7 @@ def get_experiment_report(experiment=None, session=None):
             # Get dataframe of measurements of current problem
             current_sheet_name = 'p{}_{}'.format(counter_p + 1, "_".join(words))
             current_query = session.query(Problem, Measurement, Designer, Metric). \
-                with_entities(Measurement.id.label('measurement_id'), Designer.email.label('username'),
+                with_entities(Measurement.id.label('measurement_id'), Designer.email.label('designer'),
                               Problem.brief_description.label('problem'), Metric.name.label('metric_type'),
                               Measurement.value.label('measurement'), Measurement.acquisition_start_date,
                               Measurement.acquisition_end_date). \
@@ -78,6 +78,8 @@ def get_experiment_report(experiment=None, session=None):
                 filter(Problem.id == problem.id).statement
             current_df = pd.read_sql_query(current_query, session.bind)
             current_df.loc[current_df['measurement'] == '[]', 'measurement'] = '0'
+            current_df.loc[current_df['measurement'] == '-1', 'measurement'] = 'No executed'
+            current_df.loc[current_df['measurement'] == '-2', 'measurement'] = 'Exit unexpectedly'
             '''current_query = session.query(DesignerExperimentalScenario, Designer, Measurement, Metric, Problem). \
                 with_entities(Measurement.id.label('measurement_id'), Designer.email.label('username'),
                               DesignerExperimentalScenario.designer_type.label('group_type'),

@@ -95,18 +95,52 @@ class Experiment(Base):
                 else:   # Experimental scenario is finished
                     return Message(action=5, information=['The experiment is finished, can not execute'],
                                    comment='Error updating register')
-
             elif parameters[1] == 'finished':    # When an experiment goes from execution to finished
                 if experiment_aux.state == 'execution':
                     experimental_sc_aux = session.query(ExperimentalScenario). \
                         filter(ExperimentalScenario.experiment_id == parameters[0]).all()
+                    # Change experimental scenarios state, associated with current experiment
+                    for item in experimental_sc_aux:
+                        if item.state == 'created':  # An scenario has not been executed yet
+                            return Message(action=5, information=['At least one associated scenario has not been '
+                                                                  'executed yet. Execute all scenarios first to finish '
+                                                                  'the experiment'],
+                                           comment='Error updating register')
+                        item.state = 'finished'
+                        item.finished_date = datetime.now()
+                    from Modules.Classes.Metric import Metric
+                    from Modules.Classes.Measurement import Measurement
+                    from Modules.Classes.Designer import Designer
+                    from Modules.Classes.Problem import Problem
+                    from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
+                    # Section to create empty measurement (-1) for all designers that have not executed the scenarios
+                    all_designers = session.query(Designer). \
+                        join(Designer.experimental_scenario_associations). \
+                        join(DesignerExperimentalScenario.experimental_scenario).\
+                        join(ExperimentalScenario.experiment).filter(Experiment.id == parameters[0]).all()
+                    done_designers = session.query(Designer). \
+                        join(Designer.measurements). \
+                        join(Measurement.problem).join(Problem.experimental_scenario).\
+                        join(ExperimentalScenario.experiment).filter(Experiment.id == parameters[0]).all()
+                    for item in done_designers:
+                        if item in all_designers:
+                            all_designers.remove(item)
+                    if all_designers:   # If at least one designer is remaining a measurement, it has to be created (-1)
+                        problems = session.query(Problem). \
+                            join(Problem.experimental_scenario). \
+                            join(ExperimentalScenario.experiment).filter(Experiment.id == parameters[0]).all()
+                        metrics = session.query(Metric).all()
+                        current_date = datetime.now()
+                        # Here creates the empty measurements
+                        for designer_aux in all_designers:
+                            for problem_aux in problems:
+                                for metric_aux in metrics:
+                                    measurement_aux = Measurement(-1, current_date, current_date, metric_aux,
+                                                                  designer_aux, problem_aux)
+                                    session.add(measurement_aux)
                     # Change experiment state
                     experiment_aux.state = 'finished'
                     experiment_aux.finished_date = datetime.now()
-                    # Change experimental scenarios state, associated with current experiment
-                    for item in experimental_sc_aux:
-                        item.state = 'finished'
-                        item.finished_date = datetime.now()
                 elif experiment_aux.state == 'finished':
                     return Message(action=5, information=['The experiment is already finished'],
                                    comment='Error updating register')
