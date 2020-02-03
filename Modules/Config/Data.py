@@ -4,6 +4,7 @@ import shutil
 import os
 import zipfile
 
+
 class Message:
 
     def __init__(self, action=0, comment='', information=None):
@@ -41,6 +42,7 @@ def get_experiment_report(experiment=None, session=None):
     from Modules.Classes.Metric import Metric
     from Modules.Classes.Problem import Problem
     from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
+    from sqlalchemy import and_
     # Get appropriate name for excel workbook
     words = experiment.name.split(' ')
     for index, word in enumerate(words):
@@ -67,17 +69,25 @@ def get_experiment_report(experiment=None, session=None):
                 words[index] = word.lower()
             # Get dataframe of measurements of current problem
             current_sheet_name = 'p{}_{}'.format(counter_p + 1, "_".join(words))
-            current_query = session.query(DesignerExperimentalScenario, Designer, Measurement, Metric, Problem). \
-                with_entities(Measurement.id.label('measurement_id'), Designer.email.label('user'),
+            current_query = session.query(Problem, Measurement, Designer, Metric). \
+                with_entities(Measurement.id.label('measurement_id'), Designer.email.label('username'),
+                              Problem.brief_description.label('problem'), Metric.name.label('metric_type'),
+                              Measurement.value.label('measurement'), Measurement.acquisition_start_date,
+                              Measurement.acquisition_end_date). \
+                join(Problem.measurements).join(Measurement.designer).join(Measurement.metric). \
+                filter(Problem.id == problem.id).statement
+            current_df = pd.read_sql_query(current_query, session.bind)
+            current_df.loc[current_df['measurement'] == '[]', 'measurement'] = '0'
+            '''current_query = session.query(DesignerExperimentalScenario, Designer, Measurement, Metric, Problem). \
+                with_entities(Measurement.id.label('measurement_id'), Designer.email.label('username'),
                               DesignerExperimentalScenario.designer_type.label('group_type'),
                               Problem.brief_description.label('problem'), Metric.name.label('metric_type'),
                               Measurement.value.label('measurement'), Measurement.acquisition_start_date,
                               Measurement.acquisition_end_date). \
                 join(DesignerExperimentalScenario.designer).join(Designer.measurements).join(Measurement.metric). \
                 join(Measurement.problem).filter(Problem.id == problem.id).statement
-            current_df = pd.read_sql_query(current_query, session.bind)
             current_df.loc[current_df['group_type'] == 1, 'group_type'] = 'experimental'
-            current_df.loc[current_df['group_type'] == 2, 'group_type'] = 'control'
+            current_df.loc[current_df['group_type'] == 2, 'group_type'] = 'control'''
             current_sheets.append(current_df)
             current_sheets_names.append(current_sheet_name)
         with pd.ExcelWriter(current_workbook_path + current_workbook_name) as writer:

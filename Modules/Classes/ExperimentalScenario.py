@@ -58,7 +58,7 @@ class ExperimentalScenario(Base):
         # [control_designers_ids...], [experimental_patterns_ids...], [control_patterns_ids...]]
         experiment = session.query(Experiment).filter(Experiment.id == parameters[5]).first()
         if parameters[4] is not None:   # Description diagram is optional
-            description_diagram = session.query(Diagram).filter(Diagram.id == parameters[3]).first()
+            description_diagram = session.query(Diagram).filter(Diagram.id == parameters[4]).first()
         else:
             description_diagram = None
         exp_sc_aux = ExperimentalScenario(parameters[0], parameters[1], parameters[2], parameters[3],
