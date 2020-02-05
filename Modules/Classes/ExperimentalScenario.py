@@ -265,6 +265,9 @@ class ExperimentalScenario(Base):
             for item in exp_sc_aux.problems:
                 msg_rspt.information[3].append(item.__str__())
             # Retrieve main information of designers associated with the scenario
+            problems = session.query(Problem). \
+                join(Problem.experimental_scenario). \
+                filter(ExperimentalScenario.id == parameters[0]).all()
             all_designers = session.query(Designer). \
                 join(Designer.experimental_scenario_associations). \
                 join(DesignerExperimentalScenario.experimental_scenario).\
@@ -272,7 +275,20 @@ class ExperimentalScenario(Base):
             done_designers = session.query(Designer). \
                 join(Designer.measurements). \
                 join(Measurement.problem).join(Problem.experimental_scenario). \
-                filter(and_(ExperimentalScenario.id == parameters[0], Measurement.value != -2, Measurement.value != -1)).all()
+                filter(and_(ExperimentalScenario.id == parameters[0], Measurement.value >= 0)).all()
+            # There is the possibility that a designer exited the scenario while it was in execution (maybe completed
+            # one of two problems) the above query will show that the designer completed both problems, when not
+            aux_done_designers = done_designers
+            for item in problems:
+                # Check for each problem of the scenario if have been completed succesfullly
+                done_designers_problem = session.query(Designer). \
+                    join(Designer.measurements). \
+                    join(Measurement.problem). \
+                    filter(and_(Problem.id == item.id, Measurement.value >= 0)).all()
+                # If at least one problem not completed, the the whole scenario was not completed
+                if len(done_designers) != len(done_designers_problem):
+                    aux_done_designers = done_designers if len(done_designers) < len(done_designers_problem) else done_designers_problem
+            done_designers = aux_done_designers
             exit_designers = session.query(Designer). \
                 join(Designer.measurements). \
                 join(Measurement.problem).join(Problem.experimental_scenario). \

@@ -1,6 +1,5 @@
 # coding=utf-8
-
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Float
+from sqlalchemy import Column, Integer, ForeignKey, DateTime, Float, and_
 from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
@@ -40,12 +39,19 @@ class Measurement(Base):
     def create(parameters, session):
         from Modules.Classes.Designer import Designer
         # Received --> [value, acquisition_start_date, acquisition_end_date, metric_id, designer_id, problem_id]
-        metric_aux = session.query(Metric).filter(Metric.id == parameters[3]).first()
-        designer_aux = session.query(Designer).filter(Designer.id == parameters[4]).first()
-        problem_aux = session.query(Problem).filter(Problem.id == parameters[5]).first()
-        measurement_aux = Measurement(parameters[0], parameters[1], parameters[2], metric_aux, designer_aux, problem_aux)
-        session.add(measurement_aux)
-        session.commit()
+        # First check if the measurements for the problem do not exist (it may exist if experimenter finished an
+        # experiment while it was in execution and any designer was active)
+        existing_measurement = session.query(Measurement).filter(and_(Measurement.problem_id == parameters[5],
+                                                                      Measurement.designer_id == parameters[4],
+                                                                      Measurement.metric_id == parameters[3])).all()
+        if not existing_measurement:
+            metric_aux = session.query(Metric).filter(Metric.id == parameters[3]).first()
+            designer_aux = session.query(Designer).filter(Designer.id == parameters[4]).first()
+            problem_aux = session.query(Problem).filter(Problem.id == parameters[5]).first()
+            measurement_aux = Measurement(parameters[0], parameters[1], parameters[2], metric_aux, designer_aux,
+                                          problem_aux)
+            session.add(measurement_aux)
+            session.commit()
         session.close()
         msg_rspt = Message(action=2, comment='Register created successfully')
         return msg_rspt

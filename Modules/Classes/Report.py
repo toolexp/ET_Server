@@ -54,15 +54,29 @@ class Report(Base):
         if parameters[1] == 'problem':
             from Modules.Classes.Designer import Designer
             from Modules.Classes.Measurement import Measurement
-            from Modules.Classes.Metric import Metric
             from Modules.Classes.Problem import Problem
             # Received --> [id_problem, 'problem']
-            current_query = session.query(Measurement). \
-                with_entities(Designer.email.label('designer'), Metric.name.label('metric_type'),
-                              Measurement.value.label('measurement')). \
-                join(Problem.measurements).join(Measurement.designer).join(Measurement.metric). \
-                filter(Problem.id == parameters[0]).statement
-            current_df = pd.read_sql_query(current_query, session.bind)
+            current_df = pd.DataFrame(columns=('designer', 'm1', 'm2', 'm3', 'm4'))
+            designers = session.query(Designer). \
+                join(Designer.measurements).join(Measurement.problem). \
+                filter(Problem.id == parameters[0]).all()
+            for designer_aux in designers:
+                measurements = session.query(Measurement). \
+                    join(Designer.measurements).join(Measurement.problem). \
+                    filter(and_(Problem.id == parameters[0], Designer.id == designer_aux.id)).all()
+                measurements_aux = ['0', '0', '0', '0']
+                for item in measurements:
+                    if item.metric_id == 1:
+                        measurements_aux[0] = str(item.value) if item.value >= 0 else 'X'
+                    elif item.metric_id == 2:
+                        measurements_aux[1] = str(item.value) if item.value >= 0 else 'X'
+                    elif item.metric_id == 3:
+                        measurements_aux[2] = str(item.value) if item.value >= 0 else 'X'
+                    else:
+                        measurements_aux[3] = str(item.value) if item.value >= 0 else 'X'
+                current_df = current_df.append({'designer': designer_aux.email, 'm1': measurements_aux[0],
+                                                'm2': measurements_aux[1], 'm3': measurements_aux[2],
+                                                'm4': measurements_aux[3]}, ignore_index=True)
             msg_rspt.information.append(current_df)
         session.close()
         return msg_rspt

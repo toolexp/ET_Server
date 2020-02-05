@@ -1,6 +1,5 @@
 # coding=utf-8
-
-from sqlalchemy import Column, String, Integer, DateTime
+from sqlalchemy import Column, String, Integer, DateTime, and_
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
 from datetime import datetime
@@ -118,22 +117,42 @@ class Experiment(Base):
                         join(Designer.experimental_scenario_associations). \
                         join(DesignerExperimentalScenario.experimental_scenario).\
                         join(ExperimentalScenario.experiment).filter(Experiment.id == parameters[0]).all()
-                    done_designers = session.query(Designer). \
+                    '''done_designers = session.query(Designer). \
                         join(Designer.measurements). \
                         join(Measurement.problem).join(Problem.experimental_scenario).\
                         join(ExperimentalScenario.experiment).filter(Experiment.id == parameters[0]).all()
+                    scenarios = session.query(ExperimentalScenario). \
+                        join(ExperimentalScenario.experiment). \
+                        filter(Experiment.id == parameters[0]).all()
+                    # There is the possibility that a designer executed only one scenario when it was assigned more
+                    # than one the above query will show that the designer completed all scenarios, when not
+                    aux_done_designers = done_designers
+                    for item in scenarios:
+                        # Check for each scenario of the experiment if have been executed
+                        done_designers_scenario = session.query(Designer). \
+                            join(Designer.measurements).join(Measurement.problem).join(Problem.experimental_scenario). \
+                            filter(ExperimentalScenario.id == item.id).all()
+                        # If at least one problem not completed, the the whole scenario was not completed
+                        if len(done_designers) != len(done_designers_scenario):
+                            aux_done_designers = done_designers if len(done_designers) < len(
+                                done_designers_scenario) else done_designers_scenario
+                    done_designers = aux_done_designers
                     for item in done_designers:
                         if item in all_designers:
                             all_designers.remove(item)
-                    if all_designers:   # If at least one designer is remaining a measurement, it has to be created (-1)
-                        problems = session.query(Problem). \
-                            join(Problem.experimental_scenario). \
-                            join(ExperimentalScenario.experiment).filter(Experiment.id == parameters[0]).all()
-                        metrics = session.query(Metric).all()
-                        current_date = datetime.now()
-                        # Here creates the empty measurements
-                        for designer_aux in all_designers:
-                            for problem_aux in problems:
+                    if all_designers:   # If at least one designer is remaining a measurement, it has to be created (-1)'''
+                    problems = session.query(Problem). \
+                        join(Problem.experimental_scenario). \
+                        join(ExperimentalScenario.experiment).filter(Experiment.id == parameters[0]).all()
+                    metrics = session.query(Metric).all()
+                    current_date = datetime.now()
+                    # Here creates the empty measurements for scenarios that were not executed by designers
+                    for designer_aux in all_designers:
+                        for problem_aux in problems:
+                            existing_measurement = session.query(Measurement).\
+                                filter(and_(Measurement.designer_id == designer_aux.id,
+                                            Measurement.problem_id == problem_aux.id)).all()
+                            if not existing_measurement:    # If at least one designer is remaining a measurement, it has to be created (-1)
                                 for metric_aux in metrics:
                                     measurement_aux = Measurement(float(-1), current_date, current_date, metric_aux,
                                                                   designer_aux, problem_aux)
