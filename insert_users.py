@@ -34,10 +34,10 @@ Base.metadata.create_all(engine)
 session = Session()
 
 # Create objects
-metric_demo1 = Metric('Solution time', 'total time in seconds that the resolution of a problem lasts')
-metric_demo2 = Metric('Selection time', 'time in seconds required to select a PDP solution')
-metric_demo3 = Metric('Viewed patterns', 'total number of PDPs displayed')
-metric_demo4 = Metric('Chosen patterns', 'number of PDPs added to the solution')
+metric_demo1 = Metric(1, 'Solution time', 'total time in seconds that the resolution of a problem lasts')
+metric_demo2 = Metric(2, 'Selection time', 'time in seconds required to select a PDP solution')
+metric_demo3 = Metric(3, 'Viewed patterns', 'total number of PDPs displayed')
+metric_demo4 = Metric(4, 'Chosen patterns', 'number of PDPs added to the solution')
 
 admin_demo = Administrator('Diego', 'Guzman', 'dguzman', hashlib.sha1('diego1234'.encode()).hexdigest())
 

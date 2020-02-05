@@ -11,7 +11,8 @@ class Metric(Base):
     name = Column(String)
     description = Column(String)
 
-    def __init__(self, name, description):
+    def __init__(self, id, name, description):
+        self.id = id
         self.name = name
         self.description = description
 

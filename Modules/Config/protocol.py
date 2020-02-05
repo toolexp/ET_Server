@@ -124,8 +124,8 @@ switcher_protocol = {
         103: SentSolution.update,
         104: SentSolution.delete,
         105: SentSolution.select,
-        106: Report.create
-        #107: Report.read,
+        106: Report.create,
+        107: Report.read
         #108: Report.update,
         #109: Report.delete,
         #110: Report.select

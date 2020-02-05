@@ -47,3 +47,22 @@ class Report(Base):
         myfile.close()
         msg_rspt = Message(action=2, information=[file_name, file_bytes], comment='Register created successfully')
         return msg_rspt
+
+    def read(parameters, session):
+        msg_rspt = Message(action=2, information=[])
+        import pandas as pd
+        if parameters[1] == 'problem':
+            from Modules.Classes.Designer import Designer
+            from Modules.Classes.Measurement import Measurement
+            from Modules.Classes.Metric import Metric
+            from Modules.Classes.Problem import Problem
+            # Received --> [id_problem, 'problem']
+            current_query = session.query(Measurement). \
+                with_entities(Designer.email.label('designer'), Metric.name.label('metric_type'),
+                              Measurement.value.label('measurement')). \
+                join(Problem.measurements).join(Measurement.designer).join(Measurement.metric). \
+                filter(Problem.id == parameters[0]).statement
+            current_df = pd.read_sql_query(current_query, session.bind)
+            msg_rspt.information.append(current_df)
+        session.close()
+        return msg_rspt

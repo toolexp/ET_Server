@@ -135,7 +135,7 @@ class Experiment(Base):
                         for designer_aux in all_designers:
                             for problem_aux in problems:
                                 for metric_aux in metrics:
-                                    measurement_aux = Measurement(-1, current_date, current_date, metric_aux,
+                                    measurement_aux = Measurement(float(-1), current_date, current_date, metric_aux,
                                                                   designer_aux, problem_aux)
                                     session.add(measurement_aux)
                     # Change experiment state

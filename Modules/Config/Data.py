@@ -77,9 +77,8 @@ def get_experiment_report(experiment=None, session=None):
                 join(Problem.measurements).join(Measurement.designer).join(Measurement.metric). \
                 filter(Problem.id == problem.id).statement
             current_df = pd.read_sql_query(current_query, session.bind)
-            current_df.loc[current_df['measurement'] == '[]', 'measurement'] = '0'
-            current_df.loc[current_df['measurement'] == '-1', 'measurement'] = 'No executed'
-            current_df.loc[current_df['measurement'] == '-2', 'measurement'] = 'Exit unexpectedly'
+            current_df.loc[current_df['measurement'] == -1, 'measurement'] = 'No executed'
+            current_df.loc[current_df['measurement'] == -2, 'measurement'] = 'Exit unexpectedly'
             '''current_query = session.query(DesignerExperimentalScenario, Designer, Measurement, Metric, Problem). \
                 with_entities(Measurement.id.label('measurement_id'), Designer.email.label('username'),
                               DesignerExperimentalScenario.designer_type.label('group_type'),

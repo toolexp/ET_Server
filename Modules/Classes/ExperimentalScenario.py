@@ -264,7 +264,7 @@ class ExperimentalScenario(Base):
             msg_rspt.information.append([])
             for item in exp_sc_aux.problems:
                 msg_rspt.information[3].append(item.__str__())
-            # Section to create empty measurement (-1) for all designers that have not executed the scenarios
+            # Retrieve main information of designers associated with the scenario
             all_designers = session.query(Designer). \
                 join(Designer.experimental_scenario_associations). \
                 join(DesignerExperimentalScenario.experimental_scenario).\
@@ -272,15 +272,15 @@ class ExperimentalScenario(Base):
             done_designers = session.query(Designer). \
                 join(Designer.measurements). \
                 join(Measurement.problem).join(Problem.experimental_scenario). \
-                filter(and_(ExperimentalScenario.id == parameters[0], Measurement.value != '-2', Measurement.value != '-1')).all()
+                filter(and_(ExperimentalScenario.id == parameters[0], Measurement.value != -2, Measurement.value != -1)).all()
             exit_designers = session.query(Designer). \
                 join(Designer.measurements). \
                 join(Measurement.problem).join(Problem.experimental_scenario). \
-                filter(and_(ExperimentalScenario.id == parameters[0], Measurement.value == '-2')).all()
+                filter(and_(ExperimentalScenario.id == parameters[0], Measurement.value == -2)).all()
             not_done_designers = session.query(Designer). \
                 join(Designer.measurements). \
                 join(Measurement.problem).join(Problem.experimental_scenario). \
-                filter(and_(ExperimentalScenario.id == parameters[0], Measurement.value == '-1')).all()
+                filter(and_(ExperimentalScenario.id == parameters[0], Measurement.value == -1)).all()
             number_designers = [len(all_designers), len(done_designers), len(exit_designers), len(not_done_designers)]
             msg_rspt.information.append(number_designers)
         session.close()

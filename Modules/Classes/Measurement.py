@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Float
 from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
@@ -12,7 +12,7 @@ class Measurement(Base):
     __tablename__ = 'measurements'
 
     id = Column(Integer, primary_key=True)
-    value = Column(String)
+    value = Column(Float)
     acquisition_start_date = Column(DateTime)
     acquisition_end_date = Column(DateTime)
     metric_id = Column(Integer, ForeignKey('metrics.id'))
