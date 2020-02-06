@@ -5,12 +5,6 @@ from sqlalchemy.orm import relationship
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
 
-experimenters_experiments_association = Table(
-    'experimenters_experiments', Base.metadata,
-    Column('experimenter_id', Integer, ForeignKey('experimenters.id')),
-    Column('experiment_id', Integer, ForeignKey('experiments.id'))
-)
-
 
 class Experimenter(Base):
     __tablename__ = 'experimenters'
@@ -20,8 +14,6 @@ class Experimenter(Base):
     surname = Column(String)
     email = Column(String)
     password = Column(String)
-
-    experiments = relationship("Experiment", secondary=experimenters_experiments_association, backref='experimenters')
 
     def __init__(self, name, surname, email, password):
         self.name = name

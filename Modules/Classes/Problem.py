@@ -66,7 +66,7 @@ class Problem(Base):
         session.close()
         return msg_rspt
 
-    @staticmethod
+    '''@staticmethod
     def update(parameters, session):
         # Received --> [id_problem, brief_description, description, id_i_solution, id_experimental_scenario]
         problem_aux = session.query(Problem).filter(Problem.id == parameters[0]).first()
@@ -79,7 +79,7 @@ class Problem(Base):
         session.commit()
         session.close()
         msg_rspt = Message(action=2, comment='Register updated successfully')
-        return msg_rspt
+        return msg_rsp'''
 
     @staticmethod
     def delete(parameters, session):

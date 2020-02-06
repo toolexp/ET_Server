@@ -58,7 +58,7 @@ class ExpectedSolution(Base):
         msg_rspt = Message(action=2, information=[new_e_sol_aux.id], comment='Register created successfully')
         return msg_rspt
 
-    @staticmethod
+    '''@staticmethod
     def update(parameters, session):
         from Modules.Classes.Pattern import Pattern
         e_solution_aux = session.query(ExpectedSolution).filter(ExpectedSolution.id == parameters[0]).first()
@@ -83,7 +83,7 @@ class ExpectedSolution(Base):
         session.commit()
         session.close()
         msg_rspt = Message(action=  2, comment='Register deleted successfully')
-        return msg_rspt
+        return msg_rspt'''
 
     @staticmethod
     def select(parameters, session):

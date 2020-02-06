@@ -56,17 +56,6 @@ class Pattern(Base):
         return msg_rspt
 
     @staticmethod
-    def update(parameters, session):
-        # Received --> [id_pattern, name]
-        # Template can not be updated
-        pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[0]).first()
-        pattern_aux.name = parameters[1]
-        session.commit()
-        session.close()
-        msg_rspt = Message(action=2, comment='Register updated successfully')
-        return msg_rspt
-
-    @staticmethod
     def delete(parameters, session):
         from Modules.Classes.ExperimentalScenarioPattern import ExperimentalScenarioPattern
         exp_scenario_aux = session.query(ExperimentalScenarioPattern).filter(ExperimentalScenarioPattern.pattern_id ==

@@ -47,17 +47,6 @@ class Category(Base):
         return msg_rspt
 
     @staticmethod
-    def update(parameters, session):
-        section_aux = session.query(Section).filter(Section.id == parameters[0]).first()
-        section_aux.name = parameters[1]
-        section_aux.description = parameters[2]
-        section_aux.data_type = parameters[3]
-        session.commit()
-        session.close()
-        msg_rspt = Message(action=2, comment='Register updated successfully')
-        return msg_rspt
-
-    @staticmethod
     def delete(parameters, session):
         # Received --> [id_classification]
         categories_aux = session.query(Category).filter(Category.classification_id == parameters[0]).all()

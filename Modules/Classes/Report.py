@@ -64,16 +64,16 @@ class Report(Base):
                 measurements = session.query(Measurement). \
                     join(Designer.measurements).join(Measurement.problem). \
                     filter(and_(Problem.id == parameters[0], Designer.id == designer_aux.id)).all()
-                measurements_aux = ['0', '0', '0', '0']
+                measurements_aux = [None, None, None, None]
                 for item in measurements:
                     if item.metric_id == 1:
-                        measurements_aux[0] = str(item.value) if item.value >= 0 else 'X'
+                        measurements_aux[0] = item.value if item.value >= 0 else None
                     elif item.metric_id == 2:
-                        measurements_aux[1] = str(item.value) if item.value >= 0 else 'X'
+                        measurements_aux[1] = item.value if item.value >= 0 else None
                     elif item.metric_id == 3:
-                        measurements_aux[2] = str(item.value) if item.value >= 0 else 'X'
+                        measurements_aux[2] = item.value if item.value >= 0 else None
                     else:
-                        measurements_aux[3] = str(item.value) if item.value >= 0 else 'X'
+                        measurements_aux[3] = item.value if item.value >= 0 else None
                 current_df = current_df.append({'designer': designer_aux.email, 'm1': measurements_aux[0],
                                                 'm2': measurements_aux[1], 'm3': measurements_aux[2],
                                                 'm4': measurements_aux[3]}, ignore_index=True)

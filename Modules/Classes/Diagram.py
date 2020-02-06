@@ -73,15 +73,6 @@ class Diagram(Base):
             raise Exception('Error creating a diagram: ' + str(e))
 
     @staticmethod
-    def read(parameters, session):
-        diagrams = session.query(Diagram).all()
-        msg_rspt = Message(action=2, information=[])
-        for diagram in diagrams:
-            msg_rspt.information.append(diagram.__str__())
-        session.close()
-        return msg_rspt
-
-    @staticmethod
     def update(parameters, session):
         # Received --> [id_diagram, file_content, filename, type_diagram]
         if parameters[3] == 'pattern':

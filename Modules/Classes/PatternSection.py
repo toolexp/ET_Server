@@ -97,13 +97,3 @@ class PatternSection(Base):
         session.close()
         msg_rspt = Message(action=2, comment='Register updated successfully')
         return msg_rspt
-
-    @staticmethod
-    def delete(parameters, session):
-        # Received --> [id_pattern_section]
-        content_aux = session.query(PatternSection).filter(PatternSection.id == parameters[0]).first()
-        session.delete(content_aux)
-        session.commit()
-        session.close()
-        msg_rspt = Message(action=2, comment='Register deleted successfully')
-        return msg_rspt
