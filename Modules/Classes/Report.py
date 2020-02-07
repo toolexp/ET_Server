@@ -1,6 +1,7 @@
 # coding=utf-8
 
 from sqlalchemy import Column, Integer, ForeignKey, and_, String
+from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
 from Modules.Config.Data import Message, get_experiment_report
@@ -51,12 +52,12 @@ class Report(Base):
     def read(parameters, session):
         msg_rspt = Message(action=2, information=[])
         import pandas as pd
+        current_df = pd.DataFrame(columns=('id', 'variable', 'm1', 'm2', 'm3', 'm4'))
         if parameters[1] == 'problem':
             from Modules.Classes.Designer import Designer
             from Modules.Classes.Measurement import Measurement
             from Modules.Classes.Problem import Problem
             # Received --> [id_problem, 'problem']
-            current_df = pd.DataFrame(columns=('id_designer', 'designer', 'm1', 'm2', 'm3', 'm4'))
             designers = session.query(Designer). \
                 join(Designer.measurements).join(Measurement.problem). \
                 filter(Problem.id == parameters[0]).all()
@@ -74,10 +75,49 @@ class Report(Base):
                         measurements_aux[2] = item.value if item.value >= 0 else None
                     else:
                         measurements_aux[3] = item.value if item.value >= 0 else None
-                current_df = current_df.append({'id_designer': designer_aux.id, 'designer': designer_aux.email,
+                current_df = current_df.append({'id': designer_aux.id, 'variable': designer_aux.email,
                                                 'm1': measurements_aux[0], 'm2': measurements_aux[1],
                                                 'm3': measurements_aux[2], 'm4': measurements_aux[3]},
                                                ignore_index=True)
-            msg_rspt.information.append(current_df)
+        elif parameters[1] == 'scenario':
+            from Modules.Classes.ExperimentalScenario import ExperimentalScenario
+            from Modules.Classes.Designer import Designer
+            from Modules.Classes.Measurement import Measurement
+            from Modules.Classes.Problem import Problem
+            # Received --> [id_scenario, 'scenario']
+            problems = session.query(Problem).join(Problem.experimental_scenario).\
+                filter(ExperimentalScenario.id == parameters[0]).all()
+            for problem_aux in problems:
+                measurements_aux = []
+                for item in range(1, 5):
+                    average = session.query(func.avg(Measurement.value).label('average')). join(Measurement.problem).\
+                        filter(and_(Problem.id == problem_aux.id, Measurement.metric_id == item,
+                                    Measurement.value >= 0)).all()
+                    measurements_aux.append(average[0].average)
+                current_df = current_df.append({'id': 'X', 'variable': problem_aux.brief_description,
+                                                'm1': measurements_aux[0], 'm2': measurements_aux[1],
+                                                'm3': measurements_aux[2], 'm4': measurements_aux[3]},
+                                               ignore_index=True)
+        else:
+            from Modules.Classes.ExperimentalScenario import ExperimentalScenario
+            from Modules.Classes.Designer import Designer
+            from Modules.Classes.Measurement import Measurement
+            from Modules.Classes.Problem import Problem
+            # Received --> [id_experiment, 'experiment']
+            scenarios = session.query(ExperimentalScenario).join(ExperimentalScenario.experiment). \
+                filter(Experiment.id == parameters[0]).all()
+            for scenario_aux in scenarios:
+                measurements_aux = []
+                for item in range(1, 5):
+                    average = session.query(func.avg(Measurement.value).label('average')).join(Measurement.problem). \
+                        join(Problem.experimental_scenario). \
+                        filter(and_(ExperimentalScenario.id == scenario_aux.id, Measurement.metric_id == item,
+                                    Measurement.value >= 0)).all()
+                    measurements_aux.append(average[0].average)
+                current_df = current_df.append({'id': 'X', 'variable': scenario_aux.title,
+                                                'm1': measurements_aux[0], 'm2': measurements_aux[1],
+                                                'm3': measurements_aux[2], 'm4': measurements_aux[3]},
+                                               ignore_index=True)
+        msg_rspt.information.append(current_df)
         session.close()
         return msg_rspt

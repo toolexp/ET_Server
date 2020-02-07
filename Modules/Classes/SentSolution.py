@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from sqlalchemy import Column, String, Integer, Table, ForeignKey
+from sqlalchemy import Column, String, Integer, Table, ForeignKey, and_
 from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
@@ -68,15 +68,33 @@ class SentSolution(Base):
 
     @staticmethod
     def select(parameters, session):
-        # Received --> [id_sent_solution]
-        s_solution_aux = session.query(SentSolution).filter(SentSolution.id == parameters[0]).first()
+        from Modules.Classes.ExperimentalScenario import ExperimentalScenario
+        from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
+        from Modules.Classes.ExperimentalScenarioPattern import ExperimentalScenarioPattern
+        from Modules.Classes.Problem import Problem
+        # Received --> [id_designer, id_problem]
+        # Return --> [s_solution_aux.annotations, s_solution_aux.diagram_id, [s_solution_aux.patterns__str__()],
+        # designer_group, [patterns_assigned_designer]]
+        s_solution_aux = session.query(SentSolution).filter(and_(SentSolution.designer_id == parameters[0],
+                                                                 SentSolution.problem_id == parameters[1])).first()
         msg_rspt = Message(action=2, information=[])
         msg_rspt.information.append(s_solution_aux.annotations)
         msg_rspt.information.append(s_solution_aux.diagram_id)
-        msg_rspt.information.append(s_solution_aux.designer_id)
-        msg_rspt.information.append(s_solution_aux.problem_id)
         msg_rspt.information.append([])
         for item in s_solution_aux.patterns:
             msg_rspt.information[2].append(item.__str__())
+        # Look for patterns assigned for designer in experimental scenario
+        exp_scenario = session.query(ExperimentalScenario).join(ExperimentalScenario.problems).\
+            filter(Problem.id == parameters[1]).first()
+        type_designer_scenario = session.query(DesignerExperimentalScenario).\
+            filter(and_(DesignerExperimentalScenario.experimental_scenario_id == exp_scenario.id,
+                        DesignerExperimentalScenario.designer_id == parameters[0])).first()
+        msg_rspt.information.append(type_designer_scenario.designer_type)
+        type_scenario_patterns = session.query(ExperimentalScenarioPattern).\
+            filter(and_(ExperimentalScenarioPattern.experimental_scenario_id == exp_scenario.id,
+                        ExperimentalScenarioPattern.pattern_type == type_designer_scenario.designer_type)).all()
+        msg_rspt.information.append([])
+        for item in type_scenario_patterns:
+            msg_rspt.information[4].append(item.pattern_id)
         session.close()
         return msg_rspt
