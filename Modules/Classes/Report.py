@@ -2,7 +2,7 @@
 
 from sqlalchemy import Column, Integer, ForeignKey, and_, String
 from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship
 from Modules.Config.base import Base
 from Modules.Config.Data import Message, get_experiment_report
 from Modules.Classes.Experiment import Experiment
@@ -49,6 +49,7 @@ class Report(Base):
         msg_rspt = Message(action=2, information=[file_name, file_bytes], comment='Register created successfully')
         return msg_rspt
 
+    @staticmethod
     def read(parameters, session):
         msg_rspt = Message(action=2, information=[])
         import pandas as pd
