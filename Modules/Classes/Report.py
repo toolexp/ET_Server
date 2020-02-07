@@ -56,7 +56,7 @@ class Report(Base):
             from Modules.Classes.Measurement import Measurement
             from Modules.Classes.Problem import Problem
             # Received --> [id_problem, 'problem']
-            current_df = pd.DataFrame(columns=('designer', 'm1', 'm2', 'm3', 'm4'))
+            current_df = pd.DataFrame(columns=('id_designer', 'designer', 'm1', 'm2', 'm3', 'm4'))
             designers = session.query(Designer). \
                 join(Designer.measurements).join(Measurement.problem). \
                 filter(Problem.id == parameters[0]).all()
@@ -74,9 +74,10 @@ class Report(Base):
                         measurements_aux[2] = item.value if item.value >= 0 else None
                     else:
                         measurements_aux[3] = item.value if item.value >= 0 else None
-                current_df = current_df.append({'designer': designer_aux.email, 'm1': measurements_aux[0],
-                                                'm2': measurements_aux[1], 'm3': measurements_aux[2],
-                                                'm4': measurements_aux[3]}, ignore_index=True)
+                current_df = current_df.append({'id_designer': designer_aux.id, 'designer': designer_aux.email,
+                                                'm1': measurements_aux[0], 'm2': measurements_aux[1],
+                                                'm3': measurements_aux[2], 'm4': measurements_aux[3]},
+                                               ignore_index=True)
             msg_rspt.information.append(current_df)
         session.close()
         return msg_rspt

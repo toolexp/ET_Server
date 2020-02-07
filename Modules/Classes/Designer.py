@@ -28,7 +28,7 @@ class Designer(Base):
     @staticmethod
     def create(parameters, session):
         """
-           Creates an 'Designer' object and stores it into the DB, the data for the
+           Creates a 'Designer' object and stores it into the DB, the data for the
            object is inside the 'parameters'
 
            Parameters
