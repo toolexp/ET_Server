@@ -28,34 +28,17 @@ class Designer(Base):
     @staticmethod
     def create(parameters, session):
         """
-           Creates a 'Designer' object and stores it into the DB, the data for the
-           object is inside the 'parameters'
-
-           Parameters
-           ----------
-           parameters: Message.information [string, string, string, string]
-               -> parameters[0] has Designer.name
-               -> parameters[1] has Designer.surname
-               -> parameters[2] has Designer.email
-               -> parameters[3] has Designer.password
-           session: Session
-               Session of connection with the database
-
-           Returns
-           -------
-           msg_rspt: Message
-               Message with information of the fail or success of the operation
-
-           Raises
-           ------
-           Exception:
-               If any of the lines of code generates an error
-           """
+        Creates a 'Designer' object and stores it into the DB, the data for the object is inside the 'parameters'
+        variable.
+        :param parameters:
+        :param session:
+        :return:
+        """
+        # Received 'parameters' --> [name, surname, email, password]
         try:
-            # Check if username is available
             msg_rspt = Message(action=2, comment='Register created successfully')
             current_designers = session.query(Designer).filter(Designer.email == parameters[2]).first()
-            if not current_designers:
+            if not current_designers:   # Check if email is already in use
                 designer_aux = Designer(parameters[0], parameters[1], parameters[2], parameters[3])
                 session.add(designer_aux)
                 session.commit()
@@ -70,25 +53,12 @@ class Designer(Base):
     @staticmethod
     def read(parameters, session):
         """
-            Retreive a list with al the 'Designers' registered into the DB. The list
-            contains a string representation of each 'Designer' (__str__())
-
-            Parameters
-            ----------
-            parameters: Message.information [] (not used)
-            session: Session
-                Session of connection with the database
-
-            Returns
-            -------
-            msg_rspt: Message
-                Message with the list of experimenters
-
-            Raises
-            ------
-            Exception:
-                If any of the lines of code generates an error
-            """
+        Retrieves a list of 'Designers' registered into the DB. The list contains a string representation of
+        each 'Designer' (__str__()).
+        :param parameters:
+        :param session:
+        :return:
+        """
         try:
             designers = session.query(Designer).all()
             session.close()
@@ -102,34 +72,18 @@ class Designer(Base):
     @staticmethod
     def update(parameters, session):
         """
-            Update information of an 'Designer' registered into the DB.
-
-            Parameters
-            ----------
-            parameters: Message.information [int, string, string, string, string]
-               -> parameters[0] has Designer.id
-               -> parameters[1] has Designer.name
-               -> parameters[2] has Designer.surname
-               -> parameters[3] has Designer.email
-               -> parameters[4] has Designer.password
-            session: Session
-                Session of connection with the database
-
-            Returns
-            -------
-            msg_rspt: Message
-                Message with information of the fail or success of the operation
-
-            Raises
-            ------
-            Exception:
-                If any of the lines of code generates an error
-            """
+        Updates a 'Designer' object from the DB, the id and new data for the object is inside the 'parameters'
+        variable.
+        :param parameters:
+        :param session:
+        :return:
+        """
+        # Received 'parameters' --> [id_designer, name, surname, email, password]
         try:
             msg_rspt = Message(action=2, comment='Register updated successfully')
             current_designers = session.query(Designer).filter(and_(Designer.email == parameters[3],
                                                                     Designer.id != parameters[0])).first()
-            if not current_designers:
+            if not current_designers:   # Check if email is already in use
                 designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
                 designer_aux.name = parameters[1]
                 designer_aux.surname = parameters[2]
@@ -147,29 +101,16 @@ class Designer(Base):
     @staticmethod
     def delete(parameters, session):
         """
-            Remove an 'Designer' from the DB.
-
-            Parameters
-            ----------
-            parameters: Message.information [int]
-               -> parameters[0] has Designer.id
-            session: Session
-                Session of connection with the database
-
-            Returns
-            -------
-            msg_rspt: Message
-                Message with information of the fail or success of the operation
-
-            Raises
-            ------
-            Exception:
-                If any of the lines of code generates an error
-            """
+        Removes a 'Designer' object from the DB. The 'parameters' contains de id of the 'Designer' object.
+        :param parameters:
+        :param session:
+        :return:
+        """
+        # Received 'parameters' --> [id_designer]
         try:
             designer_exp_aux = session.query(DesignerExperimentalScenario).\
                 filter(DesignerExperimentalScenario.designer_id == parameters[0]).first()
-            if designer_exp_aux:
+            if designer_exp_aux:   # Check if designer is not associated in any experiment, if so, it can not be deleted
                 return Message(action=5, information=['The designer is associated to one or more experimental scenarios'],
                                comment='Error deleting register')
             measurement_aux = session.query(Measurement).filter(Measurement.designer_id == parameters[0]).first()
@@ -188,45 +129,23 @@ class Designer(Base):
     @staticmethod
     def select(parameters, session):
         """
-            Retrieve information of an 'Experimenter' from the DB.
-
-            Parameters
-            ----------
-            parameters: Message.information [int] or [string, 'login']
-               -> parameters[0] has Designer.id when only one parameter
-               -> parameters[0] has Designer.e-mail when two parameters
-            session: Session
-                Session of connection with the database
-
-            Returns
-            -------
-            msg_rspt: Message
-                Message with information of the 'Experimenter'
-
-            Raises
-            ------
-            Exception:
-                If any of the lines of code generates an error
-            """
+        Retrieve information (attributes) of a 'Designer' object from the DB. The 'parameters' contains de id of
+        the desired 'Designer'. This function can also ask for info when logging in as designer. Each attribute
+        occupies a space of the returned list.
+        :param parameters:
+        :param session:
+        :return:
+        """
         try:
             msg_rspt = Message(action=2, information=[])
-            if len(parameters) == 2:    # Asking for info in login form
-                '''designer_exp_aux = session.query(DesignerExperimentalScenario). \
-                    filter(DesignerExperimentalScenario.designer_id == parameters[0]).first()
-                if designer_exp_aux:
-                    return Message(action=5,
-                                   information=['The designer is associated to one or more experimental scenarios'],
-                                   comment='Error deleting register')
-                measurement_aux = session.query(Measurement).filter(Measurement.designer_id == parameters[0]).first()
-                if measurement_aux:
-                    return Message(action=5, information=['The designer is associated to one or more measurements'],
-                                   comment='Error selecting register')
-                designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()'''
+            # 1. Received 'parameters' --> [email 'login']
+            if len(parameters) == 2:  # Asking for info in login form
                 designer_aux = session.query(Designer).filter(Designer.email == parameters[0]).first()
                 if not designer_aux:
                     return Message(action=5, information=['The designer is not registered in the system'],
                                    comment='Error selecting register')
                 msg_rspt.information.append(designer_aux.id)
+            # 2. Received 'parameters' --> [id_designer]
             else:
                 designer_aux = session.query(Designer).filter(Designer.id == parameters[0]).first()
             msg_rspt.information.append(designer_aux.name)

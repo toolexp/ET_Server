@@ -24,29 +24,13 @@ class Diagram(Base):
     @staticmethod
     def create(parameters, session):
         """
-           Creates a 'Diagram' object and stores it into the DB, the data for the
-           object is inside the 'parameters'
-
-           Parameters
-           ----------
-           parameters: Message.information [string, string, string, string]
-               -> parameters[0] has Bytes: file content
-               -> parameters[1] has string: filename
-               -> parameters[2] has string: type of diagram to be saved
-           session: Session
-               Session of connection with the database
-
-           Returns
-           -------
-           msg_rspt: Message
-               Message with information of the fail or success of the operation and the id of the
-               created register
-
-           Raises
-           ------
-           Exception:
-               If any of the lines of code generates an error
-           """
+        Creates a 'Diagram' object and stores it into the DB, the data for the object is inside the 'parameters'
+        variable. Creates a diagram into the file system.
+        :param parameters:
+        :param session:
+        :return:
+        """
+        # Received 'parameters' --> [file_bytes, filename, diagram_type]
         try:
             if parameters[2] == 'pattern':
                 path = './Resources/Diagrams/Patterns/'
@@ -74,7 +58,14 @@ class Diagram(Base):
 
     @staticmethod
     def update(parameters, session):
-        # Received --> [id_diagram, file_content, filename, type_diagram]
+        """
+        Updates a 'Diagram' object from the DB, the id and new data for the object is inside the 'parameters'
+        variable. Removes the existing diagram from the file system and creates a new diagram.
+        :param parameters:
+        :param session:
+        :return:
+        """
+        # Received 'parameters' --> [id_diagram, file_bytes, filename, diagram_type]
         if parameters[3] == 'pattern':
             path = './Resources/Diagrams/Patterns/'
         elif parameters[3] == 'exp sol':
@@ -100,6 +91,14 @@ class Diagram(Base):
 
     @staticmethod
     def delete(parameters, session):
+        """
+        Removes a 'Diagram' object from the DB. The 'parameters' contains de id of the 'Diagram' object. It also removes
+        the diagram from the file system
+        :param parameters:
+        :param session:
+        :return:
+        """
+        # Received 'parameters' --> [id_diagram]
         diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[0]).first()
         remove(diagram_aux.file_path)
         if len(parameters) == 1:
@@ -111,6 +110,14 @@ class Diagram(Base):
 
     @staticmethod
     def select(parameters, session):
+        """
+        Retrieve information (attributes) of a 'Diagram' object from the DB. The 'parameters' contains de id of
+        the desired 'Diagram'. Each attribute occupies a space of the returned list.
+        :param parameters:
+        :param session:
+        :return:
+        """
+        # Received 'parameters' --> [id_diagram]
         diagram_aux = session.query(Diagram).filter(Diagram.id == parameters[0]).first()
         myfile = open(diagram_aux.file_path, 'rb')
         file_bytes = myfile.read()

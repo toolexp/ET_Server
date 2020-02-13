@@ -27,34 +27,17 @@ class Experimenter(Base):
     @staticmethod
     def create(parameters, session):
         """
-           Creates an 'Experimenter' object and stores it into the DB, the data for the
-           object is inside the 'parameters'
-
-           Parameters
-           ----------
-           parameters: Message.information [string, string, string, string]
-               -> parameters[0] has Experimenter.name
-               -> parameters[1] has Experimenter.surname
-               -> parameters[2] has Experimenter.email
-               -> parameters[3] has Experimenter.password
-           session: Session
-               Session of connection with the database
-
-           Returns
-           -------
-           msg_rspt: Message
-               Message with information of the fail or success of the operation
-
-           Raises
-           ------
-           Exception:
-               If any of the lines of code generates an error
-           """
+        Creates an 'Experimenter' object and stores it into the DB, the data for the object is inside the 'parameters'
+        variable.
+        :param parameters:
+        :param session:
+        :return:
+        """
+        # Received 'parameters' --> [name, surname, email, password]
         try:
-            # Check if username is available
             msg_rspt = Message(action=2, comment='Register created successfully')
             current_experimenter = session.query(Experimenter).filter(Experimenter.email == parameters[2]).first()
-            if not current_experimenter:
+            if not current_experimenter:    # Check if email is already in use
                 experimenter_aux = Experimenter(parameters[0], parameters[1], parameters[2], parameters[3])
                 session.add(experimenter_aux)
                 session.commit()
@@ -69,25 +52,12 @@ class Experimenter(Base):
     @staticmethod
     def read(parameters, session):
         """
-            Retreive a list with al the 'Experimenters' registered into the DB. The list
-            contains a string representation of each 'Experimenter' (__str__())
-
-            Parameters
-            ----------
-            parameters: Message.information [] (not used)
-            session: Session
-                Session of connection with the database
-
-            Returns
-            -------
-            msg_rspt: Message
-                Message with the list of experimenters
-
-            Raises
-            ------
-            Exception:
-                If any of the lines of code generates an error
-            """
+        Retrieves a list of 'Experimenters' registered into the DB. The list contains a string representation of
+        each 'Experimenter' (__str__()).
+        :param parameters:
+        :param session:
+        :return:
+        """
         try:
             experimenters = session.query(Experimenter).all()
             session.close()
@@ -101,34 +71,18 @@ class Experimenter(Base):
     @staticmethod
     def update(parameters, session):
         """
-            Update information of an 'Experimenter' registered into the DB.
-
-            Parameters
-            ----------
-            parameters: Message.information [int, string, string, string, string]
-               -> parameters[0] has Experimenter.id
-               -> parameters[1] has Experimenter.name
-               -> parameters[2] has Experimenter.surname
-               -> parameters[3] has Experimenter.email
-               -> parameters[4] has Experimenter.password
-            session: Session
-                Session of connection with the database
-
-            Returns
-            -------
-            msg_rspt: Message
-                Message with information of the fail or success of the operation
-
-            Raises
-            ------
-            Exception:
-                If any of the lines of code generates an error
-            """
+        Updates an 'Experimenter' object from the DB, the id and new data for the object is inside the 'parameters'
+        variable.
+        :param parameters:
+        :param session:
+        :return:
+        """
+        # Received 'parameters' --> [id_experimenter, name, surname, email, password]
         try:
             msg_rspt = Message(action=2, comment='Register updated successfully')
             current_experimenter = session.query(Experimenter).filter(and_(Experimenter.email == parameters[3],
                                                                       Experimenter.id != parameters[0])).first()
-            if not current_experimenter:
+            if not current_experimenter:    # Check if email is already in use
                 experimenter_aux = session.query(Experimenter).filter(Experimenter.id == parameters[0]).first()
                 experimenter_aux.name = parameters[1]
                 experimenter_aux.surname = parameters[2]
@@ -146,25 +100,12 @@ class Experimenter(Base):
     @staticmethod
     def delete(parameters, session):
         """
-            Remove an 'Experimenter' from the DB.
-
-            Parameters
-            ----------
-            parameters: Message.information [int]
-               -> parameters[0] has Experimenter.id
-            session: Session
-                Session of connection with the database
-
-            Returns
-            -------
-            msg_rspt: Message
-                Message with information of the fail or success of the operation
-
-            Raises
-            ------
-            Exception:
-                If any of the lines of code generates an error
-            """
+        Removes an 'Experimenter' object from the DB. The 'parameters' contains de id of the 'Experimenter' object.
+        :param parameters:
+        :param session:
+        :return:
+        """
+        # Received 'parameters' --> [id_experimenter]
         try:
             experimenter_aux = session.query(Experimenter).filter(Experimenter.id == parameters[0]).first()
             session.delete(experimenter_aux)
@@ -178,34 +119,23 @@ class Experimenter(Base):
     @staticmethod
     def select(parameters, session):
         """
-            Retrieve information of an 'Experimenter' from the DB.
-
-            Parameters
-            ----------
-            parameters: Message.information [int] or [string, 'login']
-               -> parameters[0] has Experimenter.id when only one parameter
-               -> parameters[0] has Experimenter.e-mail when two parameters
-            session: Session
-                Session of connection with the database
-
-            Returns
-            -------
-            msg_rspt: Message
-                Message with information of the 'Experimenter'
-
-            Raises
-            ------
-            Exception:
-                If any of the lines of code generates an error
-            """
+        Retrieve information (attributes) of an 'Experimenter' object from the DB. The 'parameters' contains de id of
+        the desired 'Experimenter'. This function can also ask for info when logging in as experimenter. Each
+        attribute occupies a space of the returned list.
+        :param parameters:
+        :param session:
+        :return:
+        """
         try:
             msg_rspt = Message(action=2, information=[])
-            if len(parameters) == 2:    # Asking for info in login form
+            # 1. Received 'parameters' --> [email 'login']
+            if len(parameters) == 2:  # Asking for info in login form
                 experimenter_aux = session.query(Experimenter).filter(Experimenter.email == parameters[0]).first()
                 if not experimenter_aux:
                     return Message(action=5, information=['The experimenter is not registered in the system'],
                                    comment='Error selecting register')
                 msg_rspt.information.append(experimenter_aux.id)
+            # 2. Received 'parameters' --> [id_experimenter]
             else:
                 experimenter_aux = session.query(Experimenter).filter(Experimenter.id == parameters[0]).first()
             msg_rspt.information.append(experimenter_aux.name)

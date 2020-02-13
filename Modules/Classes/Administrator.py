@@ -26,34 +26,17 @@ class Administrator(Base):
     @staticmethod
     def create(parameters, session):
         """
-       Creates an 'Administrator' object and stores it into the DB, the data for the
-       object is inside the 'parameters'
-
-       Parameters
-       ----------
-       parameters: Message.information [string, string, string, string]
-           -> parameters[0] has Administrator.name
-           -> parameters[1] has Administrator.surname
-           -> parameters[2] has Administrator.email
-           -> parameters[3] has Administrator.password
-       session: Session
-           Session of connection with the database
-
-       Returns
-       -------
-       msg_rspt: Message
-           Message with information of the fail or success of the operation
-
-       Raises
-       ------
-       Exception:
-           If any of the lines of code generates an error
-       """
+        Creates an 'Administrator' object and stores it into the DB, the data for the object is inside the 'parameters'
+        variable.
+        :param parameters:
+        :param session:
+        :return:
+        """
+        # Received 'parameters' --> [name, surname, email, password]
         try:
-            # Check if username is available
             msg_rspt = Message(action=2, comment='Register created successfully')
             current_admin = session.query(Administrator).filter(Administrator.email == parameters[2]).first()
-            if not current_admin:
+            if not current_admin:       # Check if email is already in use
                 admin_aux = Administrator(parameters[0], parameters[1], parameters[2], parameters[3])
                 session.add(admin_aux)
                 session.commit()
@@ -68,25 +51,12 @@ class Administrator(Base):
     @staticmethod
     def read(parameters, session):
         """
-            Retreive a list with al the 'Administrators' registered into the DB. The list
-            contains a string representation of each 'Administrator' (__str__())
-
-            Parameters
-            ----------
-            parameters: Message.information [] (not used)
-            session: Session
-                Session of connection with the database
-
-            Returns
-            -------
-            msg_rspt: Message
-                Message with the list of administrators
-
-            Raises
-            ------
-            Exception:
-                If any of the lines of code generates an error
-            """
+        Retrieves a list of 'Administrators' registered into the DB. The list contains a string representation of
+        each 'Administrator' (__str__()).
+        :param parameters:
+        :param session:
+        :return:
+        """
         try:
             admins = session.query(Administrator).all()
             session.close()
@@ -100,34 +70,18 @@ class Administrator(Base):
     @staticmethod
     def update(parameters, session):
         """
-            Update information of an 'Administrator' registered into the DB.
-
-            Parameters
-            ----------
-            parameters: Message.information [int, string, string, string, string]
-               -> parameters[0] has Administrator.id
-               -> parameters[1] has Administrator.name
-               -> parameters[2] has Administrator.surname
-               -> parameters[3] has Administrator.email
-               -> parameters[4] has Administrator.password
-            session: Session
-                Session of connection with the database
-
-            Returns
-            -------
-            msg_rspt: Message
-                Message with information of the fail or success of the operation
-
-            Raises
-            ------
-            Exception:
-                If any of the lines of code generates an error
-            """
+        Updates an 'Administrator' object from the DB, the id and new data for the object is inside the 'parameters'
+        variable.
+        :param parameters:
+        :param session:
+        :return:
+        """
+        # Received 'parameters' --> [id_administrator, name, surname, email, password]
         try:
             msg_rspt = Message(action=2, comment='Register updated successfully')
             current_admin = session.query(Administrator).filter(and_(Administrator.email == parameters[3],
                                                                      Administrator.id != parameters[0])).first()
-            if not current_admin:
+            if not current_admin:   # Check if email is already in use
                 admin_aux = session.query(Administrator).filter(Administrator.id == parameters[0]).first()
                 admin_aux.name = parameters[1]
                 admin_aux.surname = parameters[2]
@@ -145,25 +99,12 @@ class Administrator(Base):
     @staticmethod
     def delete(parameters, session):
         """
-            Remove an 'Administrator' from the DB.
-
-            Parameters
-            ----------
-            parameters: Message.information [int]
-               -> parameters[0] has Administrator.id
-            session: Session
-                Session of connection with the database
-
-            Returns
-            -------
-            msg_rspt: Message
-                Message with information of the fail or success of the operation
-
-            Raises
-            ------
-            Exception:
-                If any of the lines of code generates an error
-            """
+        Removes an 'Administrator' object from the DB. The 'parameters' contains de id of the 'Administrator' object.
+        :param parameters:
+        :param session:
+        :return:
+        """
+        # Received 'parameters' --> [id_administrator]
         try:
             admin_aux = session.query(Administrator).filter(Administrator.id == parameters[0]).first()
             session.delete(admin_aux)
@@ -177,27 +118,16 @@ class Administrator(Base):
     @staticmethod
     def select(parameters, session):
         """
-            Retrieve information of an 'Administrator' from the DB.
-
-            Parameters
-            ----------
-            parameters: Message.information [int]
-               -> parameters[0] has Administrator.id
-            session: Session
-                Session of connection with the database
-
-            Returns
-            -------
-            msg_rspt: Message
-                Message with information of the 'Administrator'
-
-            Raises
-            ------
-            Exception:
-                If any of the lines of code generates an error
-            """
+        Retrieve information (attributes) of an 'Administrator' object from the DB. The 'parameters' contains de id of
+        the desired 'Administrator'. This function can also ask for info when logging in as administrator. Each
+        attribute occupies a space of the returned list.
+        :param parameters:
+        :param session:
+        :return:
+        """
         try:
             msg_rspt = Message(action=2, information=[])
+            # 1. Received 'parameters' --> [email 'login']
             if len(parameters) == 2:    # Asking for info in login form
                 admin_aux = session.query(Administrator).filter(Administrator.email == parameters[0]).first()
                 if not admin_aux:
@@ -205,6 +135,7 @@ class Administrator(Base):
                                    comment='Error selecting register')
 
                 msg_rspt.information.append(admin_aux.id)
+            # 2. Received 'parameters' --> [id_administrator]
             else:
                 admin_aux = session.query(Administrator).filter(Administrator.id == parameters[0]).first()
             msg_rspt.information.append(admin_aux.name)
