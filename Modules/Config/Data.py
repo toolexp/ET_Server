@@ -16,8 +16,9 @@ class Message:
 
     :param action: number that indicates an specific action.
     When message is sent from server to client, possible options for this parameters are:
-        - 2: means that the requested action by the client was done successfully
+        - 2: means that the requested action by the client was completed successfully
         - 5: means that the requested action by the client was not completed
+        - 6: means that the requested action by the client was completed but with a warning
     When message is sent from client to server, possible options are listed in this project > Modules.Config.protocol
     :type action: int
     :param comment: additional information that may be useful for any of the endpoints

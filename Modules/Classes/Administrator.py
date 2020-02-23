@@ -1,11 +1,24 @@
-# coding=utf-8
-
 from sqlalchemy import Column, String, Integer, and_
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
 
 
 class Administrator(Base):
+    """
+    A class used to represent an administrator user. An administrator object has attributes:
+
+    :param id: identifier of object in the database. This is the primary key
+    :type id: int
+    :param name: first name of the user
+    :type name: str
+    :param surname: last name of the user
+    :type surname: str
+    :param email: email or username of the user. Used to validate in login process
+    :type email: str
+    :param password: password of the user. Used to validate in login process. It is stored in the database using hash
+    :type password: str
+    """
+
     __tablename__ = 'administrators'
 
     id = Column(Integer, primary_key=True)
@@ -15,12 +28,18 @@ class Administrator(Base):
     password = Column(String)
 
     def __init__(self, name, surname, email, password):
+        """
+        Constructor of the class
+        """
         self.name = name
         self.surname = surname
         self.email = email
         self.password = password
 
     def __str__(self):
+        """
+        Method that represents the object as a string
+        """
         return '{}¥{}¥{}¥{}'.format(self.id, self.name, self.surname, self.email)
 
     @staticmethod
@@ -28,9 +47,13 @@ class Administrator(Base):
         """
         Creates an 'Administrator' object and stores it into the DB, the data for the object is inside the 'parameters'
         variable.
-        :param parameters:
-        :param session:
-        :return:
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
         """
         # Received 'parameters' --> [name, surname, email, password]
         try:
@@ -53,9 +76,13 @@ class Administrator(Base):
         """
         Retrieves a list of 'Administrators' registered into the DB. The list contains a string representation of
         each 'Administrator' (__str__()).
-        :param parameters:
-        :param session:
-        :return:
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
         """
         try:
             admins = session.query(Administrator).all()
@@ -72,9 +99,13 @@ class Administrator(Base):
         """
         Updates an 'Administrator' object from the DB, the id and new data for the object is inside the 'parameters'
         variable.
-        :param parameters:
-        :param session:
-        :return:
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
         """
         # Received 'parameters' --> [id_administrator, name, surname, email, password]
         try:
@@ -100,9 +131,13 @@ class Administrator(Base):
     def delete(parameters, session):
         """
         Removes an 'Administrator' object from the DB. The 'parameters' contains de id of the 'Administrator' object.
-        :param parameters:
-        :param session:
-        :return:
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
         """
         # Received 'parameters' --> [id_administrator]
         try:
@@ -121,9 +156,13 @@ class Administrator(Base):
         Retrieve information (attributes) of an 'Administrator' object from the DB. The 'parameters' contains de id of
         the desired 'Administrator'. This function can also ask for info when logging in as administrator. Each
         attribute occupies a space of the returned list.
-        :param parameters:
-        :param session:
-        :return:
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
         """
         try:
             msg_rspt = Message(action=2, information=[])

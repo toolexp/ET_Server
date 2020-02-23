@@ -1,4 +1,3 @@
-# coding=utf-8
 from sqlalchemy import Column, String, Integer, DateTime, and_
 from Modules.Config.base import Base
 from Modules.Config.Data import Message
@@ -6,6 +5,27 @@ from datetime import datetime
 
 
 class Experiment(Base):
+    """
+    A class used to represent an experiment. An experiment object has attributes:
+
+    :param id: identifier of object in the database. This is the primary key
+    :type id: int
+    :param name: name of the experiment
+    :type name: str
+    :param description: description of the experiment
+    :type description: str
+    :param design_type: indicates the type of design of the experiment (one or two groups of designers)
+    :type design_type: int
+    :param state: current state of the experiment. It may be: created, execution or finished
+    :type state: str
+    :param creation_date: datetime when the experiment was created
+    :type creation_date: datetime
+    :param execution_date: datetime when the experiment was executed (made it available for designers)
+    :type execution_date: datetime
+    :param finished_date: datetime when the experiment was finished (manually or automatically)
+    :type finished_date: datetime
+    """
+
     __tablename__ = 'experiments'
 
     id = Column(Integer, primary_key=True)
@@ -18,6 +38,9 @@ class Experiment(Base):
     finished_date = Column(DateTime)
 
     def __init__(self, name, description, design_type):
+        """
+        Constructor of the class
+        """
         self.name = name
         self.description = description
         self.design_type = design_type
@@ -27,10 +50,24 @@ class Experiment(Base):
         self.finished_date = None
 
     def __str__(self):
+        """
+        Method that represents the object as a string
+        """
         return '{}¥{}¥{}¥{}¥{}'.format(self.id, self.name, self.description, self.design_type, self.state)
 
     @staticmethod
     def create(parameters, session):
+        """
+        Creates an 'Experiment' object and stores it into the DB, the data for the object is inside the 'parameters'
+        variable.
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
+        """
         # Received --> [name, description, design_type]
         experiment_aux = Experiment(parameters[0], parameters[1], parameters[2])
         session.add(experiment_aux)
@@ -42,11 +79,23 @@ class Experiment(Base):
 
     @staticmethod
     def read(parameters, session):
-        # Received --> ['finished']
+        """
+        Retrieves a list of 'Experiments' registered into the DB. The list contains a string representation of
+        each 'Experiment' (__str__()).
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
+        """
         msg_rspt = Message(action=2, information=[])
-        if len(parameters) == 1:    # Asking for finished experiments (reports)
+        # Received --> ['finished']
+        if len(parameters) == 1:    # Asking for finished experiments (to get reports)
             experiments = session.query(Experiment).filter(Experiment.state == 'finished').all()
-        else:
+        # Received --> []
+        else:   # Asking for all experiments
             experiments = session.query(Experiment).all()
         for item in experiments:
             msg_rspt.information.append(item.__str__())
@@ -55,20 +104,31 @@ class Experiment(Base):
 
     @staticmethod
     def update(parameters, session):
+        """
+        Updates an 'Experiment' object from the DB, the id and new data for the object is inside the 'parameters'
+        variable.
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
+        """
         experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
-        if len(parameters) == 4:
+        if len(parameters) == 4:    # Update information of the experiment
             # Received --> [id_experiment, name, description, design_type]
             experiment_aux.name = parameters[1]
             experiment_aux.description = parameters[2]
             experiment_aux.design_type = parameters[3]
-        else:
-            from Modules.Classes.ExperimentalScenario import ExperimentalScenario
+        else:   # Update state of the experiment
             # Received --> [id_experiment, state]
-            if parameters[1] == 'execution':   # When an experiment goes from created to execution
+            from Modules.Classes.ExperimentalScenario import ExperimentalScenario
+            if parameters[1] == 'execution':   # When an experiment is executed
                 if experiment_aux.state == 'created':
                     experimental_sc_aux = session.query(ExperimentalScenario).\
                         filter(ExperimentalScenario.experiment_id == parameters[0]).all()
-                    if not experimental_sc_aux:
+                    if not experimental_sc_aux:     # Any scenario configured yet
                         return Message(action=5, information=['No experimental scenarios created for this experiment. '
                                                               'Create al least one to execute the experiment'],
                                        comment='Error updating register')
@@ -79,7 +139,8 @@ class Experiment(Base):
                     for item in experimental_sc_aux:
                         item.state = 'execution'
                         item.execution_date = datetime.now()
-                elif experiment_aux.state == 'execution':    # When need to execute new scenarios after having executed the experiment
+                elif experiment_aux.state == 'execution':    # When need to execute new scenarios after having executed
+                    # the experiment, if new scenarios were created
                     experimental_sc_aux = session.query(ExperimentalScenario). \
                         filter(ExperimentalScenario.experiment_id == parameters[0]).all()
                     executed_scenarios = True
@@ -88,19 +149,19 @@ class Experiment(Base):
                             item.state = 'execution'
                             item.execution_date = datetime.now()
                             executed_scenarios = False
-                    if executed_scenarios:
+                    if executed_scenarios:  # If no new scenarios were created
                         return Message(action=5, information=['All scenarios configured are already in execution'],
                                        comment='Error updating register')
-                else:   # Experimental scenario is finished
+                else:   # Experimental scenario is finished, can not execute
                     return Message(action=5, information=['The experiment is finished, can not execute'],
                                    comment='Error updating register')
-            elif parameters[1] == 'finished':    # When an experiment goes from execution to finished
-                if experiment_aux.state == 'execution':
+            elif parameters[1] == 'finished':    # When an experiment finishes
+                if experiment_aux.state == 'execution':     # When current state of experiment is 'execution'
                     experimental_sc_aux = session.query(ExperimentalScenario). \
                         filter(ExperimentalScenario.experiment_id == parameters[0]).all()
                     # Change experimental scenarios state, associated with current experiment
                     for item in experimental_sc_aux:
-                        if item.state == 'created':  # An scenario has not been executed yet
+                        if item.state == 'created':  # At least one scenario has not been executed yet
                             return Message(action=5, information=['At least one associated scenario has not been '
                                                                   'executed yet. Execute all scenarios first to finish '
                                                                   'the experiment'],
@@ -112,35 +173,11 @@ class Experiment(Base):
                     from Modules.Classes.Designer import Designer
                     from Modules.Classes.Problem import Problem
                     from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
-                    # Section to create empty measurement (-1) for all designers that have not executed the scenarios
+                    # Section to create empty measurements (-1) for all designers that have not executed the scenarios
                     all_designers = session.query(Designer). \
                         join(Designer.experimental_scenario_associations). \
                         join(DesignerExperimentalScenario.experimental_scenario).\
                         join(ExperimentalScenario.experiment).filter(Experiment.id == parameters[0]).all()
-                    '''done_designers = session.query(Designer). \
-                        join(Designer.measurements). \
-                        join(Measurement.problem).join(Problem.experimental_scenario).\
-                        join(ExperimentalScenario.experiment).filter(Experiment.id == parameters[0]).all()
-                    scenarios = session.query(ExperimentalScenario). \
-                        join(ExperimentalScenario.experiment). \
-                        filter(Experiment.id == parameters[0]).all()
-                    # There is the possibility that a designer executed only one scenario when it was assigned more
-                    # than one the above query will show that the designer completed all scenarios, when not
-                    aux_done_designers = done_designers
-                    for item in scenarios:
-                        # Check for each scenario of the experiment if have been executed
-                        done_designers_scenario = session.query(Designer). \
-                            join(Designer.measurements).join(Measurement.problem).join(Problem.experimental_scenario). \
-                            filter(ExperimentalScenario.id == item.id).all()
-                        # If at least one problem not completed, the the whole scenario was not completed
-                        if len(done_designers) != len(done_designers_scenario):
-                            aux_done_designers = done_designers if len(done_designers) < len(
-                                done_designers_scenario) else done_designers_scenario
-                    done_designers = aux_done_designers
-                    for item in done_designers:
-                        if item in all_designers:
-                            all_designers.remove(item)
-                    if all_designers:   # If at least one designer is remaining a measurement, it has to be created (-1)'''
                     problems = session.query(Problem). \
                         join(Problem.experimental_scenario). \
                         join(ExperimentalScenario.experiment).filter(Experiment.id == parameters[0]).all()
@@ -152,7 +189,8 @@ class Experiment(Base):
                             existing_measurement = session.query(Measurement).\
                                 filter(and_(Measurement.designer_id == designer_aux.id,
                                             Measurement.problem_id == problem_aux.id)).all()
-                            if not existing_measurement:    # If at least one designer is remaining a measurement, it has to be created (-1)
+                            if not existing_measurement:    # If at least one designer has a remaining measurement,
+                                # it has to be created (-1)
                                 for metric_aux in metrics:
                                     measurement_aux = Measurement(float(-1), current_date, current_date, metric_aux,
                                                                   designer_aux, problem_aux)
@@ -160,10 +198,10 @@ class Experiment(Base):
                     # Change experiment state
                     experiment_aux.state = 'finished'
                     experiment_aux.finished_date = datetime.now()
-                elif experiment_aux.state == 'finished':
+                elif experiment_aux.state == 'finished':    # Current state is finished
                     return Message(action=5, information=['The experiment is already finished'],
                                    comment='Error updating register')
-                else:   # Experimental scenario is created
+                else:   # Current state is created, can not finish yet
                     return Message(action=5, information=['The experiment is created, first execute to finish it'],
                                    comment='Error updating register')
         session.commit()
@@ -173,6 +211,16 @@ class Experiment(Base):
 
     @staticmethod
     def delete(parameters, session):
+        """
+        Removes an 'Experiment' object from the DB. The 'parameters' contains de id of the 'Experiment' object.
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
+        """
         # Received --> [id_experiment]
         from Modules.Classes.ExperimentalScenario import ExperimentalScenario
         experimetal_sc = session.query(ExperimentalScenario).filter(ExperimentalScenario.experiment_id == parameters[0]).first()
@@ -188,19 +236,31 @@ class Experiment(Base):
 
     @staticmethod
     def select(parameters, session):
+        """
+        Retrieve information (attributes) of an 'Experiment' object from the DB. The 'parameters' contains de id of
+        the desired 'Experimenter'.
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
+        """
         from Modules.Classes.ExperimentalScenario import ExperimentalScenario
         msg_rspt = Message(action=2, information=[])
         experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
-        if len(parameters) == 2:
+        if len(parameters) == 2:    # When an experiment is selected for updating its information
             if experiment_aux.state == 'finished' or experiment_aux.state == 'execution':
                 return Message(action=5, comment='The state of the experiment doesn\'t allow you to change it\'s '
                                                  'information')
             experimetal_sc = session.query(ExperimentalScenario).filter(
                 ExperimentalScenario.experiment_id == parameters[0]).first()
-            if experimetal_sc:
+            if experimetal_sc:  # The experiment has at least one configured scenario, WARNING when updating design type
                 msg_rspt.comment = 'The experiment has experimental scenarios associated to it. If you change its\' ' \
                                    'design type, CONFIGURED INFORMATION MAY BE DELETED'
                 msg_rspt.action = 6
+        # Select attributes of the experiment
         msg_rspt.information.append(experiment_aux.name)
         msg_rspt.information.append(experiment_aux.description)
         msg_rspt.information.append(experiment_aux.design_type)

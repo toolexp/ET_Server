@@ -1,5 +1,3 @@
-# coding=utf-8
-
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
@@ -8,6 +6,19 @@ from Modules.Classes.Classification import Classification
 
 
 class Category(Base):
+    """
+    A class used to represent a category. A category object has attributes:
+
+    :param id: identifier of object in the database. This is the primary key
+    :type id: int
+    :param name: name of the category
+    :type name: str
+    :param classification_id: identifier of the classification object which the category belongs to. This is a foreign key
+    :type classification_id: int
+    :param classification: classification object which the category belongs to
+    :type classification: Modules.Classes.Classification.Classification
+    """
+
     __tablename__ = 'categories'
 
     id = Column(Integer, primary_key=True)
@@ -18,10 +29,16 @@ class Category(Base):
                                                                     single_parent=True))
 
     def __init__(self, name, classification):
+        """
+        Constructor of the class
+        """
         self.name = name
         self.classification = classification
 
     def __str__(self):
+        """
+        Method that represents the object as a string
+        """
         return '{}¥{}¥{}'.format(self.id, self.name, self.classification_id)
 
     @staticmethod
@@ -29,9 +46,13 @@ class Category(Base):
         """
         Creates a 'Category' object and stores it into the DB, the data for the object is inside the 'parameters'
         variable.
-        :param parameters:
-        :param session:
-        :return:
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
         """
         # Received 'parameters' --> [name, id_classification]
         classification_aux = session.query(Classification).filter(Classification.id == parameters[1]).first()
@@ -47,9 +68,13 @@ class Category(Base):
         """
         Retrieves a list of 'Categories' registered into the DB. The target objects depends of the length of the
         'parameters'. The list contains a string representation of each 'Category' (__str__()).
-        :param parameters:
-        :param session:
-        :return:
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
         """
         if len(parameters) == 0:    # Ask for all categories stored in DB
             categories = session.query(Category).all()
@@ -67,9 +92,13 @@ class Category(Base):
         """
         Removes a 'Category' object from the DB. The 'parameters' contains de id of the 'Classification' object that the
         categories are associated with.
-        :param parameters:
-        :param session:
-        :return:
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
         """
         # Received --> [id_classification]
         categories_aux = session.query(Category).filter(Category.classification_id == parameters[0]).all()
@@ -85,9 +114,13 @@ class Category(Base):
         """
         Retrieve information (attributes) of a 'Category' object from the DB. The 'parameters' contains de id of the
         desired 'Category'. Each attribute occupies a space of the returned list.
-        :param parameters:
-        :param session:
-        :return:
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
         """
         # Received --> [id_category]
         category_aux = session.query(Category).filter(Category.id == parameters[0]).first()
