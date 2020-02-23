@@ -1,3 +1,7 @@
+"""
+File with classes and special functions that are required at some point in the project
+"""
+
 from datetime import datetime
 import pandas as pd
 import shutil
@@ -6,8 +10,26 @@ import zipfile
 
 
 class Message:
+    """
+    A class used to represent the message that is exchanged between server and clients. This message is like the
+    communication protocol handled by both endpoints of the communication. A message object has attributes:
+
+    :param action: number that indicates an specific action.
+    When message is sent from server to client, possible options for this parameters are:
+        - 2: means that the requested action by the client was done successfully
+        - 5: means that the requested action by the client was not completed
+    When message is sent from client to server, possible options are listed in this project > Modules.Config.protocol
+    :type action: int
+    :param comment: additional information that may be useful for any of the endpoints
+    :type comment: str
+    :param information: list of parameters with important information associated with the action of the message
+    :type information: list
+    """
 
     def __init__(self, action=0, comment='', information=None):
+        """
+        Constructor of the class
+        """
         if information is None:
             information = []
         self.action = action
@@ -16,6 +38,14 @@ class Message:
 
 
 def verify_ip(ip):
+    """
+    Verifies that the format of an IP address is correct
+
+    :param ip: ip address
+    :type ip: str
+    :return: success or not depending on the validation
+    :rtype: bool
+    """
     try:
         digits = ip.split('.')
         for item in digits:
@@ -29,20 +59,39 @@ def verify_ip(ip):
 
 
 def verify_port(port):
-    if not port.isdigit():
-        return False
-    else:
-        return True
+    """
+    Verifies that the format of a port number is correct (number and range)
+
+    :param port: port number
+    :type port: str
+    :return: success or not depending on the validation
+    :rtype: bool
+    """
+    if port.isdigit():
+        if 1023 < int(port) <= 65535:
+            return True
+    return False
 
 
 def get_experiment_report(experiment=None, session=None):
+    """
+    Creates a zipped report with all detailed information of a finished experiment. Stores the created zipped file
+    into Resources.Reports folder and returns the path of the file so it can be stored in the database.
+
+    :param experiment: experiment object queried from the database from which the report will be created
+    :type experiment: Modules.Classes.Experiment.Experiment
+    :param session: session established with the database
+    :type session: Modules.Config.base.Session
+    :return: newly created experiment report path
+    :rtype: str
+    :return: newly created experiment filename
+    :rtype: str
+    """
     from Modules.Classes.ExperimentalScenario import ExperimentalScenario
     from Modules.Classes.Designer import Designer
     from Modules.Classes.Measurement import Measurement
     from Modules.Classes.Metric import Metric
     from Modules.Classes.Problem import Problem
-    from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
-    from sqlalchemy import and_
     # Get appropriate name for excel workbook
     words = experiment.name.split(' ')
     for index, word in enumerate(words):
@@ -79,16 +128,6 @@ def get_experiment_report(experiment=None, session=None):
             current_df = pd.read_sql_query(current_query, session.bind)
             current_df.loc[current_df['measurement'] == -1, 'measurement'] = 'No executed'
             current_df.loc[current_df['measurement'] == -2, 'measurement'] = 'Exit unexpectedly'
-            '''current_query = session.query(DesignerExperimentalScenario, Designer, Measurement, Metric, Problem). \
-                with_entities(Measurement.id.label('measurement_id'), Designer.email.label('username'),
-                              DesignerExperimentalScenario.designer_type.label('group_type'),
-                              Problem.brief_description.label('problem'), Metric.name.label('metric_type'),
-                              Measurement.value.label('measurement'), Measurement.acquisition_start_date,
-                              Measurement.acquisition_end_date). \
-                join(DesignerExperimentalScenario.designer).join(Designer.measurements).join(Measurement.metric). \
-                join(Measurement.problem).filter(Problem.id == problem.id).statement
-            current_df.loc[current_df['group_type'] == 1, 'group_type'] = 'experimental'
-            current_df.loc[current_df['group_type'] == 2, 'group_type'] = 'control'''
             current_sheets.append(current_df)
             current_sheets_names.append(current_sheet_name)
         with pd.ExcelWriter(current_workbook_path + current_workbook_name) as writer:
@@ -110,6 +149,14 @@ def get_experiment_report(experiment=None, session=None):
 
 
 def zipdir(path, ziph):
+    """
+    Zips a folder with all its content.
+
+    :param path: path of current folder that wants to be zipped
+    :type path: str
+    :param ziph: zipfile object where de folder will be zipped
+    :type ziph: zipfile.ZipFile
+    """
     # ziph is zipfile handle
     for root, dirs, files in os.walk(path):
         for file in files:

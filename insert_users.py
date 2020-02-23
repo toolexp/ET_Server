@@ -1,9 +1,15 @@
-# coding=utf-8
+"""
+Script that insert values for users(administrators and experimenters) to the database. This is necessary to be ran if
+insert_demo.py script is not executed, so at least one user is registered in the system. This script also creates the
+default metrics. This script may be ran once if needed before working with the project
+"""
 
 # Import necessary modules
 import hashlib
 from datetime import datetime
 
+# Import all classes (ALWAYS IMPORT ALL CLASSES MAPPED TO THE DATABASE, EVEN IF THEY ARE NOT USED, NEEDED TO MAP ALL
+# CLASSES WITH ALL ENTITIES CORRECTLY)
 from Modules.Config.base import Session, engine, Base
 from Modules.Classes.Administrator import Administrator
 from Modules.Classes.Category import Category

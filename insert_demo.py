@@ -1,9 +1,14 @@
-# coding=utf-8
+"""
+Script that insert demo values for most of the entities of the database. This script may be ran once if needed before
+working with the project
+"""
 
 # Import necessary modules
 import hashlib
 from datetime import datetime
 
+# Import all classes (ALWAYS IMPORT ALL CLASSES MAPPED TO THE DATABASE, EVEN IF THEY ARE NOT USED, NEEDED TO MAP ALL
+# CLASSES WITH ALL ENTITIES CORRECTLY)
 from Modules.Config.base import Session, engine, Base
 from Modules.Classes.Administrator import Administrator
 from Modules.Classes.Category import Category
@@ -163,7 +168,6 @@ des_exp_sc_demo20 = DesignerExperimentalScenario(2, designer_demo20, experimenta
 exp_sc_pat_demo1 = ExperimentalScenarioPattern(1, experimental_sc_demo, pattern_demo2)
 exp_sc_pat_demo2 = ExperimentalScenarioPattern(2, experimental_sc_demo, pattern_demo2)
 
-
 # Make persistence in DB
 session.add(admin_demo)
 session.add(designer_demo1)
@@ -243,7 +247,6 @@ session.add(des_exp_sc_demo17)
 session.add(des_exp_sc_demo18)
 session.add(des_exp_sc_demo19)
 session.add(des_exp_sc_demo20)
-
 session.add(exp_sc_pat_demo1)
 session.add(exp_sc_pat_demo2)
 
