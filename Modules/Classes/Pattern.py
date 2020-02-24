@@ -1,5 +1,3 @@
-# coding=utf-8
-
 from sqlalchemy import Column, Integer, ForeignKey, and_
 from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
@@ -12,6 +10,17 @@ from Modules.Classes.SentSolution import SentSolution
 
 
 class Pattern(Base):
+    """
+    A class used to represent a pattern. A pattern object has attributes:
+
+    :param id: identifier of object in the database. This is the primary key
+    :type id: int
+    :param template_id: identifier of the template object that the pattern is associated with. This is a foreign key
+    :type template_id: int
+    :param template: template object that the pattern is associated with
+    :type template: Modules.Classes.Template.Template
+    """
+
     __tablename__ = 'patterns'
 
     id = Column(Integer, primary_key=True)
@@ -20,9 +29,15 @@ class Pattern(Base):
     template = relationship("Template", backref=backref("patterns", cascade="all, delete-orphan", single_parent=True))
 
     def __init__(self, template):
+        """
+        Constructor of the class
+        """
         self.template = template
 
     def __str__(self):
+        """
+        Method that represents the object as a string
+        """
         return '{}¥{}'.format(self.id, self.template_id)
 
     @staticmethod

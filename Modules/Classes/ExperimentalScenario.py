@@ -1,5 +1,3 @@
-# coding=utf-8
-
 from sqlalchemy import Column, String, Integer, ForeignKey, and_, Boolean, DateTime
 from sqlalchemy.orm import relationship, backref
 from Modules.Config.base import Base
@@ -12,6 +10,38 @@ from datetime import datetime
 
 
 class ExperimentalScenario(Base):
+    """
+    A class used to represent an experimental scenario. An experimental scenario object has attributes:
+
+    :param id: identifier of object in the database. This is the primary key
+    :type id: int
+    :param title: title of the scenario
+    :type title: str
+    :param description: description given to the scenario
+    :type description: str
+    :param access_code: unique code used to control access to the scenario
+    :type access_code: str
+    :param state: current state of the scenario. It may be: created, execution or finished
+    :type state: str
+    :param availability: indicates whether the scenario is available or not for configured designers
+    :type availability: bool
+    :param creation_date: datetime when the experiment was created
+    :type creation_date: datetime
+    :param execution_date: datetime when the experiment was executed (made it available for designers)
+    :type execution_date: datetime
+    :param finished_date: datetime when the experiment was finished (manually or automatically)
+    :type finished_date: datetime
+    :param description_diagram_id: identifier of the diagram object that is used to describe the scenario.
+    This is a foreign key
+    :type description_diagram_id: int
+    :param experiment_id: identifier of the experiment object which the scenario belongs to. This is a foreign key
+    :type experiment_id: int
+    :param description_diagram: diagram object that is used to describe the scenario
+    :type description_diagram: Modules.Classes.Diagram.Diagram
+    :param experiment: experiment object which the scenario belongs to
+    :type experiment: Modules.Classes.Experiment.Experiment
+    """
+
     __tablename__ = 'experimental_scenarios'
 
     id = Column(Integer, primary_key=True)
@@ -32,6 +62,9 @@ class ExperimentalScenario(Base):
                                                             single_parent=True))
 
     def __init__(self, title, description, access_code, state, description_diagram, experiment):
+        """
+        Constructor of the class
+        """
         self.title = title
         self.description = description
         self.access_code = access_code
@@ -44,6 +77,9 @@ class ExperimentalScenario(Base):
         self.finished_date = None
 
     def __str__(self):
+        """
+        Method that represents the object as a string
+        """
         if self.availability:
             aux_av = '✓'
         else:
@@ -52,10 +88,22 @@ class ExperimentalScenario(Base):
 
     @staticmethod
     def create(parameters, session):
+        """
+        Creates an 'ExperimentalScenario' object and stores it into the DB, the data for the object is inside the
+        'parameters' variable.
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
+        """
         from Modules.Classes.Designer import Designer
         from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
-        # Received --> [title, description, access_code, state, description_diagram_id, experiment_id, [experimental_designers_ids...],
-        # [control_designers_ids...], [experimental_patterns_ids...], [control_patterns_ids...]]
+        # Received --> [title, description, access_code, state, description_diagram_id, experiment_id,
+        # [experimental_designers_ids...], [control_designers_ids...], [experimental_patterns_ids...],
+        # [control_patterns_ids...]]
         experiment = session.query(Experiment).filter(Experiment.id == parameters[5]).first()
         if parameters[4] is not None:   # Description diagram is optional
             description_diagram = session.query(Diagram).filter(Diagram.id == parameters[4]).first()
@@ -85,7 +133,8 @@ class ExperimentalScenario(Base):
                 pattern_aux = session.query(Pattern).filter(Pattern.id == item).first()
                 exp_sc_pat = ExperimentalScenarioPattern(2, new_exp_sc_aux, pattern_aux)
                 session.add(exp_sc_pat)
-        if parameters[3] == 'execution':    # When an scenario is created with 'execution' state, the experiment containing it has to be in 'execution' as well
+        if parameters[3] == 'execution':    # When an scenario is created with 'execution' state, the experiment
+            # containing it has to be in 'execution' as well
             experiment.state = 'execution'
             experiment.execution_date = datetime.now()
         session.commit()
@@ -96,18 +145,29 @@ class ExperimentalScenario(Base):
 
     @staticmethod
     def read(parameters, session):
-        if len(parameters) == 0:
+        """
+        Retrieves a list of 'ExperimentalScenarios' registered into the DB. The list contains a string representation of
+        each 'ExperimentalScenario' (__str__()).
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
+        """
+        if len(parameters) == 0:    # Ask for all experimental scenarios registered in the DB
             exp_scenarios = session.query(ExperimentalScenario).all()
-        elif len(parameters) == 1:
+        elif len(parameters) == 1:  # Ask for all experimental scenarios associated with an experiment
             # Received --> [id_experiment]
             exp_scenarios = session.query(ExperimentalScenario).filter(
                 ExperimentalScenario.experiment_id == parameters[0]).all()
-        else:
+        else:   # When a designer retrieves available scenarios for him
             from Modules.Classes.Measurement import Measurement
             from Modules.Classes.Designer import Designer
             from Modules.Classes.Problem import Problem
             from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
-            # Received --> ['my scenarios', id_designer] (When a designer retrieves available scenarios for him)
+            # Received --> ['my scenarios', id_designer]
             exp_scenarios = session.query(ExperimentalScenario). \
                 join(ExperimentalScenario.designer_associations). \
                 join(DesignerExperimentalScenario.designer).filter(and_(Designer.id == parameters[1],
@@ -117,7 +177,7 @@ class ExperimentalScenario(Base):
                 join(ExperimentalScenario.problems). \
                 join(Problem.measurements).filter(Measurement.designer_id == parameters[1]).all()
             for item in exp_scenarios_done:
-                if item in exp_scenarios:
+                if item in exp_scenarios:   # Exclude scenarios that have been aready completed
                     exp_scenarios.remove(item)
         msg_rspt = Message(action=2, information=[])
         for item in exp_scenarios:
@@ -127,8 +187,18 @@ class ExperimentalScenario(Base):
 
     @staticmethod
     def update(parameters, session):
-        if len(parameters) == 3:
-            # To cahnge availability of scenario for designers
+        """
+        Updates an 'ExperimentalScenario' object from the DB, the id and new data for the object is inside the
+        'parameters' variable.
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
+        """
+        if len(parameters) == 3:    # To cahnge availability of scenario for designers
             # Received --> ['change_availability', id_exp_sc, new_state]
             exp_sc_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[1]).first()
             exp_sc_aux.availability = parameters[2]
@@ -139,7 +209,8 @@ class ExperimentalScenario(Base):
             change_state = True
             designers_exp_sc = session.query(DesignerExperimentalScenario).\
                 filter(DesignerExperimentalScenario.experimental_scenario_id == parameters[1]).all()
-            for item in designers_exp_sc:   # Check if exist measurement for all designers in selected experimental scenarios
+            for item in designers_exp_sc:   # Check if there exists measurements for all designers in selected
+                # experimental scenarios
                 measurements_aux = session.query(Measurement).filter(Measurement.designer_id == item.designer_id).all()
                 if measurements_aux:
                     num_measurements = 0
@@ -158,7 +229,7 @@ class ExperimentalScenario(Base):
                     ExperimentalScenario.id == parameters[1]).first()
                 exp_sc_aux.state = parameters[0]
                 exp_sc_aux.finished_date = datetime.now()
-        else:
+        else:   # Ask for updating the main information of an experimental scenario
             from Modules.Classes.Designer import Designer
             from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
             # Received --> [id_exp_sc, title, description, access_code, description_diagram_id, experiment_id,
@@ -212,9 +283,20 @@ class ExperimentalScenario(Base):
 
     @staticmethod
     def delete(parameters, session):
+        """
+        Removes an 'ExperimentalScenario' object from the DB. The 'parameters' contains de id of the
+        'ExperimentalScenario' object.
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
+        """
         # Received --> [id_exp_scenario]
         exp_scenario_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[0]).first()
-        # Neccesary to remove diagram path if existing
+        # Neccesary to remove diagrams files if existing from files storage
         if exp_scenario_aux.description_diagram is not None:
             Diagram.delete([exp_scenario_aux.description_diagram_id, 'just remove path'], session)
         for item in exp_scenario_aux.problems:
@@ -228,12 +310,22 @@ class ExperimentalScenario(Base):
 
     @staticmethod
     def select(parameters, session):
+        """
+        Retrieve information (attributes) of an 'ExperimentalScenario' object from the DB. The 'parameters' contains de
+        id of the desired 'ExperimentalScenario'.
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
+        """
         msg_rspt = Message(action=2, information=[])
-        if len(parameters) == 2:
+        if len(parameters) == 2:    # Get role of designer for current experimental scenario (control or experimental)
             from Modules.Classes.Designer import Designer
             from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
-            # Received --> [id_designer, id_exp_scenario] # Get role for current experimental scenario
-            # (control or experimental)
+            # Received --> [id_designer, id_exp_scenario]
             exp_scenario = session.query(DesignerExperimentalScenario). \
                 filter(and_(DesignerExperimentalScenario.designer_id == parameters[0],
                             DesignerExperimentalScenario.experimental_scenario_id == parameters[1])).first()
@@ -241,7 +333,7 @@ class ExperimentalScenario(Base):
                 msg_rspt.information.append('experimental')
             else:
                 msg_rspt.information.append('control')
-        elif len(parameters) == 1:
+        elif len(parameters) == 1:  # Ask for information of an specific experimental scenario
             # Received --> [id_exp_scenario]
             exp_sc_aux = session.query(ExperimentalScenario).filter(ExperimentalScenario.id == parameters[0]).first()
             msg_rspt.information.append(exp_sc_aux.title)
@@ -251,7 +343,7 @@ class ExperimentalScenario(Base):
             msg_rspt.information.append(exp_sc_aux.availability)
             msg_rspt.information.append(exp_sc_aux.description_diagram_id)
             msg_rspt.information.append(exp_sc_aux.experiment_id)
-        else:
+        else:   # Ask for information of an scenario to be shown as summary of the report
             from Modules.Classes.Designer import Designer
             from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
             from Modules.Classes.Measurement import Measurement
