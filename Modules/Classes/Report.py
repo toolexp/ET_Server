@@ -1,5 +1,3 @@
-# coding=utf-8
-
 from sqlalchemy import Column, Integer, ForeignKey, and_, String
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -9,6 +7,20 @@ from Modules.Classes.Experiment import Experiment
 
 
 class Report(Base):
+    """
+    A class used to represent an experiment report. A report object has attributes:
+
+    :param id: identifier of object in the database. This is the primary key
+    :type id: int
+    :param name: report name (filename)
+    :type name: str
+    :param file_path: full path of the file (report) stored in the server
+    :type file_path: str
+    :param experiment_id: identifier of the experiment object that the report is associated with. This is a foreign key
+    :type experiment_id: int
+    :param experiment: experiment object that the report is associated with
+    :type experiment: Modules.Classes.Experiment.Experiment
+    """
     __tablename__ = 'reports'
 
     id = Column(Integer, primary_key=True)
@@ -20,18 +32,33 @@ class Report(Base):
                               uselist=False)
 
     def __init__(self, name, file_path, experiment):
+        """
+        Constructor of the class
+        """
         self.name = name
         self.file_path = file_path
         self.experiment = experiment
 
     def __str__(self):
+        """
+        Method that represents the object as a string
+        """
         return '{}¥{}¥{}¥{}'.format(self.id, self.name, self.file_path, self.experiment_id)
 
     @staticmethod
     def create(parameters, session):
-        # Generating a report
+        """
+        Creates a 'Report' object and stores it into the DB, the data for the object is inside the 'parameters'
+        variable. Creates a report file if it does not exist in the server
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
+        """
         # Received --> [id_experiment]
-        # Returned --> [file_name, zipped_experiment_folder_bytes]
         report_aux = session.query(Report).filter(Report.experiment_id == parameters[0]).first()
         if not report_aux:
             experiment_aux = session.query(Experiment).filter(Experiment.id == parameters[0]).first()
@@ -46,15 +73,27 @@ class Report(Base):
         myfile = open(file_path, 'rb')
         file_bytes = myfile.read()
         myfile.close()
+        # Returned --> [file_name, zipped_experiment_folder_bytes]
         msg_rspt = Message(action=2, information=[file_name, file_bytes], comment='Register created successfully')
         return msg_rspt
 
     @staticmethod
     def read(parameters, session):
+        """
+        Retrieves a dataframe with measurements of the 'Report' detailed as they are requested: full experiment, an
+        experimental scenario or an specific problem
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
+        """
         msg_rspt = Message(action=2, information=[])
         import pandas as pd
         current_df = pd.DataFrame(columns=('id', 'variable', 'm1', 'm2', 'm3', 'm4'))
-        if parameters[1] == 'problem':
+        if parameters[1] == 'problem':  # Asks for measurements of an specific problem
             from Modules.Classes.Designer import Designer
             from Modules.Classes.Measurement import Measurement
             from Modules.Classes.Problem import Problem
@@ -80,7 +119,7 @@ class Report(Base):
                                                 'm1': measurements_aux[0], 'm2': measurements_aux[1],
                                                 'm3': measurements_aux[2], 'm4': measurements_aux[3]},
                                                ignore_index=True)
-        elif parameters[1] == 'scenario':
+        elif parameters[1] == 'scenario':   # Asks for measurements of an specific experimental scenario
             from Modules.Classes.ExperimentalScenario import ExperimentalScenario
             from Modules.Classes.Designer import Designer
             from Modules.Classes.Measurement import Measurement
@@ -99,7 +138,7 @@ class Report(Base):
                                                 'm1': measurements_aux[0], 'm2': measurements_aux[1],
                                                 'm3': measurements_aux[2], 'm4': measurements_aux[3]},
                                                ignore_index=True)
-        else:
+        else:   # Asks for measurements of an specific experiment
             from Modules.Classes.ExperimentalScenario import ExperimentalScenario
             from Modules.Classes.Designer import Designer
             from Modules.Classes.Measurement import Measurement

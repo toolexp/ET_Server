@@ -42,8 +42,18 @@ class Pattern(Base):
 
     @staticmethod
     def create(parameters, session):
+        """
+        Creates a 'Pattern' object and stores it into the DB, the data for the object is inside the 'parameters'
+        variable.
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
+        """
         # Received --> [id_template]
-        # Returned --> [id_pattern (new)]
         template_aux = session.query(Template).filter(Template.id == parameters[0]).first()
         pattern_aux = Pattern(template_aux)
         session.add(pattern_aux)
@@ -55,9 +65,20 @@ class Pattern(Base):
 
     @staticmethod
     def read(parameters, session):
-        if len(parameters) == 0:
+        """
+        Retrieves a list of 'Patterns' registered into the DB. The list contains a string representation of
+        each 'Pattern' (__str__()).
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
+        """
+        if len(parameters) == 0:    # Asks for all patterns stored into the database
             patterns = session.query(Pattern).all()
-        else:
+        else:   # Asks for patterns associated with an experimental scenario and are for an specific designers group
             from Modules.Classes.ExperimentalScenarioPattern import ExperimentalScenarioPattern
             # Received --> [id_exp_scenario, pattern_type]
             patterns = session.query(Pattern). \
@@ -72,26 +93,36 @@ class Pattern(Base):
 
     @staticmethod
     def delete(parameters, session):
+        """
+        Removes a 'Pattern' object from the DB. The 'parameters' contains de id of the 'Pattern' object.
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
+        """
         from Modules.Classes.ExperimentalScenarioPattern import ExperimentalScenarioPattern
         exp_scenario_aux = session.query(ExperimentalScenarioPattern).filter(ExperimentalScenarioPattern.pattern_id ==
                                                                              parameters[0]).first()
-        if exp_scenario_aux:
+        if exp_scenario_aux:    # First check if the pattern is not associated with any experimental scenario
             return Message(action=5, information=['The pattern is associated to one or more experimental scenarios'],
                            comment='Error deleting register')
         pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[0]).first()
         expected_sols = session.query(ExpectedSolution).all()
-        for item in expected_sols:
+        for item in expected_sols:  # Then, check if the pattern is not associated with any expected solution
             if pattern_aux in item.patterns:
                 return Message(action=5, information=['The pattern is associated to one or more ideal solutions'],
                                comment='Error deleting register')
         sent_sols = session.query(SentSolution).all()
-        for item in sent_sols:
+        for item in sent_sols:  # Finally, check if the pattern is not associated with any sent solution
             if pattern_aux in item.patterns:
                 return Message(action=5, information=['The pattern is associated to one or more sent solutions'],
                                comment='Error deleting register')
         diagrams_aux = session.query(PatternSection).filter(and_(PatternSection.pattern_id == parameters[0],
                                                                  PatternSection.diagram_id != None)).all()
-        for item in diagrams_aux:
+        for item in diagrams_aux:   # Delete diagrams (only files) that may be associated with the pattern
             Diagram.delete([item.diagram_id, 'just remove path'], session)
         session.delete(pattern_aux)
         session.commit()
@@ -101,26 +132,36 @@ class Pattern(Base):
 
     @staticmethod
     def select(parameters, session):
+        """
+        Retrieve information (attributes) of a 'Pattern' object from the DB. The 'parameters' contains de id of
+        the desired 'Pattern'.
+
+        :param parameters: list of important information that is needed in this function
+        :type parameters: list
+        :param session: session established with the database
+        :type session: Modules.Config.base.Session
+        :return msg_rspt: message ready to send to a client (response of requested action)
+        :rtype msg_rspt: Modules.Config.Data.Message
+        """
         pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[0]).first()
-        if len(parameters) == 2:
+        if len(parameters) == 2:    # Asks for the pattern to update its info
             from Modules.Classes.ExperimentalScenarioPattern import ExperimentalScenarioPattern
             exp_scenario_aux = session.query(ExperimentalScenarioPattern).\
                 filter(ExperimentalScenarioPattern.pattern_id == parameters[0]).first()
-            if exp_scenario_aux:
+            if exp_scenario_aux:    # First check if the pattern is not associated with any experimental scenario
                 return Message(action=5,
                                information=['The pattern is associated to one or more experimental scenarios'],
                                comment='Error selecting register')
             expected_sols = session.query(ExpectedSolution).all()
-            for item in expected_sols:
+            for item in expected_sols:  # Then, check if the pattern is not associated with any expected solution
                 if pattern_aux in item.patterns:
                     return Message(action=5, information=['The pattern is associated to one or more ideal solutions'],
                                    comment='Error selecting register')
             sent_sols = session.query(SentSolution).all()
-            for item in sent_sols:
+            for item in sent_sols:  # Finally, check if the pattern is not associated with any sent solution
                 if pattern_aux in item.patterns:
                     return Message(action=5, information=['The pattern is associated to one or more sent solutions'],
                                    comment='Error selecting register')
-        pattern_aux = session.query(Pattern).filter(Pattern.id == parameters[0]).first()
         msg_rspt = Message(action=2, information=[])
         msg_rspt.information.append(pattern_aux.template.__str__())
         session.close()
