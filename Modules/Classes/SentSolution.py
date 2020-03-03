@@ -4,11 +4,10 @@ from Modules.Config.base import Base
 from Modules.Config.Data import Message
 from Modules.Classes.Diagram import Diagram
 
-
+"""
+Many to many association table generated into the DB
+"""
 sent_solutions_patterns_association = Table(
-    """
-    Many to many association table generated into the DB
-    """
     'sent_solutions_patterns', Base.metadata,
     Column('sent_solution_id', Integer, ForeignKey('sent_solutions.id')),
     Column('pattern_id', Integer, ForeignKey('patterns.id'))

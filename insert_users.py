@@ -48,10 +48,12 @@ metric_demo4 = Metric(4, 'Chosen patterns', 'number of PDPs added to the solutio
 admin_demo = Administrator('Diego', 'Guzman', 'dguzman', hashlib.sha1('diego1234'.encode()).hexdigest())
 
 experimenter_demo1 = Experimenter('Julio', 'Caiza', 'jcaiza', hashlib.sha1('jcaiza1234'.encode()).hexdigest())
+experimenter_demo2 = Experimenter('Zaida', 'Andrade', 'zandrade', hashlib.sha1('zandrade1234'.encode()).hexdigest())
 
 # Make persistence in DB
 session.add(admin_demo)
 session.add(experimenter_demo1)
+session.add(experimenter_demo2)
 session.add(metric_demo1)
 session.add(metric_demo2)
 session.add(metric_demo3)

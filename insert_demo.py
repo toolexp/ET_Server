@@ -47,6 +47,8 @@ metric_demo4 = Metric(4, 'Chosen patterns', 'number of PDPs added to the solutio
 admin_demo = Administrator('Diego', 'Guzman', 'dguzman', hashlib.sha1('diego1234'.encode()).hexdigest())
 
 experimenter_demo1 = Experimenter('Julio', 'Caiza', 'jcaiza', hashlib.sha1('jcaiza1234'.encode()).hexdigest())
+experimenter_demo2 = Experimenter('Zaida', 'Andrade', 'zandrade', hashlib.sha1('zandrade1234'.encode()).hexdigest())
+
 experiment_demo = Experiment('Template 1 vs Template 2', 'Does using patterns of Template 1 reduce time vs using '
                                                          'patterns of Template 2?', 2)
 experimenter_demo1.experiments = [experiment_demo]
@@ -191,6 +193,7 @@ session.add(designer_demo18)
 session.add(designer_demo19)
 session.add(designer_demo20)
 session.add(experimenter_demo1)
+session.add(experimenter_demo2)
 session.add(metric_demo1)
 session.add(metric_demo2)
 session.add(metric_demo3)
