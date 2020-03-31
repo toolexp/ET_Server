@@ -45,15 +45,13 @@ metric_demo2 = Metric(2, 'Selection time', 'time in seconds required to select a
 metric_demo3 = Metric(3, 'Viewed patterns', 'total number of PDPs displayed')
 metric_demo4 = Metric(4, 'Chosen patterns', 'number of PDPs added to the solution')
 
-admin_demo = Administrator('Diego', 'Guzman', 'dguzman', hashlib.sha1('diego1234'.encode()).hexdigest())
+admin_demo = Administrator('admin', '1', 'admin1', hashlib.sha1('admin11234'.encode()).hexdigest())
 
-experimenter_demo1 = Experimenter('Julio', 'Caiza', 'jcaiza', hashlib.sha1('jcaiza1234'.encode()).hexdigest())
-experimenter_demo2 = Experimenter('Zaida', 'Andrade', 'zandrade', hashlib.sha1('zandrade1234'.encode()).hexdigest())
+experimenter_demo1 = Experimenter('experimenter', '1', 'exp1', hashlib.sha1('exp11234'.encode()).hexdigest())
 
 # Make persistence in DB
 session.add(admin_demo)
 session.add(experimenter_demo1)
-session.add(experimenter_demo2)
 session.add(metric_demo1)
 session.add(metric_demo2)
 session.add(metric_demo3)

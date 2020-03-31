@@ -4,7 +4,7 @@ the server to an specific function depending on the action of the received messa
 """
 
 # Import all classes (entities) needed for the protocol (ALWAYS IMPORT ALL CLASSES MAPPED TO THE DATABASE, EVEN IF
-# THEY ARE NOT USED, NEEDED TO MAP ALL CLASSES WITH ALL ENTITIES CORRECTLY)
+# THEY ARE NOT USED, ALL CLASSES ARE NEEDED TO MAP WITH ALL ENTITIES CORRECTLY)
 from Modules.Config.base import Session, engine, Base
 from Modules.Classes.Administrator import Administrator
 from Modules.Classes.Category import Category

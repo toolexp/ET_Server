@@ -13,8 +13,8 @@ PORT = 60000        # Port to listen on (non-privileged ports are > 1023)
 connection = Connection()
 try:
     # Ask user for Socket info
-    host = input('Insert ip address of the server to listen:\n')
-    port = input('Insert the port number to listen on (>1023):\n')
+    host = input('Insert ip address of the server to listen (default is 127.0.0.1):\n')
+    port = input('Insert the port number to listen on (>1023) (default is 60000):\n')
     # Ask for maximum number of connected clients
     while True:
         clients = input('Insert maximum number of handled clients:\n')

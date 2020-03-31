@@ -100,7 +100,7 @@ def get_experiment_report(experiment=None, session=None):
     folder_name = '{}_{}'.format("_".join(words), datetime.now().date().strftime('%Y-%m-%d'))
     os.mkdir('./Resources/{}'.format(folder_name))
     exp_scenarios = session.query(ExperimentalScenario).filter(
-        ExperimentalScenario.experiment_id == experiment.id).all()
+        ExperimentalScenario.experiment_id == experiment.id).order_by(ExperimentalScenario.title).all()
     # Get scenarios of experiment (each scenario is an excel workbook)
     for counter_sc, scenario in enumerate(exp_scenarios):
         # Get appropriate name for excel workbook
@@ -122,13 +122,13 @@ def get_experiment_report(experiment=None, session=None):
             current_query = session.query(Problem, Measurement, Designer, Metric). \
                 with_entities(Measurement.id.label('measurement_id'), Designer.email.label('designer'),
                               Problem.brief_description.label('problem'), Metric.name.label('metric_type'),
-                              Measurement.value.label('measurement'), Measurement.acquisition_start_date,
+                              Measurement.value.label('measurement_value'), Measurement.acquisition_start_date,
                               Measurement.acquisition_end_date). \
                 join(Problem.measurements).join(Measurement.designer).join(Measurement.metric). \
-                filter(Problem.id == problem.id).statement
+                filter(Problem.id == problem.id).order_by(Designer.email).statement
             current_df = pd.read_sql_query(current_query, session.bind)
-            current_df.loc[current_df['measurement'] == -1, 'measurement'] = 'No executed'
-            current_df.loc[current_df['measurement'] == -2, 'measurement'] = 'Exit unexpectedly'
+            current_df.loc[current_df['measurement_value'] == -1, 'measurement_value'] = 'Did not execute'
+            current_df.loc[current_df['measurement_value'] == -2, 'measurement_value'] = 'Exited unexpectedly'
             current_sheets.append(current_df)
             current_sheets_names.append(current_sheet_name)
         with pd.ExcelWriter(current_workbook_path + current_workbook_name) as writer:

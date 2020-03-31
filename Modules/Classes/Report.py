@@ -100,7 +100,7 @@ class Report(Base):
             # Received --> [id_problem, 'problem']
             designers = session.query(Designer). \
                 join(Designer.measurements).join(Measurement.problem). \
-                filter(Problem.id == parameters[0]).all()
+                filter(Problem.id == parameters[0]).order_by(Designer.email).all()
             for designer_aux in designers:
                 measurements = session.query(Measurement). \
                     join(Designer.measurements).join(Measurement.problem). \
@@ -126,7 +126,7 @@ class Report(Base):
             from Modules.Classes.Problem import Problem
             # Received --> [id_scenario, 'scenario']
             problems = session.query(Problem).join(Problem.experimental_scenario).\
-                filter(ExperimentalScenario.id == parameters[0]).all()
+                filter(ExperimentalScenario.id == parameters[0]).order_by(Problem.brief_description).all()
             for problem_aux in problems:
                 measurements_aux = []
                 for item in range(1, 5):
@@ -145,7 +145,7 @@ class Report(Base):
             from Modules.Classes.Problem import Problem
             # Received --> [id_experiment, 'experiment']
             scenarios = session.query(ExperimentalScenario).join(ExperimentalScenario.experiment). \
-                filter(Experiment.id == parameters[0]).all()
+                filter(Experiment.id == parameters[0]).order_by(ExperimentalScenario.title).all()
             for scenario_aux in scenarios:
                 measurements_aux = []
                 for item in range(1, 5):
