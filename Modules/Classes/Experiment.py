@@ -174,27 +174,28 @@ class Experiment(Base):
                     from Modules.Classes.Problem import Problem
                     from Modules.Classes.DesignerExperimentalScenario import DesignerExperimentalScenario
                     # Section to create empty measurements (-1) for all designers that have not executed the scenarios
-                    all_designers = session.query(Designer). \
-                        join(Designer.experimental_scenario_associations). \
-                        join(DesignerExperimentalScenario.experimental_scenario).\
-                        join(ExperimentalScenario.experiment).filter(Experiment.id == parameters[0]).all()
-                    problems = session.query(Problem). \
-                        join(Problem.experimental_scenario). \
-                        join(ExperimentalScenario.experiment).filter(Experiment.id == parameters[0]).all()
                     metrics = session.query(Metric).all()
                     current_date = datetime.now()
-                    # Here creates the empty measurements for scenarios that were not executed by designers
-                    for designer_aux in all_designers:
-                        for problem_aux in problems:
-                            existing_measurement = session.query(Measurement).\
-                                filter(and_(Measurement.designer_id == designer_aux.id,
-                                            Measurement.problem_id == problem_aux.id)).all()
-                            if not existing_measurement:    # If at least one designer has a remaining measurement,
-                                # it has to be created (-1)
-                                for metric_aux in metrics:
-                                    measurement_aux = Measurement(float(-1), current_date, current_date, metric_aux,
-                                                                  designer_aux, problem_aux)
-                                    session.add(measurement_aux)
+                    for item in experimental_sc_aux:
+                        all_designers = session.query(Designer). \
+                            join(Designer.experimental_scenario_associations). \
+                            join(DesignerExperimentalScenario.experimental_scenario).\
+                            filter(ExperimentalScenario.id == item.id).all()
+                        problems = session.query(Problem). \
+                            join(Problem.experimental_scenario). \
+                            filter(ExperimentalScenario.id == item.id).all()
+                        # Here creates the empty measurements for scenarios that were not executed by designers
+                        for designer_aux in all_designers:
+                            for problem_aux in problems:
+                                existing_measurement = session.query(Measurement).\
+                                    filter(and_(Measurement.designer_id == designer_aux.id,
+                                                Measurement.problem_id == problem_aux.id)).all()
+                                if not existing_measurement:    # If at least one designer has a remaining measurement,
+                                    # it has to be created (-1)
+                                    for metric_aux in metrics:
+                                        measurement_aux = Measurement(float(-1), current_date, current_date, metric_aux,
+                                                                      designer_aux, problem_aux)
+                                        session.add(measurement_aux)
                     # Change experiment state
                     experiment_aux.state = 'finished'
                     experiment_aux.finished_date = datetime.now()
